@@ -1,960 +1,229 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>CuesGames</title>
-<meta name="description" content="CuesGames: Slots, Blackjack, Math Sprint and Typing — responsive, touch-friendly, and customizable." />
-<style>
-  :root{
-    --bg-dark: #071026;
-    --panel-dark: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.12));
-    --ink: #e8f0ff;
-    --muted: #9fb0d6;
-    --accent: #7cf1c8;
-    --accent-2: #9bb4ff;
-    --glass: rgba(255,255,255,0.03);
-    --card-back: linear-gradient(180deg,#0b213f,#06112a);
-    --card-face: linear-gradient(180deg,#f6fbff,#dfe8ff);
-  }
-
-  /* base */
-  *{box-sizing:border-box}
-  html,body{height:100%;margin:0;background:radial-gradient(1400px 800px at 70% -20%, #16233f 0%, var(--bg-dark) 60%) fixed;color:var(--ink);font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; -webkit-font-smoothing:antialiased}
-  a{color:var(--accent)}
-
-  .wrap{max-width:1180px;margin:18px auto;padding:18px;display:grid;gap:18px}
-  header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border-radius:14px;background:var(--panel-dark);border:1px solid rgba(255,255,255,.04)}
-  .brand{display:flex;gap:12px;align-items:center}
-  .logo{width:48px;height:48px;border-radius:12px;display:grid;place-items:center;background:conic-gradient(from 160deg,var(--accent),var(--accent-2));color:#071026;font-weight:900}
-  h1{font-size:20px;margin:0}
-  .sub{font-size:12px;color:var(--muted)}
-
-  .nav{display:flex;gap:8px;flex-wrap:wrap}
-  .tab{appearance:none;border:none;border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer;background:linear-gradient(180deg,#163055,#0b1b33);color:var(--ink);border:1px solid rgba(255,255,255,.04);transition:transform .12s,box-shadow .12s}
-  .tab[aria-current="page"]{box-shadow:0 10px 30px rgba(0,0,0,.5), 0 0 0 3px rgba(124,241,200,.06)}
-  .tab:active{transform:translateY(1px)}
-
-  .grid{display:grid;grid-template-columns:1fr 320px;gap:18px}
-  @media(max-width:1000px){ .grid{grid-template-columns:1fr} }
-
-  .card{background:var(--panel-dark);border-radius:12px;padding:14px;border:1px solid rgba(255,255,255,.03);box-shadow:0 16px 40px rgba(0,0,0,.4)}
-  .stage{min-height:520px}
-  .section{display:none}
-  .section.active{display:block}
-
-  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  @media(max-width:920px){ .row{grid-template-columns:1fr} }
-
-  .hud{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
-  .chip{padding:6px 10px;border-radius:999px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.03);font-weight:700}
-  .chip.warn{color:#ffd36e} .chip.good{color:#79f28c}
-
-  button.btn{appearance:none;border:none;border-radius:10px;padding:10px 12px;font-weight:800;background:linear-gradient(180deg,#17325a,#0b1a33);color:var(--ink);cursor:pointer;border:1px solid rgba(255,255,255,.04);transition:transform .08s ease,filter .12s}
-  button.btn:active{transform:translateY(1px)}
-  .btn.ghost{background:transparent;border-color:rgba(255,255,255,.06)}
-
-  .reels{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0}
-  .reel{height:120px;border-radius:12px;display:grid;place-items:center;font-size:48px;background:linear-gradient(180deg,#20345a,#0f1930);border:1px solid rgba(255,255,255,.04);transition:transform .3s}
-  .reel.spin{animation:spin-reel .45s linear}
-  @keyframes spin-reel{0%{transform:translateY(-10px) scale(.98)}50%{transform:translateY(10px) scale(1.02)}100%{transform:none}}
-
-  .cards{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
-  .cardx{width:64px;height:90px;border-radius:10px;display:grid;place-items:center;background:var(--card-face);color:#071026;font-weight:900;border:1px solid rgba(10,12,20,.06);box-shadow:0 8px 18px rgba(0,0,0,.24);transition:transform .12s}
-  .cardx.back{background:var(--card-back);color:#fff;display:grid;font-weight:900;align-items:center;justify-content:center}
-  .cardx.small{width:50px;height:70px}
-
-  .problem{font-size:26px;font-weight:800;margin:8px 0}
-  input[type="number"], input[type="text"], select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.04);background:#081227;color:var(--ink)}
-
-  .typingText{padding:12px;border-radius:12px;background:#071229;border:1px solid rgba(255,255,255,.03);min-height:96px;color:var(--ink);font-size:16px;line-height:1.5}
-  .typingText .done{opacity:.55} .typingText .cur{outline:2px solid rgba(155,180,255,.12)} .typingText .wrong{background:#5b0f22;color:#fff;padding:0 2px;border-radius:2px}
-
-  .customRow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
-  @media(max-width:720px){ .customRow{grid-template-columns:1fr} }
-
-  footer{opacity:.85;text-align:center;font-size:12px;padding:8px;color:var(--muted)}
-
-  /* subtle transitions */
-  .fade{transition:opacity .22s ease, transform .22s ease}
-  .hidden{opacity:0;transform:translateY(6px)}
-  .visible{opacity:1;transform:none}
-
-  /* credits style */
-  .credits{font-size:13px;color:var(--muted);margin-top:12px}
-  .muted{color:var(--muted)}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Devin's Games — Game Hub</title>
+  <meta name="description" content="Devin's Games — Slots, Blackjack, Math Sprint, Typing. Responsive, polished, single-page app with customization." />
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="wrap">
-    <header>
+  <div id="app" class="app">
+    <header class="top">
       <div class="brand">
-        <div class="logo">CG</div>
+        <div class="logo">DG</div>
         <div>
-          <h1>CuesGames — <span class="sub">Game Hub</span></h1>
-          <div class="sub">Slots • Blackjack • Math Sprint • Typing — clean, fast, and customizable.</div>
+          <h1>Devin’s Games</h1>
+          <p class="tag">Fun practice games — made by Devin Slifer</p>
         </div>
       </div>
 
-      <nav class="nav" role="tablist" aria-label="Games">
+      <nav class="tabs" role="tablist">
         <button class="tab" data-tab="slots" aria-current="page">🎰 Slots</button>
         <button class="tab" data-tab="blackjack">🂡 Blackjack</button>
         <button class="tab" data-tab="math">➗ Math Sprint</button>
         <button class="tab" data-tab="typing">⌨️ Typing</button>
+        <button class="tab" data-tab="custom">⚙️ Customize</button>
       </nav>
     </header>
 
-    <div class="grid">
-      <main class="card stage">
-        <!-- SLOTS -->
-        <section id="sec-slots" class="section active" role="tabpanel">
-          <h2>Lucky Slots</h2>
-          <p class="sub">Spin for points. Hold the bet buttons to increase or decrease faster — they accelerate the longer you hold.</p>
+    <main class="main">
+      <!-- SLOTS -->
+      <section id="sec-slots" class="panel active" role="tabpanel">
+        <h2>Lucky Slots</h2>
+        <p class="slots-note">Thank You James For The Triple 🍋</p>
+        <div class="hud">
+          <div class="pill">Balance: <strong id="slotsBal">100</strong></div>
+          <div class="pill">Bet: <strong id="slotsBet">5</strong></div>
+          <div class="pill">Best: <strong id="slotsBest">0</strong></div>
+        </div>
 
-          <div class="hud">
-            <div class="chip">Balance: <strong id="slotsBal">100</strong></div>
-            <div class="chip">Bet: <strong id="slotsBet">5</strong></div>
-            <div class="chip">Best: <strong id="slotsBest">0</strong></div>
-            <div class="chip" id="slotsMsg">Ready</div>
-          </div>
-
-          <div class="row">
-            <div>
-              <div class="reels">
-                <div class="reel" id="reel1">🍒</div>
-                <div class="reel" id="reel2">🍋</div>
-                <div class="reel" id="reel3">⭐</div>
-              </div>
-
-              <div style="display:flex;gap:8px;align-items:center">
-                <button class="btn" id="spinBtn">Spin</button>
-                <button class="btn" id="betDown" data-dir="-">Bet −</button>
-                <button class="btn" id="betUp" data-dir="+">Bet +</button>
-                <button class="btn ghost" id="resetSlots">Reset</button>
-              </div>
+        <div class="layout two-col">
+          <div>
+            <div class="reels">
+              <div class="reel" id="reel1">🍒</div>
+              <div class="reel" id="reel2">🍋</div>
+              <div class="reel" id="reel3">⭐</div>
             </div>
 
-            <div>
+            <div class="controls">
+              <button class="btn primary" id="spinBtn">Spin</button>
+              <div class="bet-controls">
+                <button class="btn" id="betDown" data-dir="-">−</button>
+                <div class="bet-display" id="betDisplay">5</div>
+                <button class="btn" id="betUp" data-dir="+">+</button>
+              </div>
+              <button class="btn ghost" id="resetSlots">Reset</button>
+            </div>
+
+            <div id="slotsMsg" class="message muted">Ready to play.</div>
+          </div>
+
+          <aside>
+            <div class="card small">
               <h3>Payouts</h3>
-              <ul class="sub">
+              <ul>
                 <li>3× ⭐ = 20× bet</li>
                 <li>3× 🍒 = 12× bet</li>
                 <li>3× 🍋 = 8× bet</li>
-                <li>Any 2 match = 3× bet</li>
+                <li>Any 2 matching = 3× bet</li>
               </ul>
-              <p class="sub">All scores are local — just for fun. Use the customization panel to set theme, font size, and sounds.</p>
+              <p class="muted">No cash limits — bets and balances can grow large. Values stored locally in your browser.</p>
             </div>
-          </div>
-        </section>
+          </aside>
+        </div>
+      </section>
 
-        <!-- BLACKJACK -->
-        <section id="sec-blackjack" class="section" role="tabpanel" aria-hidden="true">
-          <h2>Blackjack</h2>
-          <p class="sub">Get closer to 21 than the dealer without going over. Aces switch between 1 and 11 automatically.</p>
+      <!-- BLACKJACK -->
+      <section id="sec-blackjack" class="panel" role="tabpanel" aria-hidden="true">
+        <h2>Blackjack</h2>
+        <div class="hud">
+          <div class="pill">Bank: <strong id="bjBank">100</strong></div>
+          <div class="pill">Bet: <strong id="bjBet">10</strong></div>
+          <div class="pill">Best: <strong id="bjBest">0</strong></div>
+        </div>
 
-          <div class="hud">
-            <div class="chip">Bank: <strong id="bjBank">100</strong></div>
-            <div class="chip">Bet: <strong id="bjBet">10</strong></div>
-            <div class="chip">Best: <strong id="bjBest">0</strong></div>
-            <div class="chip" id="bjMsg">Ready</div>
-          </div>
+        <div class="layout two-col">
+          <div>
+            <h4>Dealer (<span id="dVal">?</span>)</h4>
+            <div class="cards" id="dealer"></div>
 
-          <div class="row">
-            <div>
-              <h3>Dealer <span class="muted">(<span id="dVal">?</span>)</span></h3>
-              <div class="cards" id="dealer"></div>
+            <h4>You (<span id="pVal">0</span>)</h4>
+            <div class="cards" id="player"></div>
 
-              <h3>You <span class="muted">(<span id="pVal">0</span>)</span></h3>
-              <div class="cards" id="player"></div>
+            <div class="controls">
+              <button class="btn primary" id="bjDeal">Deal</button>
+              <button class="btn" id="bjHit" disabled>Hit</button>
+              <button class="btn" id="bjStand" disabled>Stand</button>
 
-              <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-                <button class="btn" id="bjDeal">Deal</button>
-                <button class="btn" id="bjHit" disabled>Hit</button>
-                <button class="btn" id="bjStand" disabled>Stand</button>
-                <button class="btn ghost" id="bjBetDown" data-dir="-">Bet −</button>
-                <button class="btn ghost" id="bjBetUp" data-dir="+">Bet +</button>
-                <button class="btn ghost" id="bjReset">Reset Bank</button>
+              <div class="bet-controls small">
+                <button class="btn ghost" id="bjBetDown" data-dir="-">−</button>
+                <div class="bet-display" id="bjBetDisplay">10</div>
+                <button class="btn ghost" id="bjBetUp" data-dir="+">+</button>
               </div>
+              <button class="btn ghost" id="bjReset">Reset Bank</button>
             </div>
 
-            <div>
-              <h3>Quick notes</h3>
-              <ul class="sub">
-                <li>Ace counts as 1 or 11 automatically for best total.</li>
-                <li>Blackjack (Ace + 10-value) pays 3:2 on initial deal.</li>
-                <li>Your total shows under "You"; dealer shows the visible card value until reveal.</li>
+            <div id="bjMsg" class="message muted">Good luck!</div>
+          </div>
+
+          <aside>
+            <div class="card small">
+              <h3>Rules</h3>
+              <ul>
+                <li>Ace is 1 or 11.</li>
+                <li>Dealer hits to 16 and stands on 17+</li>
+                <li>Blackjack pays 3:2 on an initial winning hand.</li>
               </ul>
             </div>
-          </div>
-        </section>
+          </aside>
+        </div>
+      </section>
 
-        <!-- MATH -->
-        <section id="sec-math" class="section" role="tabpanel" aria-hidden="true">
-          <h2>Math Sprint</h2>
-          <p class="sub">Answer as many problems as you can. Difficulty is customizable — harder levels make the questions tougher.</p>
+      <!-- MATH -->
+      <section id="sec-math" class="panel" role="tabpanel" aria-hidden="true">
+        <h2>Math Sprint</h2>
+        <div class="hud">
+          <div class="pill">Score: <strong id="mathScore">0</strong></div>
+          <div class="pill">Streak: <strong id="mathStreak">0</strong></div>
+          <div class="pill">Time: <strong id="mathTime">60</strong>s</div>
+          <div class="pill">Best: <strong id="mathBest">0</strong></div>
+        </div>
 
-          <div class="hud">
-            <div class="chip">Score: <strong id="mathScore">0</strong></div>
-            <div class="chip">Streak: <strong id="mathStreak">0</strong></div>
-            <div class="chip warn">Time: <strong id="mathTime">60</strong>s</div>
-            <div class="chip">Best: <strong id="mathBest">0</strong></div>
-          </div>
-
-          <div class="row">
-            <div>
-              <div class="problem" id="mathQ">loading…</div>
-              <div style="display:flex;gap:8px;margin-top:8px">
-                <input type="number" id="mathA" placeholder="Answer" />
-                <button class="btn" id="mathSubmit">Submit</button>
-                <button class="btn" id="mathStart">Start</button>
-                <button class="btn ghost" id="mathReset">Reset Best</button>
-              </div>
-              <p class="muted" id="mathMsg"> </p>
+        <div class="layout two-col">
+          <div>
+            <div class="problem" id="mathQ">Loading...</div>
+            <div class="controls">
+              <input id="mathA" type="number" placeholder="Answer" />
+              <button class="btn primary" id="mathSubmit">Submit</button>
+              <button class="btn" id="mathStart">Start</button>
+              <button class="btn ghost" id="mathReset">Reset Best</button>
             </div>
+            <div id="mathMsg" class="message muted"></div>
+          </div>
 
-            <div>
-              <h3>Settings</h3>
-              <label><input type="checkbox" id="opAdd" checked/> Add</label><br/>
-              <label><input type="checkbox" id="opSub" checked/> Subtract</label><br/>
-              <label><input type="checkbox" id="opMul" checked/> Multiply</label><br/>
-              <label><input type="checkbox" id="opDiv" checked/> Divide</label><br/><br/>
+          <aside>
+            <div class="card small">
+              <h3>Math Settings</h3>
+              <label><input type="checkbox" id="mAdd" checked> Add</label><br/>
+              <label><input type="checkbox" id="mSub" checked> Subtract</label><br/>
+              <label><input type="checkbox" id="mMul" checked> Multiply</label><br/>
+              <label><input type="checkbox" id="mDiv"> Divide</label><br/>
               <label>Difficulty:
-                <select id="mathDiff">
-                  <option value="easy">Easy (1–12)</option>
-                  <option value="medium" selected>Medium (1–50)</option>
-                  <option value="hard">Hard (1–200)</option>
+                <select id="mDiff">
+                  <option value="easy">Easy</option>
+                  <option value="medium" selected>Medium</option>
+                  <option value="hard">Hard</option>
                 </select>
               </label>
-              <p class="muted">Hard mode includes larger numbers and tougher multiplication/division. Streaks give extra points.</p>
+              <p class="muted">Hard mode includes multi-step/chained problems and larger numbers.</p>
             </div>
-          </div>
-        </section>
+          </aside>
+        </div>
+      </section>
 
-        <!-- TYPING -->
-        <section id="sec-typing" class="section" role="tabpanel" aria-hidden="true">
-          <h2>Typing Test</h2>
-          <p class="sub">Type for accuracy and speed. Choose the duration in the customization panel, then tap Start.</p>
+      <!-- TYPING -->
+      <section id="sec-typing" class="panel" role="tabpanel" aria-hidden="true">
+        <h2>Typing Test</h2>
+        <div class="hud">
+          <div class="pill">WPM: <strong id="typeWpm">0</strong></div>
+          <div class="pill">Accuracy: <strong id="typeAcc">100%</strong></div>
+          <div class="pill">Time: <strong id="typeTime">30</strong>s</div>
+          <div class="pill">Best: <strong id="typeBest">0</strong></div>
+        </div>
 
-          <div class="hud">
-            <div class="chip">WPM: <strong id="typeWpm">0</strong></div>
-            <div class="chip">Accuracy: <strong id="typeAcc">100%</strong></div>
-            <div class="chip warn">Time: <strong id="typeTime">30</strong>s</div>
-            <div class="chip">Best: <strong id="typeBest">0</strong></div>
-          </div>
-
-          <div class="typingText" id="typingText" aria-live="polite"></div>
-
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <input type="text" id="typeInput" placeholder="Tap Start then type here" />
-            <button class="btn" id="typeStart">Start</button>
+        <div class="typing-area">
+          <div id="typingText" class="typingText" aria-live="polite"></div>
+          <div class="controls">
+            <input id="typeInput" type="text" placeholder="Tap Start then type here" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+            <button class="btn primary" id="typeStart">Start</button>
             <button class="btn ghost" id="typeReset">Reset Best</button>
           </div>
+          <div id="typeMsg" class="message muted"></div>
+        </div>
+      </section>
 
-          <p class="muted" id="typeMsg"></p>
-        </section>
+      <!-- CUSTOMIZATION -->
+      <section id="sec-custom" class="panel" role="tabpanel" aria-hidden="true">
+        <h2>Customization</h2>
 
-      </main>
-
-      <aside class="card">
-        <h3>Customize CuesGames</h3>
-
-        <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+        <div class="card">
           <label>Theme:
             <select id="themeSelect">
               <option value="dark" selected>Dark</option>
               <option value="light">Light</option>
             </select>
           </label>
-          <label style="margin-left:6px">Accent:
-            <input id="accentPicker" type="color" value="#7cf1c8" />
-          </label>
-        </div>
 
-        <div class="customRow">
+          <label>Accent:
+            <input type="color" id="accentPicker" value="#7cf1c8" />
+          </label>
+
           <label>Font size:
-            <input id="fontSize" type="range" min="13" max="20" value="16" />
+            <input id="fontSize" type="range" min="13" max="20" value="16">
           </label>
-          <label>Sounds:
-            <select id="soundToggle"><option value="on">On</option><option value="off" selected>Off</option></select>
+
+          <label>Typing time:
+            <select id="typingDur">
+              <option value="15">15s</option>
+              <option value="30" selected>30s</option>
+              <option value="60">60s</option>
+            </select>
           </label>
-        </div>
 
-        <div style="margin-top:8px">
-          <label>Typing duration:
-            <select id="typingDuration"><option value="15">15s</option><option value="30" selected>30s</option><option value="60">60s</option></select>
-          </label>
+          <div style="margin-top:.75rem">
+            <button class="btn" id="resetCustom">Reset to defaults</button>
+          </div>
         </div>
+      </section>
+    </main>
 
-        <div style="margin-top:12px">
-          <button class="btn" id="resetCustom">Reset Customization</button>
-        </div>
-
-        <div class="credits">
-          <strong>Credits</strong><br/>
-          Made for Computer Apps — Devin Slifer
-        </div>
-      </aside>
-    </div>
-
-    <footer>CuesGames — single-file web game for GitHub Pages</footer>
+    <footer class="footer">
+      <div>Created by Devin Slifer</div>
+      <div class="muted small">For Computer Apps — have fun & good luck!</div>
+    </footer>
   </div>
 
-<script>
-/* ============================
-   Utilities & persistence
-   ============================ */
-const qs = s => document.querySelector(s);
-const qsa = s => Array.from(document.querySelectorAll(s));
-const irnd = (a,b)=> Math.floor(Math.random()*(b-a+1))+a;
-const rnd = (a,b)=> Math.random()*(b-a)+a;
-const clamp = (v,a,b)=> Math.max(a, Math.min(b, v));
-
-// persistent settings helpers
-const Settings = {
-  get(key, def){
-    try { const v = localStorage.getItem('cg_'+key); return v!==null ? JSON.parse(v) : def; }
-    catch(e){ return def; }
-  },
-  set(key, val){ localStorage.setItem('cg_'+key, JSON.stringify(val)); }
-};
-
-/* ============================
-   Apply customization (theme/font/accent)
-   ============================ */
-function applyCustom(){
-  const theme = Settings.get('theme','dark');
-  const accent = Settings.get('accent','#7cf1c8');
-  const font = Settings.get('fontsize',16);
-  document.documentElement.style.setProperty('--accent', accent);
-  document.documentElement.style.setProperty('--accent-2', shadeColor(accent, 30));
-  document.documentElement.style.fontSize = font + 'px';
-
-  // light theme tweaks
-  if(theme === 'light'){
-    document.documentElement.style.setProperty('--bg-dark','#f3f6fb');
-    document.querySelectorAll('.card').forEach(el=> el.style.background = 'linear-gradient(180deg, rgba(255,255,255,0.9), #f0f6ff)');
-    document.documentElement.style.setProperty('--ink','#071026');
-    document.documentElement.style.setProperty('--muted','#4a596e');
-    document.documentElement.style.setProperty('--card-back','linear-gradient(180deg,#d0e7ff,#b6d8ff)');
-    document.documentElement.style.setProperty('--card-face','linear-gradient(180deg,#ffffff,#f1f7ff)');
-  } else {
-    // dark
-    document.documentElement.style.setProperty('--bg-dark','#071026');
-    document.querySelectorAll('.card').forEach(el=> el.style.background = '');
-    document.documentElement.style.setProperty('--ink','#e8f0ff');
-    document.documentElement.style.setProperty('--muted','#9fb0d6');
-    document.documentElement.style.setProperty('--card-back','linear-gradient(180deg,#0b213f,#06112a)');
-    document.documentElement.style.setProperty('--card-face','linear-gradient(180deg,#f6fbff,#dfe8ff)');
-  }
-}
-
-function shadeColor(hex, percent) {
-  // small utility: lighten hex by percent (0-100)
-  hex = hex.replace('#','');
-  const num = parseInt(hex,16);
-  let r = (num >> 16) + Math.round(255 * (percent/100));
-  let g = ((num >> 8) & 0x00FF) + Math.round(255 * (percent/100));
-  let b = (num & 0x0000FF) + Math.round(255 * (percent/100));
-  r = Math.min(255, r); g = Math.min(255, g); b = Math.min(255, b);
-  return '#'+( (1<<24) + (r<<16) + (g<<8) + b ).toString(16).slice(1);
-}
-
-// initialize UI from settings
-(function initCustomization(){
-  const theme = Settings.get('theme','dark');
-  const accent = Settings.get('accent','#7cf1c8');
-  const fontsize = Settings.get('fontsize',16);
-  const sound = Settings.get('sound','off');
-  const typingDur = Settings.get('typingDur',30);
-
-  qs('#themeSelect').value = theme;
-  qs('#accentPicker').value = accent;
-  qs('#fontSize').value = fontsize;
-  qs('#soundToggle').value = sound;
-  qs('#typingDuration').value = String(typingDur);
-
-  applyCustom();
-
-  qs('#themeSelect').addEventListener('change', e=>{ Settings.set('theme', e.target.value); applyCustom(); });
-  qs('#accentPicker').addEventListener('input', e=>{ Settings.set('accent', e.target.value); applyCustom(); });
-  qs('#fontSize').addEventListener('input', e=>{ Settings.set('fontsize', Number(e.target.value)); applyCustom(); });
-  qs('#soundToggle').addEventListener('change', e=>{ Settings.set('sound', e.target.value); });
-  qs('#typingDuration').addEventListener('change', e=>{ Settings.set('typingDur', Number(e.target.value)); });
-
-  qs('#resetCustom').addEventListener('click', ()=>{
-    if(confirm('Reset customization to defaults?')){
-      ['theme','accent','fontsize','sound','typingDur'].forEach(k=>localStorage.removeItem('cg_'+k));
-      location.reload();
-    }
-  });
-})();
-
-/* ============================
-   Tabs
-   ============================ */
-qsa('.tab').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    qsa('.tab').forEach(b=>b.removeAttribute('aria-current'));
-    btn.setAttribute('aria-current','page');
-    const t = btn.dataset.tab;
-    qsa('.section').forEach(s=> s.classList.toggle('active', s.id === 'sec-'+t));
-    // focus main element
-    setTimeout(()=>{
-      const el = document.querySelector(`#sec-${t} button, #sec-${t} input`);
-      if(el) el.focus();
-    }, 120);
-  });
-});
-
-/* ============================
-   Remove remnants of leaderboards (user asked to remove them)
-   (There are none now — leaderboards were removed) 
-   ============================ */
-
-/* ============================
-   SLOTS (with hold-to-increment acceleration and sounds)
-   ============================ */
-(function(){
-  const symbols = ['🍒','🍋','⭐','🔔','🍇'];
-  const reelEls = [qs('#reel1'), qs('#reel2'), qs('#reel3')];
-  const elBal = qs('#slotsBal'), elBet = qs('#slotsBet'), elBest = qs('#slotsBest'), elMsg = qs('#slotsMsg');
-
-  let state = {
-    bal: Number(localStorage.getItem('cg_slots_bal')||100),
-    bet: Number(localStorage.getItem('cg_slots_bet')||5),
-    best: Number(localStorage.getItem('cg_slots_best')||0)
-  };
-  let spinning = false;
-
-  function save(){
-    localStorage.setItem('cg_slots_bal', state.bal);
-    localStorage.setItem('cg_slots_bet', state.bet);
-    state.best = Math.max(state.best, state.bal);
-    localStorage.setItem('cg_slots_best', state.best);
-    render();
-  }
-  function render(){
-    elBal.textContent = state.bal;
-    elBet.textContent = state.bet;
-    elBest.textContent = state.best;
-  }
-
-  async function spin(){
-    if(spinning) return;
-    if(state.bet < 1){ elMsg.textContent = 'Set a bet of at least 1'; return; }
-    if(state.bet > state.bal){ elMsg.textContent = 'Not enough balance'; return; }
-    spinning = true;
-    elMsg.textContent = 'Spinning…';
-    state.bal -= state.bet; render();
-
-    // pick results
-    const results = [symbols[irnd(0,symbols.length-1)], symbols[irnd(0,symbols.length-1)], symbols[irnd(0,symbols.length-1)]];
-
-    // animate reels
-    for(let i=0;i<3;i++){
-      const el = reelEls[i];
-      el.classList.add('spin');
-      for(let f=0; f<9; f++){
-        el.textContent = symbols[irnd(0,symbols.length-1)];
-        await new Promise(r => setTimeout(r, 35 + i*25));
-      }
-      el.textContent = results[i];
-      el.classList.remove('spin');
-    }
-
-    // payout
-    let award = 0;
-    const set = new Set(results);
-    if(set.size === 1){
-      const s = results[0];
-      award = (s === '⭐' ? 20 : (s === '🍒' ? 12 : (s === '🍋' ? 8 : 6))) * state.bet;
-      elMsg.textContent = `Triple ${s}! +${award}`;
-    } else if(set.size === 2){
-      award = 3 * state.bet;
-      elMsg.textContent = `Pair! +${award}`;
-    } else {
-      elMsg.textContent = 'No match';
-    }
-
-    state.bal = clamp(state.bal + award, 0, 9999999);
-    state.best = Math.max(state.best, state.bal);
-    save();
-    spinning = false;
-  }
-
-  qs('#spinBtn').addEventListener('click', spin);
-
-  // hold-to-change with acceleration
-  function holdAdjust(btn, dir, targetKey='cg_slots_bet'){
-    let iv = null, step = 1, accel = 0;
-    const change = ()=>{
-      state.bet = clamp(state.bet + dir*step, 1, 99999);
-      localStorage.setItem(targetKey, state.bet);
-      render();
-      accel++;
-      if(accel % 8 === 0) step = Math.min(100, step*2);
-    };
-    btn.addEventListener('mousedown', e=>{ e.preventDefault(); change(); iv = setInterval(change, 140); });
-    btn.addEventListener('mouseup', ()=>{ clearInterval(iv); iv=null; step=1; accel=0; });
-    btn.addEventListener('mouseleave', ()=>{ clearInterval(iv); iv=null; step=1; accel=0; });
-    btn.addEventListener('touchstart', e=>{ e.preventDefault(); change(); iv = setInterval(change, 140); }, {passive:false});
-    btn.addEventListener('touchend', ()=>{ clearInterval(iv); iv=null; step=1; accel=0; });
-  }
-  holdAdjust(qs('#betUp'), +1);
-  holdAdjust(qs('#betDown'), -1);
-
-  qs('#resetSlots').addEventListener('click', ()=>{ state.bal = 100; state.bet = 5; save(); elMsg.textContent = 'Balance reset'; });
-
-  render();
-})();
-
-/* ============================
-   BLACKJACK — improved visuals & behavior
-   ============================ */
-(function(){
-  const suits = ['♠','♥','♦','♣'];
-  const ranks = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
-  const dealerEl = qs('#dealer'), playerEl = qs('#player');
-  const bankEl = qs('#bjBank'), betEl = qs('#bjBet'), bestEl = qs('#bjBest'), msgEl = qs('#bjMsg');
-  const pValEl = qs('#pVal'), dValEl = qs('#dVal');
-
-  let state = {
-    bank: Number(localStorage.getItem('cg_bj_bank')||100),
-    bet: Number(localStorage.getItem('cg_bj_bet')||10),
-    best: Number(localStorage.getItem('cg_bj_best')||0),
-    deck: [], player: [], dealer: [], inRound: false
-  };
-
-  function save(){ localStorage.setItem('cg_bj_bank', state.bank); localStorage.setItem('cg_bj_bet', state.bet); state.best = Math.max(state.best, state.bank); localStorage.setItem('cg_bj_best', state.best); renderTop(); }
-  function renderTop(){ bankEl.textContent = state.bank; betEl.textContent = state.bet; bestEl.textContent = state.best; }
-
-  function buildDeck(){
-    state.deck = [];
-    suits.forEach(s => ranks.forEach(r => state.deck.push(r + s)));
-    // shuffle
-    for(let i = state.deck.length - 1; i > 0; i--){
-      const j = irnd(0, i);
-      [state.deck[i], state.deck[j]] = [state.deck[j], state.deck[i]];
-    }
-  }
-
-  function cardValueRank(r){
-    if(['J','Q','K'].includes(r)) return 10;
-    if(r === 'A') return 11;
-    return Number(r);
-  }
-
-  function handValue(hand){
-    let total = 0, aces = 0;
-    for(const c of hand){
-      const r = c.slice(0, -1);
-      if(r === 'A'){ total += 11; aces++; }
-      else if(['J','Q','K'].includes(r)) total += 10;
-      else total += Number(r);
-    }
-    while(total > 21 && aces){
-      total -= 10; aces--;
-    }
-    return total;
-  }
-
-  function renderHand(el, hand, hideFirst=false){
-    el.innerHTML = '';
-    hand.forEach((c,i)=>{
-      const d = document.createElement('div');
-      d.className = 'cardx';
-      if(hideFirst && i === 0){
-        d.classList.add('back');
-        d.textContent = '🂠';
-      } else {
-        d.textContent = c;
-      }
-      el.appendChild(d);
-    });
-  }
-
-  function updateVals(revealDealer=false){
-    pValEl.textContent = state.player.length ? handValue(state.player) : 0;
-    if(revealDealer) dValEl.textContent = state.dealer.length ? handValue(state.dealer) : 0;
-    else {
-      // show visible card's value (first face-down hidden, show second only)
-      if(state.dealer.length >= 2){
-        // reveal value of visible card(s) (excluding first hidden)
-        const visible = state.dealer.slice(1);
-        let sum = 0, aces = 0;
-        for(const c of visible){
-          const r = c.slice(0, -1);
-          if(r === 'A'){ sum += 11; aces++; }
-          else if(['J','Q','K'].includes(r)) sum += 10;
-          else sum += Number(r);
-        }
-        // adjust aces in visible (not full dealer)
-        while(sum > 21 && aces){ sum -= 10; aces--; }
-        dValEl.textContent = sum ? sum : '?';
-      } else dValEl.textContent = '?';
-    }
-  }
-
-  function resetRound(){
-    state.player = []; state.dealer = []; state.inRound = false;
-    renderHand(playerEl, state.player, false);
-    renderHand(dealerEl, state.dealer, false);
-    updateVals();
-    qs('#bjHit').disabled = true; qs('#bjStand').disabled = true;
-  }
-
-  function checkBlackjack(){
-    const pv = handValue(state.player), dv = handValue(state.dealer);
-    const pBJ = (state.player.length === 2 && pv === 21);
-    const dBJ = (state.dealer.length === 2 && dv === 21);
-    if(pBJ || dBJ){
-      renderHand(dealerEl, state.dealer, false);
-      updateVals(true);
-      if(pBJ && !dBJ){
-        const win = Math.round(state.bet * 2.5); // bet returned + 1.5x profit => add 2.5*bet
-        state.bank += win;
-        msgEl.textContent = `Blackjack! You win ${win - state.bet} (3:2)`;
-      } else if(dBJ && !pBJ){
-        msgEl.textContent = 'Dealer has blackjack — you lose';
-      } else {
-        state.bank += state.bet; // push
-        msgEl.textContent = 'Both have blackjack — push';
-      }
-      state.inRound = false;
-      qs('#bjHit').disabled = true; qs('#bjStand').disabled = true;
-      save();
-      return true;
-    }
-    return false;
-  }
-
-  function deal(){
-    if(state.inRound) return;
-    if(state.bet < 1){ msgEl.textContent = 'Set a bet first'; return; }
-    if(state.bet > state.bank){ msgEl.textContent = 'Not enough in bank'; return; }
-    buildDeck();
-    resetRound();
-    state.bank -= state.bet;
-    save();
-    msgEl.textContent = 'Dealt';
-    state.inRound = true;
-    // initial cards
-    state.player.push(state.deck.pop(), state.deck.pop());
-    state.dealer.push(state.deck.pop(), state.deck.pop());
-    renderHand(playerEl, state.player, false);
-    renderHand(dealerEl, state.dealer, true);
-    updateVals(false);
-    setTimeout(()=>{ if(!checkBlackjack()){ qs('#bjHit').disabled = false; qs('#bjStand').disabled = false; } }, 200);
-  }
-
-  function dealerPlay(){
-    renderHand(dealerEl, state.dealer, false);
-    updateVals(true);
-    while(handValue(state.dealer) < 17){
-      // dealer hits until 17 or higher
-      state.dealer.push(state.deck.pop());
-      renderHand(dealerEl, state.dealer, false);
-      updateVals(true);
-    }
-    const pv = handValue(state.player), dv = handValue(state.dealer);
-    let win = 0, txt = '';
-    if(dv > 21 || pv > dv){
-      win = state.bet * 2; // return bet + equal profit
-      txt = `You win +${win - state.bet}`;
-    } else if(pv === dv){
-      win = state.bet; // push
-      txt = 'Push';
-    } else {
-      win = 0; txt = 'Dealer wins';
-    }
-    state.bank += win;
-    msgEl.textContent = txt;
-    state.inRound = false;
-    qs('#bjHit').disabled = true; qs('#bjStand').disabled = true;
-    save();
-  }
-
-  qs('#bjDeal').addEventListener('click', deal);
-  qs('#bjHit').addEventListener('click', ()=>{
-    if(!state.inRound) return;
-    state.player.push(state.deck.pop());
-    renderHand(playerEl, state.player, false);
-    updateVals(false);
-    if(handValue(state.player) > 21){
-      renderHand(dealerEl, state.dealer, false); updateVals(true);
-      msgEl.textContent = 'Bust!';
-      state.inRound = false;
-      qs('#bjHit').disabled = true; qs('#bjStand').disabled = true;
-      save();
-    }
-  });
-  qs('#bjStand').addEventListener('click', ()=>{ if(!state.inRound) return; dealerPlay(); });
-
-  // hold-to-change bet with acceleration
-  function holdAdjust(btn, dir, targetKey='cg_bj_bet'){
-    let iv=null, step=1, accel=0;
-    const change = ()=>{
-      state.bet = clamp(state.bet + dir*step, 1, 9999);
-      betEl.textContent = state.bet;
-      localStorage.setItem(targetKey, state.bet);
-      accel++;
-      if(accel % 8 === 0) step = Math.min(100, step*2);
-    };
-    btn.addEventListener('mousedown', e=>{ e.preventDefault(); change(); iv = setInterval(change, 140); });
-    btn.addEventListener('mouseup', ()=>{ clearInterval(iv); iv=null; step=1; accel=0; });
-    btn.addEventListener('mouseleave', ()=>{ clearInterval(iv); iv=null; step=1; accel=0; });
-    btn.addEventListener('touchstart', e=>{ e.preventDefault(); change(); iv = setInterval(change, 140); }, {passive:false});
-    btn.addEventListener('touchend', ()=>{ clearInterval(iv); iv=null; step=1; accel=0; });
-  }
-  holdAdjust(qs('#bjBetUp'), +1);
-  holdAdjust(qs('#bjBetDown'), -1);
-
-  qs('#bjReset').addEventListener('click', ()=>{ if(state.inRound) return; state.bank = 100; state.bet = 10; save(); msgEl.textContent = 'Bank reset'; });
-
-  renderTop();
-})();
-
-/* ============================
-   MATH SPRINT (harder with difficulty and options)
-   ============================ */
-(function(){
-  const qEl = qs('#mathQ'), aEl = qs('#mathA'), scoreEl = qs('#mathScore'), streakEl = qs('#mathStreak'), timeEl = qs('#mathTime'), bestEl = qs('#mathBest'), msgEl = qs('#mathMsg');
-  const opAdd = qs('#opAdd'), opSub = qs('#opSub'), opMul = qs('#opMul'), opDiv = qs('#opDiv'), diffSel = qs('#mathDiff');
-
-  let state = { score:0, streak:0, time:60, timer:0, best:Number(localStorage.getItem('cg_math_best')||0), running:false, currentAnswer: null };
-
-  function numberRangeForDifficulty(diff){
-    if(diff === 'easy') return [1,12];
-    if(diff === 'medium') return [1,50];
-    return [1,200];
-  }
-
-  function nextQuestion(){
-    const ops = [];
-    if(opAdd.checked) ops.push('+');
-    if(opSub.checked) ops.push('-');
-    if(opMul.checked) ops.push('*');
-    if(opDiv.checked) ops.push('/');
-    if(ops.length === 0) ops.push('+');
-
-    const op = ops[irnd(0, ops.length-1)];
-    const diff = diffSel.value;
-    const [minN, maxN] = numberRangeForDifficulty(diff);
-
-    let a = irnd(minN, maxN), b = irnd(minN, maxN);
-    let text = '', ans = 0;
-
-    // make division produce integer answers sometimes; in hard mode allow decimals? stick to integer answers for simplicity.
-    if(op === '/'){
-      // ensure integer result: pick ans in range, then multiply
-      ans = irnd(Math.max(1,minN), Math.max(1, Math.min(50, maxN)));
-      b = irnd(Math.max(1,minN), Math.max(1, Math.min(20, maxN)));
-      a = ans * b;
-      text = `${a} ÷ ${b} = ?`;
-    } else if(op === '*'){
-      // reduce large numbers in hard mode by lowering b
-      if(diff === 'hard'){ b = irnd(2, 20); }
-      ans = a * b;
-      text = `${a} × ${b} = ?`;
-    } else if(op === '+'){
-      ans = a + b; text = `${a} + ${b} = ?`;
-    } else {
-      // subtraction ensure not negative if easy/medium; allow negative in hard optionally
-      if(diff !== 'hard' && a < b){ [a,b] = [b,a]; }
-      ans = a - b; text = `${a} − ${b} = ?`;
-    }
-    qEl.textContent = text;
-    state.currentAnswer = ans;
-    aEl.value = '';
-    aEl.focus();
-  }
-
-  function tick(){
-    state.time--;
-    timeEl.textContent = state.time;
-    if(state.time <= 0){
-      clearInterval(state.timer);
-      state.timer = 0;
-      state.running = false;
-      msgEl.textContent = `Time's up — final ${state.score}`;
-      state.best = Math.max(state.best, state.score);
-      localStorage.setItem('cg_math_best', state.best);
-      bestEl.textContent = state.best;
-    }
-    if(state.time === 10) timeEl.parentElement.classList.add('danger');
-  }
-
-  qs('#mathStart').addEventListener('click', ()=>{
-    if(state.running) return;
-    state.running = true;
-    state.score = 0; state.streak = 0; state.time = 60;
-    scoreEl.textContent = 0; streakEl.textContent = 0; timeEl.textContent = 60; msgEl.textContent = '';
-    nextQuestion();
-    if(state.timer) clearInterval(state.timer);
-    state.timer = setInterval(tick, 1000);
-  });
-
-  qs('#mathSubmit').addEventListener('click', ()=>{
-    if(!state.running){ msgEl.textContent = 'Press Start'; return; }
-    const val = Number(aEl.value);
-    const ans = Number(state.currentAnswer);
-    if(Number.isFinite(val) && val === ans){
-      state.streak++;
-      const gain = 10 + Math.floor(Math.max(0, state.streak - 1) * (diffSel.value === 'hard' ? 5 : 2));
-      state.score += gain;
-      msgEl.textContent = `Correct +${gain}`;
-    } else {
-      state.streak = 0;
-      msgEl.textContent = `Wrong — answer ${ans}`;
-    }
-    scoreEl.textContent = state.score;
-    streakEl.textContent = state.streak;
-    nextQuestion();
-  });
-
-  aEl.addEventListener('keydown', e=>{ if(e.key === 'Enter'){ e.preventDefault(); qs('#mathSubmit').click(); } });
-
-  qs('#mathReset').addEventListener('click', ()=>{ localStorage.removeItem('cg_math_best'); state.best = 0; bestEl.textContent = 0; });
-
-  bestEl.textContent = state.best;
-})();
-
-/* ============================
-   TYPING — corrected, supports backspace and accurate WPM & accuracy
-   ============================ */
-(function(){
-  const samples = [
-    'Practice makes progress — keep your fingers light and your focus steady.',
-    'Clear instructions and clean code make everything easier to fix later.',
-    'Small daily habits add up to big improvements over time.',
-    'Stay calm. Type steady. Let accuracy build your speed.'
-  ];
-  const wrap = qs('#typingText'), input = qs('#typeInput'), wpmEl = qs('#typeWpm'), accEl = qs('#typeAcc'), timeEl = qs('#typeTime'), bestEl = qs('#typeBest'), msgEl = qs('#typeMsg');
-
-  let state = {
-    text: '',
-    pos: 0,
-    time: Settings.get('typingDur',30),
-    timer: 0,
-    correct: 0,
-    totalTyped: 0,
-    startTime: null,
-    best: Number(localStorage.getItem('cg_type_best')||0),
-    running: false
-  };
-
-  function pickText(){
-    state.text = samples[irnd(0, samples.length-1)];
-    state.pos = 0;
-    state.correct = 0;
-    state.totalTyped = 0;
-    render();
-  }
-
-  function render(){
-    // highlight typed text, current char, and remaining
-    const before = state.text.slice(0, state.pos);
-    const cur = state.text[state.pos] || '';
-    const after = state.text.slice(state.pos + 1);
-    const safe = s => s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-    wrap.innerHTML = `<span class="done">${safe(before)}</span><span class="cur">${safe(cur)}</span>${safe(after)}`;
-  }
-
-  function tick(){
-    state.time--;
-    timeEl.textContent = state.time;
-    const elapsed = Math.max(1, Settings.get('typingDur',30) - state.time);
-    const wpm = Math.round(((state.totalTyped / 5) / (elapsed / 60)));
-    const acc = state.totalTyped ? Math.round((state.correct / state.totalTyped) * 100) : 100;
-    wpmEl.textContent = wpm;
-    accEl.textContent = acc + '%';
-    if(state.time <= 0){
-      clearInterval(state.timer);
-      state.timer = 0;
-      state.running = false;
-      msgEl.textContent = `Time! WPM ${wpm} — Accuracy ${acc}%`;
-      state.best = Math.max(state.best, wpm);
-      localStorage.setItem('cg_type_best', state.best);
-      bestEl.textContent = state.best;
-    }
-  }
-
-  qs('#typeStart').addEventListener('click', ()=>{
-    if(state.running) return;
-    state.time = Settings.get('typingDur',30);
-    timeEl.textContent = state.time;
-    state.correct = 0; state.totalTyped = 0; state.pos = 0; state.running = true;
-    pickText();
-    input.value = '';
-    input.focus();
-    if(state.timer) clearInterval(state.timer);
-    state.timer = setInterval(tick, 1000);
-    msgEl.textContent = '';
-  });
-
-  // input handling: allow backspace, punctuation, spaces; update pos & counts
-  input.addEventListener('keydown', function(e){
-    if(!state.running){ if(e.key === 'Backspace') e.preventDefault(); return; }
-    // allow control keys
-    if(e.key === 'Tab' || e.key === 'Escape') { e.preventDefault(); return; }
-    // handle backspace
-    if(e.key === 'Backspace'){
-      e.preventDefault();
-      if(state.pos > 0){
-        state.pos--;
-        render();
-      }
-      return;
-    }
-    // Ignore other control keys (Arrow keys, Shift, Ctrl)
-    if(e.key.length !== 1) { return; }
-    e.preventDefault();
-    const ch = e.key;
-    state.totalTyped++;
-    const expected = state.text[state.pos] || '';
-    if(ch === expected){
-      state.correct++;
-    } else {
-      // wrong char — we still advance so test moves forward
-    }
-    state.pos++;
-    // if we reached end, pick new text (keep going)
-    if(state.pos >= state.text.length){ pickText(); }
-    render();
-  });
-
-  qs('#typeReset').addEventListener('click', ()=>{ localStorage.removeItem('cg_type_best'); state.best = 0; bestEl.textContent = 0; });
-
-  bestEl.textContent = state.best;
-})();
-
-/* ============================
-   Clean up / small helpers
-   ============================ */
-qs('#clearAll').addEventListener('click', ()=>{
-  if(confirm('Clear saved scores and settings? This removes stored bests and custom options on this device.')){
-    Object.keys(localStorage).filter(k => k.startsWith('cg_')).forEach(k=>localStorage.removeItem(k));
-    location.reload();
-  }
-});
-
-/* Initialize UI with stored scores where present */
-(function fillInitialBests(){
-  qs('#slotsBal').textContent = Number(localStorage.getItem('cg_slots_bal')||100);
-  qs('#slotsBet').textContent = Number(localStorage.getItem('cg_slots_bet')||5);
-  qs('#slotsBest').textContent = Number(localStorage.getItem('cg_slots_best')||0);
-
-  qs('#bjBank').textContent = Number(localStorage.getItem('cg_bj_bank')||100);
-  qs('#bjBet').textContent = Number(localStorage.getItem('cg_bj_bet')||10);
-  qs('#bjBest').textContent = Number(localStorage.getItem('cg_bj_best')||0);
-
-  qs('#mathBest').textContent = Number(localStorage.getItem('cg_math_best')||0);
-  qs('#typeBest').textContent = Number(localStorage.getItem('cg_type_best')||0);
-})();
-
-/* Accessibility: focus first tab control initially */
-setTimeout(()=>{ const first = document.querySelector('.tab'); if(first) first.focus(); }, 200);
-
-</script>
+  <script src="app.js"></script>
 </body>
 </html>
