@@ -3,451 +3,454 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>comp-apps — Bug Buster</title>
-  <meta name="description" content="A tiny, fast arcade game for Computer Apps class. Works on GitHub Pages in a single file." />
+  <title>comp-apps — Game Hub</title>
+  <meta name="description" content="A polished multi‑game hub for Computer Apps: simulated casino, math sprint, typing test, and an arcade mini‑game. Single file for GitHub Pages." />
   <style>
     :root{
-      --bg:#0b1020;          /* deep navy */
-      --panel:#0f1730;       /* darker panel */
-      --ink:#e8f0ff;         /* light text */
-      --muted:#99a6c6;       /* muted text */
-      --brand:#7cf1c8;       /* mint */
-      --accent:#9bb4ff;      /* periwinkle */
-      --danger:#ff7b9c;      /* coral pink */
-      --warn:#ffd36e;        /* warm yellow */
-      --ok:#79f28c;          /* green */
+      --bg:#0b1020; --panel:#0f1730; --ink:#e8f0ff; --muted:#9fb0d6;
+      --brand:#7cf1c8; --accent:#9bb4ff; --danger:#ff7b9c; --warn:#ffd36e; --ok:#79f28c;
     }
     *{box-sizing:border-box}
-    html,body{height:100%;margin:0;background:radial-gradient(1200px 600px at 70% -20%, #1a2450 0%, var(--bg) 60%) fixed;color:var(--ink);font:16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif}
+    html,body{height:100%;margin:0;background:radial-gradient(1400px 800px at 70% -20%, #1a2450 0%, var(--bg) 60%) fixed;color:var(--ink);font:16px/1.5 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial}
     a{color:var(--brand)}
 
-    .wrap{max-width:1100px;margin-inline:auto;padding:16px;display:grid;gap:16px}
+    .wrap{max-width:1240px;margin-inline:auto;padding:22px;display:grid;gap:22px}
 
     header{
-      display:flex;align-items:center;justify-content:space-between;gap:12px;
-      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(0,0,0,.12));
-      border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:10px 14px;
-      box-shadow:0 20px 50px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06);
-      backdrop-filter:saturate(130%) blur(6px);
+      display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.18));
+      border:1px solid rgba(255,255,255,.10);border-radius:20px;padding:16px 18px;
+      box-shadow:0 24px 60px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.06);
+      backdrop-filter:saturate(130%) blur(8px);
     }
-    .title{display:flex;align-items:center;gap:12px}
-    .logo{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;
+    .title{display:flex;align-items:center;gap:14px}
+    .logo{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;
       background:conic-gradient(from 160deg, var(--brand), var(--accent), var(--brand));
       color:#0a1226;font-weight:900;text-shadow:0 1px 0 rgba(255,255,255,.5)}
-    h1{font-size:20px;margin:0}
+    h1{font-size:24px;margin:0}
     .sub{font-size:12px;color:var(--muted)}
+
+    .nav{display:flex;gap:10px;flex-wrap:wrap}
+    .tab{appearance:none;border:none;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer;
+      background:linear-gradient(180deg, #1f2a55, #162044);color:var(--ink);
+      border:1px solid rgba(255,255,255,.14);box-shadow:0 6px 20px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06)}
+    .tab[aria-current="page"]{outline:2px solid var(--brand)}
+
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:22px}
+    @media (max-width: 1080px){.grid{grid-template-columns:1fr}}
+
+    .card{background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.22));
+      border:1px solid rgba(255,255,255,.10);border-radius:20px;padding:18px;
+      box-shadow:0 24px 60px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.06)}
+
+    .stage{position:relative;min-height:460px}
+    .section{display:none}
+    .section.active{display:block}
+
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    @media (max-width: 920px){.row{grid-template-columns:1fr}}
+
     .btn{appearance:none;border:none;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer;
       background:linear-gradient(180deg, #1f2a55, #162044);color:var(--ink);
-      border:1px solid rgba(255,255,255,.12);box-shadow:0 6px 20px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06)}
+      border:1px solid rgba(255,255,255,.14);box-shadow:0 6px 20px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06)}
     .btn:hover{filter:brightness(1.06)}
     .btn:active{transform:translateY(1px)}
 
-    .grid{display:grid;grid-template-columns:1fr 320px;gap:16px}
-    @media (max-width: 900px){.grid{grid-template-columns:1fr}}
-
-    .card{background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(0,0,0,.15));
-      border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:14px;
-      box-shadow:0 20px 60px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06)}
-
-    /* Canvas and HUD */
-    .stage{position:relative;aspect-ratio:16/9;max-height:70vh}
-    canvas{width:100%;height:100%;display:block;border-radius:14px;background:radial-gradient(900px 600px at 20% -10%, #131b3a 0%, #0b112a 50%, #070d21 100%)}
-    .hud{position:absolute;inset:10px 10px auto 10px;display:flex;gap:8px;flex-wrap:wrap}
+    .hud{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
     .chip{padding:6px 10px;border-radius:999px;font-weight:700;background:rgba(0,0,0,.35);
-      border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(5px);}
-    .chip.good{color:var(--ok)}
-    .chip.warn{color:var(--warn)}
-    .chip.danger{color:var(--danger)}
+      border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(5px)}
+    .chip.good{color:var(--ok)}.chip.warn{color:var(--warn)}.chip.danger{color:var(--danger)}
 
-    /* Overlays */
-    .overlay{position:absolute;inset:0;display:grid;place-items:center;padding:18px;border-radius:14px}
-    .panel{max-width:680px;background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.25));
-      border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:22px;text-align:center;
-      box-shadow:0 20px 60px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.08)}
-    .panel h2{margin:0 0 10px;font-size:28px}
-    .panel p{margin:0 0 12px;color:var(--muted)}
-
-    /* Controls legend */
-    .legend{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-    .kbd{display:inline-grid;place-items:center;min-width:28px;height:28px;padding:0 8px;border-radius:8px;
-      background:linear-gradient(180deg, #18244a, #121a37);border:1px solid rgba(255,255,255,.14)}
-
-    /* Mobile / touch controls */
-    .touch{
-      position:absolute;inset:auto 10px 10px auto;display:grid;gap:8px;grid-template-columns:repeat(3,48px);
-      opacity:.85;user-select:none;-webkit-user-select:none
-    }
-    .touch button{width:48px;height:48px;border-radius:50%;border:1px solid rgba(255,255,255,.14);
-      background:linear-gradient(180deg, #24305e, #151e3f);color:var(--ink);font-weight:900}
-    .touch .wide{grid-column:1 / -1;border-radius:12px}
-
-    /* Sidebar */
-    .side h3{margin:8px 0 6px}
-    .stat{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:12px;
-      background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);margin:6px 0}
+    .stats{display:grid;gap:10px}
+    .stat{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:12px;
+      background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.10)}
     .muted{color:var(--muted)}
     footer{opacity:.8;text-align:center;font-size:12px;padding:8px}
+
+    /* Game specific */
+    .reels{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+    .reel{display:grid;place-items:center;height:120px;border-radius:14px;
+      background:linear-gradient(180deg,#24305e,#151e3f);border:1px solid rgba(255,255,255,.14);font-size:48px}
+    .payout{font-weight:700}
+
+    .cards{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+    .cardx{width:56px;height:78px;border-radius:8px;display:grid;place-items:center;
+      background:linear-gradient(180deg,#e8f0ff,#c8d4ff);color:#0a1226;font-weight:900;border:2px solid #0a122633}
+
+    .problem{font-size:32px;font-weight:800}
+    input[type="number"], input[type="text"]{width:100%;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);
+      background:#0e1632;color:var(--ink)}
+
+    .typingText{padding:12px;border-radius:14px;background:#0e1632;border:1px solid rgba(255,255,255,.12);min-height:96px}
+    .typingText .done{opacity:.5}
+    .typingText .current{outline:2px solid var(--accent)}
+
+    .canvasWrap{aspect-ratio:16/9;max-height:70vh}
+    canvas{width:100%;height:100%;display:block;border-radius:14px;background:radial-gradient(900px 600px at 20% -10%, #131b3a 0%, #0b112a 50%, #070d21 100%)}
   </style>
 </head>
 <body>
   <!--
-    comp-apps — Bug Buster
-    Single-file HTML5 game built for GitHub Pages.
-
-    How to deploy on GitHub Pages (quick):
-    1) Create a repo named comp-apps (or any name).
-    2) Add this file as index.html and commit to the default branch (usually main).
-    3) In Settings → Pages: Source = Deploy from a branch, Branch = main, Folder = /(root).
-    4) Wait for the green check, then open the URL shown in Pages settings.
-
-    Customize: Search for CONFIG below.
-    License: MIT — do whatever; attribution appreciated.
+    comp-apps — Game Hub
+    Multi‑game single file built for GitHub Pages.
+    How to deploy: Add this file as index.html → Settings → Pages → Deploy from branch (root).
+    All games save best scores locally (localStorage). No real money; casino games are simulated for fun.
   -->
-
   <div class="wrap">
     <header class="card">
       <div class="title">
         <div class="logo">CA</div>
         <div>
-          <h1>comp-apps — <span class="muted">Bug Buster</span></h1>
-          <div class="sub">Collect files, dodge bugs, and beat the high score!</div>
+          <h1>comp-apps — <span class="muted">Game Hub</span></h1>
+          <div class="sub">Simulated Casino • Math Sprint • Typing Test • Arcade — Pick a game and set a high score.</div>
         </div>
       </div>
-      <div>
-        <button class="btn" id="startBtn" aria-label="Start game">▶ Start</button>
-        <button class="btn" id="pauseBtn" aria-label="Pause/Resume">⏸︎ Pause</button>
-        <button class="btn" id="resetBtn" aria-label="Reset high score">↺ Reset Score</button>
-      </div>
+      <nav class="nav" aria-label="Games">
+        <button class="tab" data-tab="slots" aria-current="page">🎰 Slots</button>
+        <button class="tab" data-tab="blackjack">🂡 Blackjack</button>
+        <button class="tab" data-tab="math">➗ Math Sprint</button>
+        <button class="tab" data-tab="typing">⌨️ Typing</button>
+        <button class="tab" data-tab="arcade">🕹️ Bug Buster</button>
+      </nav>
     </header>
 
     <div class="grid">
-      <section class="card stage" aria-label="Game stage">
-        <canvas id="game" width="960" height="540" role="img" aria-label="Arcade game canvas"></canvas>
-
-        <div class="hud" aria-live="polite">
-          <div class="chip" id="scoreChip">Score: 0</div>
-          <div class="chip" id="levelChip">Level: 1</div>
-          <div class="chip warn" id="timeChip">Time: 60</div>
-          <div class="chip" id="filesChip">Files: 0</div>
-          <div class="chip" id="bestChip">Best: 0</div>
-        </div>
-
-        <div class="overlay" id="startOverlay">
-          <div class="panel">
-            <h2>Welcome to <strong>Bug Buster</strong>!</h2>
-            <p>Move with <span class="kbd">W</span><span class="kbd">A</span><span class="kbd">S</span><span class="kbd">D</span> or arrow keys. Collect the <strong>files</strong>, dodge the <strong>bugs</strong>. Survive to level up!</p>
-            <div class="legend">
-              <div><strong>Goal</strong><br><span class="muted">Grab squares (+10) • Avoid triangles (-1 life)</span></div>
-              <div><strong>Power-ups</strong><br><span class="muted">Stars = slow time • Hearts = +1 life</span></div>
-              <div><strong>Keys</strong><br><span class="muted">P = Pause • R = Restart</span></div>
-              <div><strong>Mobile</strong><br><span class="muted">Use on-screen joystick</span></div>
+      <main class="card stage">
+        <!-- SLOTS -->
+        <section id="sec-slots" class="section active" aria-labelledby="tab-slots">
+          <h2>🎰 Lucky Slots <span class="muted">(simulated)</span></h2>
+          <p class="muted">Spin the reels. No money involved — just points. Try to beat your best balance.</p>
+          <div class="hud">
+            <div class="chip">Balance: <strong id="slotsBal">100</strong></div>
+            <div class="chip">Bet: <strong id="slotsBet">5</strong></div>
+            <div class="chip">Best Balance: <strong id="slotsBest">0</strong></div>
+            <div class="chip payout" id="slotsMsg"> </div>
+          </div>
+          <div class="row">
+            <div>
+              <div class="reels">
+                <div class="reel" id="reel1">🍒</div>
+                <div class="reel" id="reel2">🍋</div>
+                <div class="reel" id="reel3">⭐</div>
+              </div>
+              <div style="display:flex; gap:8px; align-items:center">
+                <button class="btn" id="spinBtn">Spin</button>
+                <button class="btn" id="betDown">Bet -</button>
+                <button class="btn" id="betUp">Bet +</button>
+                <button class="btn" id="resetSlots">Reset</button>
+              </div>
             </div>
-            <p style="margin-top:12px"><button class="btn" id="overlayStart">Play</button></p>
+            <div>
+              <h3>Payouts</h3>
+              <ul class="muted">
+                <li>3× ⭐ = 20× bet</li>
+                <li>3× 🍒 = 12× bet</li>
+                <li>3× 🍋 = 8× bet</li>
+                <li>Any 2 match = 3× bet</li>
+              </ul>
+            </div>
           </div>
-        </div>
+        </section>
 
-        <div class="overlay" id="pauseOverlay" hidden>
-          <div class="panel">
-            <h2>Paused</h2>
-            <p class="muted">Press <span class="kbd">P</span> or tap resume to continue.</p>
-            <p><button class="btn" id="overlayResume">Resume</button></p>
+        <!-- BLACKJACK -->
+        <section id="sec-blackjack" class="section" aria-labelledby="tab-blackjack">
+          <h2>🂡 Blackjack Lite <span class="muted">(simulated)</span></h2>
+          <p class="muted">Get closer to 21 than the dealer without going over. Aces count 1 or 11 automatically.</p>
+          <div class="hud">
+            <div class="chip">Bank: <strong id="bjBank">100</strong></div>
+            <div class="chip">Bet: <strong id="bjBet">10</strong></div>
+            <div class="chip">Best Bank: <strong id="bjBest">0</strong></div>
+            <div class="chip" id="bjMsg"> </div>
           </div>
-        </div>
-
-        <div class="overlay" id="gameOverOverlay" hidden>
-          <div class="panel">
-            <h2>Game Over</h2>
-            <p id="finalStats" class="muted">You scored 0 points.</p>
-            <p><button class="btn" id="overlayRestart">Try Again</button></p>
+          <div class="row">
+            <div>
+              <h3>Dealer</h3>
+              <div class="cards" id="dealer"></div>
+              <h3>You</h3>
+              <div class="cards" id="player"></div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px">
+                <button class="btn" id="bjDeal">Deal</button>
+                <button class="btn" id="bjHit" disabled>Hit</button>
+                <button class="btn" id="bjStand" disabled>Stand</button>
+                <button class="btn" id="bjBetDown">Bet -</button>
+                <button class="btn" id="bjBetUp">Bet +</button>
+                <button class="btn" id="bjReset">Reset</button>
+              </div>
+            </div>
+            <div>
+              <h3>Rules</h3>
+              <ul class="muted">
+                <li>Face cards = 10; Ace = 1 or 11.</li>
+                <li>Dealer hits to 17 and stands.</li>
+                <li>Blackjack pays 3:2.</li>
+              </ul>
+            </div>
           </div>
-        </div>
+        </section>
 
-        <!-- Touch controls -->
-        <div class="touch" id="touchControls" aria-hidden="true">
-          <button data-dx="0" data-dy="-1" aria-label="Up">↑</button>
-          <button data-dx="-1" data-dy="0" aria-label="Left">←</button>
-          <button data-dx="1" data-dy="0" aria-label="Right">→</button>
-          <button data-dx="0" data-dy="1" aria-label="Down">↓</button>
-          <button class="wide" id="touchPause">Pause</button>
-        </div>
-      </section>
+        <!-- MATH -->
+        <section id="sec-math" class="section" aria-labelledby="tab-math">
+          <h2>➗ Math Sprint</h2>
+          <p class="muted">Answer as many as you can in 60 seconds. Streaks add bonus points.</p>
+          <div class="hud">
+            <div class="chip">Score: <strong id="mathScore">0</strong></div>
+            <div class="chip">Streak: <strong id="mathStreak">0</strong></div>
+            <div class="chip warn">Time: <strong id="mathTime">60</strong>s</div>
+            <div class="chip">Best: <strong id="mathBest">0</strong></div>
+          </div>
+          <div class="row">
+            <div>
+              <div class="problem" id="mathQ">3 + 4 = ?</div>
+              <div style="display:flex; gap:8px; margin-top:8px">
+                <input type="number" id="mathA" placeholder="Your answer" />
+                <button class="btn" id="mathSubmit">Submit</button>
+                <button class="btn" id="mathStart">Start</button>
+              </div>
+              <p class="muted" id="mathMsg"> </p>
+            </div>
+            <div>
+              <h3>Operations</h3>
+              <label><input type="checkbox" id="opAdd" checked/> Add</label>
+              <label><input type="checkbox" id="opSub" checked/> Subtract</label>
+              <label><input type="checkbox" id="opMul" checked/> Multiply</label>
+              <label><input type="checkbox" id="opDiv"/> Divide</label>
+            </div>
+          </div>
+        </section>
 
-      <aside class="card side">
-        <h3>About this game</h3>
-        <p class="muted">Created for a Computer Apps project. No assets or installs — just one HTML file, perfect for GitHub Pages.</p>
-        <div class="stat"><span>High Score</span><strong id="bestSide">0</strong></div>
-        <div class="stat"><span>Longest Run</span><strong id="longestSide">0s</strong></div>
-        <div class="stat"><span>Files Collected</span><strong id="filesSide">0</strong></div>
-        <h3>Tips</h3>
-        <ul class="muted">
-          <li>Keep moving — speed ramps up every level.</li>
-          <li>Grab stars to slow the bugs for 5 seconds.</li>
-          <li>Hearts give you an extra life (max 5).</li>
-        </ul>
+        <!-- TYPING -->
+        <section id="sec-typing" class="section" aria-labelledby="tab-typing">
+          <h2>⌨️ Type Racer Lite</h2>
+          <p class="muted">Type the text below for 30 seconds. Aim for accuracy and WPM.</p>
+          <div class="hud">
+            <div class="chip">WPM: <strong id="typeWpm">0</strong></div>
+            <div class="chip">Accuracy: <strong id="typeAcc">100%</strong></div>
+            <div class="chip warn">Time: <strong id="typeTime">30</strong>s</div>
+            <div class="chip">Best WPM: <strong id="typeBest">0</strong></div>
+          </div>
+          <div class="typingText" id="typingText" aria-live="polite"></div>
+          <div style="display:flex; gap:8px; margin-top:8px">
+            <input type="text" id="typeInput" placeholder="Start typing here" />
+            <button class="btn" id="typeStart">Start</button>
+            <button class="btn" id="typeReset">Reset</button>
+          </div>
+          <p class="muted" id="typeMsg"> </p>
+        </section>
+
+        <!-- ARCADE -->
+        <section id="sec-arcade" class="section" aria-labelledby="tab-arcade">
+          <h2>🕹️ Bug Buster (Arcade)</h2>
+          <p class="muted">Collect files, dodge bugs, level up. Pause with P, Restart with R. Mobile has on-screen buttons.</p>
+          <div class="hud">
+            <div class="chip" id="scoreChip">Score: 0</div>
+            <div class="chip" id="levelChip">Level: 1</div>
+            <div class="chip warn" id="timeChip">Time: 60</div>
+            <div class="chip" id="filesChip">Files: 0</div>
+            <div class="chip" id="bestChip">Best: 0</div>
+          </div>
+          <div class="canvasWrap card" style="padding:0">
+            <canvas id="game" width="960" height="540" role="img" aria-label="Arcade game canvas"></canvas>
+          </div>
+          <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap">
+            <button class="btn" id="startBtn">▶ Start</button>
+            <button class="btn" id="pauseBtn">⏸︎ Pause</button>
+            <button class="btn" id="resetBtn">↺ Reset Score</button>
+          </div>
+          <div id="startOverlay" hidden></div>
+          <div id="pauseOverlay" hidden></div>
+          <div id="gameOverOverlay" hidden></div>
+          <div class="touch" id="touchControls" aria-hidden="true" style="position:static; display:none"></div>
+        </section>
+      </main>
+
+      <aside class="card">
+        <h3>Player Stats</h3>
+        <div class="stats">
+          <div class="stat"><span>Slots Best Balance</span><strong id="sideSlotsBest">0</strong></div>
+          <div class="stat"><span>Blackjack Best Bank</span><strong id="sideBjBest">0</strong></div>
+          <div class="stat"><span>Math Best</span><strong id="sideMathBest">0</strong></div>
+          <div class="stat"><span>Typing Best WPM</span><strong id="sideTypeBest">0</strong></div>
+          <div class="stat"><span>Arcade Best</span><strong id="bestSide">0</strong></div>
+        </div>
+        <h3 style="margin-top:12px">Notes</h3>
+        <p class="muted">Casino games are for fun only — no real money or prizes. All scores save locally in your browser.</p>
       </aside>
     </div>
 
-    <footer class="muted">comp-apps — Bug Buster · Built with ❤️ using vanilla HTML5 Canvas · MIT License</footer>
+    <footer class="muted">comp-apps — Game Hub · Vanilla HTML/CSS/JS · MIT License</footer>
   </div>
 
   <script>
-    // ======================
-    // CONFIG (tweak freely)
-    // ======================
-    const CONFIG = {
-      startLives: 3,
-      maxLives: 5,
-      baseSpeed: 2.2,
-      playerSpeed: 3.4,
-      fileWorth: 10,
-      levelTime: 60,  // seconds
-      spawnBugEvery: 1200, // ms, decreases with level
-      spawnFileEvery: 950, // ms
-      spawnPowerEvery: 6000, // ms
-      slowMoFactor: 0.45,
-      slowMoDuration: 5000,
-      levelSpeedBoost: 0.35,
-      bugSpeedVariance: 1.1,
+    // ===== Tabs =====
+    const tabs = document.querySelectorAll('.tab');
+    const sections = {
+      slots: document.getElementById('sec-slots'),
+      blackjack: document.getElementById('sec-blackjack'),
+      math: document.getElementById('sec-math'),
+      typing: document.getElementById('sec-typing'),
+      arcade: document.getElementById('sec-arcade'),
     };
+    tabs.forEach(btn=>btn.addEventListener('click',()=>{
+      tabs.forEach(b=>b.removeAttribute('aria-current'));
+      btn.setAttribute('aria-current','page');
+      Object.values(sections).forEach(s=>s.classList.remove('active'));
+      sections[btn.dataset.tab].classList.add('active');
+    }));
 
-    // ======= util ========
-    const rnd = (min, max) => Math.random() * (max - min) + min;
-    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-    const dist = (a,b) => Math.hypot(a.x-b.x, a.y-b.y);
+    // ===== Utils =====
+    const rnd = (min,max)=> Math.random()*(max-min)+min;
+    const irnd = (min,max)=> Math.floor(rnd(min,max+1));
 
-    // ======= audio (tiny, no files) ========
-    const AudioFX = (()=>{
-      let ctx; const ensure = ()=>{ctx ||= new (window.AudioContext||window.webkitAudioContext)()};
-      function beep(type='sine', f=440, t=0.08, v=0.06){ ensure(); const o=ctx.createOscillator(); const g=ctx.createGain();
-        o.type=type; o.frequency.value=f; g.gain.value=v; o.connect(g).connect(ctx.destination);
-        o.start(); o.stop(ctx.currentTime+t); }
-      return {
-        collect: ()=>beep('triangle', 760, .07, .05),
-        hit: ()=>beep('sawtooth', 140, .12, .08),
-        level: ()=>beep('square', 520, .18, .06),
-        power: ()=>beep('sine', 980, .12, .05)
-      }
-    })();
-
-    // ======= state ========
-    const canvas = document.getElementById('game');
-    const ctx = canvas.getContext('2d');
-    const dpr = Math.max(1, Math.min(2, window.devicePixelRatio||1));
-    function resize(){
-      const r = canvas.getBoundingClientRect();
-      canvas.width = Math.round(r.width * dpr);
-      canvas.height = Math.round(r.height * dpr);
+    function updateSide(){
+      document.getElementById('sideSlotsBest').textContent = localStorage.getItem('slots_best')||0;
+      document.getElementById('sideBjBest').textContent = localStorage.getItem('bj_best')||0;
+      document.getElementById('sideMathBest').textContent = localStorage.getItem('math_best')||0;
+      document.getElementById('sideTypeBest').textContent = localStorage.getItem('type_best')||0;
+      document.getElementById('bestSide').textContent = localStorage.getItem('bb_best')||0;
     }
-    new ResizeObserver(resize).observe(canvas);
-    resize();
 
-    const state = {
-      running:false, paused:false, over:false,
-      level:1, score:0, files:0, lives:CONFIG.startLives,
-      tStart:0, tNow:0, tSlowEnd:0, 
-      nextBug:0, nextFile:0, nextPower:0,
-      player:{x:200,y:200, r:10*dpr, vx:0, vy:0},
-      bugs:[], filesArr:[], powers:[],
-      best: Number(localStorage.getItem('bb_best')||0),
-      longest: Number(localStorage.getItem('bb_longest')||0),
+    // ===== Slots =====
+    const sym = ['🍒','🍋','⭐','🔔','🍇'];
+    const reelEls = [document.getElementById('reel1'),document.getElementById('reel2'),document.getElementById('reel3')];
+    const slotsBalEl = document.getElementById('slotsBal');
+    const slotsBetEl = document.getElementById('slotsBet');
+    const slotsBestEl = document.getElementById('slotsBest');
+    const slotsMsg = document.getElementById('slotsMsg');
+    let slots = {bal: Number(localStorage.getItem('slots_bal')||100), bet:5, best:Number(localStorage.getItem('slots_best')||0)};
+    function saveSlots(){ localStorage.setItem('slots_bal', slots.bal); slots.best=Math.max(slots.best, slots.bal); localStorage.setItem('slots_best', slots.best); updateSide(); renderSlots(); }
+    function renderSlots(){ slotsBalEl.textContent=slots.bal; slotsBetEl.textContent=slots.bet; slotsBestEl.textContent=slots.best; }
+    function spin(){
+      if(slots.bet<1 || slots.bet>slots.bal){ slotsMsg.textContent='Adjust your bet'; return; }
+      slots.bal -= slots.bet; const r=[0,0,0].map(()=> sym[irnd(0,sym.length-1)]);
+      reelEls.forEach((el,i)=>{ el.textContent=''; el.animate([{filter:'blur(8px)'},{filter:'blur(0)'}],{duration:300, easing:'ease-out'}).onfinish=()=>el.textContent=r[i]; });
+      let award=0; const set=new Set(r);
+      if(set.size===1){ // 3 match
+        const s=r[0]; award = (s==='⭐'?20:(s==='🍒'?12:(s==='🍋'?8:6))) * slots.bet;
+        slotsMsg.textContent = `Triple ${s}! +${award}`;
+      } else if(set.size===2){ award = 3*slots.bet; slotsMsg.textContent = `Pair! +${award}`; }
+      else { slotsMsg.textContent = `No match`; }
+      slots.bal += award; saveSlots();
+    }
+    document.getElementById('spinBtn').onclick=spin;
+    document.getElementById('betUp').onclick=()=>{ slots.bet=Math.min(slots.bet+1, 50); renderSlots(); };
+    document.getElementById('betDown').onclick=()=>{ slots.bet=Math.max(slots.bet-1, 1); renderSlots(); };
+    document.getElementById('resetSlots').onclick=()=>{ slots={bal:100,bet:5,best:slots.best}; saveSlots(); };
+    renderSlots();
+
+    // ===== Blackjack =====
+    const bj = {
+      bank: Number(localStorage.getItem('bj_bank')||100), bet:10, best:Number(localStorage.getItem('bj_best')||0), deck:[], player:[], dealer:[],
     };
-
-    // ======= draw helpers ========
-    function circle(x,y,r,color){ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=color;ctx.fill()}
-    function square(x,y,s,color){ctx.fillStyle=color;ctx.fillRect(x-s/2,y-s/2,s,s)}
-    function tri(x,y,s,color){ctx.beginPath();ctx.moveTo(x, y-s/1.2);ctx.lineTo(x-s/1.4, y+s/1.8);ctx.lineTo(x+s/1.4, y+s/1.8);ctx.closePath();ctx.fillStyle=color;ctx.fill()}
-    function label(text,x,y,size=14){ctx.font=`${size*dpr}px/1.2 ui-sans-serif, system-ui`;ctx.fillStyle='rgba(232,240,255,.9)';ctx.textAlign='center';ctx.fillText(text,x,y)}
-
-    // ======= entities ========
-    function spawnBug(){
-      const speed = (CONFIG.baseSpeed + (state.level-1)*CONFIG.levelSpeedBoost) * dpr * rnd(0.8, CONFIG.bugSpeedVariance);
-      const edge = Math.random()<.5 ? 'x' : 'y';
-      let x, y; if(edge==='x'){ x=Math.random()<.5? -20: canvas.width+20; y=rnd(0, canvas.height) } else { y=Math.random()<.5? -20: canvas.height+20; x=rnd(0, canvas.width)}
-      const ang = Math.atan2(state.player.y - y, state.player.x - x);
-      state.bugs.push({x,y, s:18*dpr, vx:Math.cos(ang)*speed, vy:Math.sin(ang)*speed});
+    const bjEls = {
+      bank: document.getElementById('bjBank'), bet: document.getElementById('bjBet'), best: document.getElementById('bjBest'), msg: document.getElementById('bjMsg'),
+      dealer: document.getElementById('dealer'), player: document.getElementById('player'),
+      deal: document.getElementById('bjDeal'), hit: document.getElementById('bjHit'), stand: document.getElementById('bjStand'),
+    };
+    function bjSave(){ localStorage.setItem('bj_bank', bj.bank); bj.best=Math.max(bj.best,bj.bank); localStorage.setItem('bj_best', bj.best); bjRenderTop(); updateSide(); }
+    function bjRenderTop(){ bjEls.bank.textContent=bj.bank; bjEls.bet.textContent=bj.bet; bjEls.best.textContent=bj.best; }
+    function freshDeck(){ const suits=['♠','♥','♦','♣']; const ranks=['A','2','3','4','5','6','7','8','9','10','J','Q','K']; bj.deck=[]; suits.forEach(s=>ranks.forEach(r=>bj.deck.push(r+s))); for(let i=0;i<bj.deck.length;i++){ const j=irnd(0,bj.deck.length-1); [bj.deck[i],bj.deck[j]]=[bj.deck[j],bj.deck[i]]; } }
+    function val(hand){ let total=0, aces=0; for(const c of hand){ let r=c.slice(0,-1); if(['J','Q','K'].includes(r)) total+=10; else if(r==='A'){ total+=11; aces++; } else total+=Number(r); } while(total>21 && aces){ total-=10; aces--; } return total; }
+    function renderHand(el, hand, hideFirst=false){ el.innerHTML=''; hand.forEach((c,i)=>{ const d=document.createElement('div'); d.className='cardx'; d.textContent = (hideFirst && i===0 ? '🂠' : c); el.appendChild(d); }); }
+    function resetRound(){ bj.player=[]; bj.dealer=[]; }
+    function deal(){ if(bj.bet<1 || bj.bet>bj.bank) { bjEls.msg.textContent='Adjust your bet'; return; } freshDeck(); resetRound(); bj.bank-=bj.bet; bjSave(); bjEls.msg.textContent='Good luck!';
+      bj.player.push(bj.deck.pop(), bj.deck.pop()); bj.dealer.push(bj.deck.pop(), bj.deck.pop());
+      bjRender(); bjEls.hit.disabled=false; bjEls.stand.disabled=false; }
+    function bjRender(){ renderHand(bjEls.player,bj.player,false); renderHand(bjEls.dealer,bj.dealer,true); }
+    function endDealer(){
+      renderHand(bjEls.dealer,bj.dealer,false);
+      while(val(bj.dealer)<17){ bj.dealer.push(bj.deck.pop()); renderHand(bjEls.dealer,bj.dealer,false); }
+      const pv=val(bj.player), dv=val(bj.dealer);
+      let win=0; let msg='';
+      const blackjack = (hand)=> hand.length===2 && val(hand)===21;
+      if(blackjack(bj.player) && !blackjack(bj.dealer)) { win = Math.round(bj.bet*2.5); msg='Blackjack! +'+(win-bj.bet); }
+      else if(dv>21 || pv>dv){ win = bj.bet*2; msg='You win! +'+(win-bj.bet); }
+      else if(pv===dv){ win = bj.bet; msg='Push'; }
+      else { win = 0; msg='Dealer wins'; }
+      bj.bank += win; bjEls.msg.textContent = msg; bjEls.hit.disabled=true; bjEls.stand.disabled=true; bjSave();
     }
+    bjEls.deal.onclick=deal;
+    bjEls.hit.onclick=()=>{ bj.player.push(bj.deck.pop()); renderHand(bjEls.player,bj.player,false); if(val(bj.player)>21){ bjEls.msg.textContent='Bust!'; bjEls.hit.disabled=true; bjEls.stand.disabled=true; bjSave(); } };
+    bjEls.stand.onclick=endDealer;
+    document.getElementById('bjBetUp').onclick=()=>{ bj.bet=Math.min(50,bj.bet+1); bjRenderTop(); };
+    document.getElementById('bjBetDown').onclick=()=>{ bj.bet=Math.max(1,bj.bet-1); bjRenderTop(); };
+    document.getElementById('bjReset').onclick=()=>{ bj.bank=100; bj.bet=10; bjSave(); bjEls.msg.textContent='Bank reset'; };
+    bjRenderTop();
+
+    // ===== Math Sprint =====
+    const math= {score:0, streak:0, time:60, timer:0, best:Number(localStorage.getItem('math_best')||0)};
+    const mq = document.getElementById('mathQ'), ma=document.getElementById('mathA'), mscore=document.getElementById('mathScore'), mstreak=document.getElementById('mathStreak'), mtime=document.getElementById('mathTime'), mbest=document.getElementById('mathBest'), mmsg=document.getElementById('mathMsg');
+    function mathSave(){ math.best=Math.max(math.best, math.score); localStorage.setItem('math_best', math.best); mbest.textContent=math.best; updateSide(); }
+    function nextQ(){ const ops=[]; if(opAdd.checked) ops.push('+'); if(opSub.checked) ops.push('-'); if(opMul.checked) ops.push('×'); if(opDiv.checked) ops.push('÷'); if(ops.length===0) ops.push('+');
+      const op=ops[irnd(0,ops.length-1)]; let a=irnd(1,12), b=irnd(1,12); let text='', ans=0;
+      if(op==='÷'){ ans=irnd(1,12); b=irnd(1,12); a=ans*b; text=`${a} ÷ ${b} = ?`; }
+      else if(op==='×'){ ans=a*b; text=`${a} × ${b} = ?`; }
+      else if(op==='+'){ ans=a+b; text=`${a} + ${b} = ?`; }
+      else { ans=a-b; text=`${a} − ${b} = ?`; }
+      mq.dataset.ans=ans; mq.textContent=text; ma.value=''; ma.focus(); }
+    function mathTick(){ math.time--; mtime.textContent=math.time; if(math.time<=0){ clearInterval(math.timer); math.timer=0; mmsg.textContent=`Time! Final score ${math.score}`; mathSave(); }
+      if(math.time===10) mtime.parentElement.classList.add('danger'); }
+    document.getElementById('mathStart').onclick=()=>{ math.score=0; math.streak=0; math.time=60; mscore.textContent=0; mstreak.textContent=0; mtime.textContent=60; mmsg.textContent=''; nextQ(); if(math.timer) clearInterval(math.timer); math.timer=setInterval(mathTick,1000); };
+    document.getElementById('mathSubmit').onclick=()=>{ const val=Number(ma.value); const ans=Number(mq.dataset.ans); if(!math.timer){ mmsg.textContent='Press Start'; return; }
+      if(val===ans){ math.streak++; const gain=10+Math.floor(Math.max(0,math.streak-1)*2); math.score+=gain; mmsg.textContent=`Correct! +${gain}`; } else { math.streak=0; mmsg.textContent=`Oops! Answer was ${ans}`; }
+      mscore.textContent=math.score; mstreak.textContent=math.streak; nextQ(); };
+    ma.addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('mathSubmit').click(); });
+    mbest.textContent = math.best; updateSide();
+
+    // ===== Typing Test =====
+    const samples=[
+      'Practice makes progress. Keep your eyes forward and your fingers light.',
+      'Computers follow instructions exactly. Great code is clear and simple.',
+      'Stay calm, type steady, and let accuracy lead your speed.',
+      'Small habits repeated daily build big skills over time.'
+    ];
+    const tstate={text:'', idx:0, time:30, timer:0, correct:0, typed:0, best:Number(localStorage.getItem('type_best')||0)};
+    const tEls={wrap:document.getElementById('typingText'), input:document.getElementById('typeInput'), wpm:document.getElementById('typeWpm'), acc:document.getElementById('typeAcc'), time:document.getElementById('typeTime'), msg:document.getElementById('typeMsg'), best:document.getElementById('typeBest')};
+    function setText(){ tstate.text = samples[irnd(0,samples.length-1)]; tstate.idx=0; renderText(); }
+    function renderText(){ const before=tstate.text.slice(0,tstate.idx); const cur=tstate.text[tstate.idx]||''; const after=tstate.text.slice(tstate.idx+1);
+      tEls.wrap.innerHTML = `<span class="done">${escapeHtml(before)}</span><span class="current">${escapeHtml(cur)}</span>${escapeHtml(after)}`; }
+    function escapeHtml(s){ return s.replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+    function tTick(){ tstate.time--; tEls.time.textContent=tstate.time; if(tstate.time<=0){ clearInterval(tstate.timer); tstate.timer=0; finish(); } if(tstate.time===10) tEls.time.parentElement.classList.add('danger'); }
+    function startTyping(){ tstate.time=30; tstate.correct=0; tstate.typed=0; tEls.time.textContent=30; tEls.wpm.textContent=0; tEls.acc.textContent='100%'; tEls.msg.textContent=''; tEls.input.value=''; setText(); tEls.input.focus(); if(tstate.timer) clearInterval(tstate.timer); tstate.timer=setInterval(tTick,1000); }
+    function finish(){ const wpm = Math.round((tstate.typed/5) * (60/30)); const acc = tstate.typed? Math.round((tstate.correct/tstate.typed)*100):100; tEls.wpm.textContent=wpm; tEls.acc.textContent=acc+'%'; tEls.msg.textContent=`Done! WPM ${wpm}, Accuracy ${acc}%`; tstate.best=Math.max(tstate.best,wpm); localStorage.setItem('type_best', tstate.best); tEls.best.textContent=tstate.best; updateSide(); }
+    tEls.input.addEventListener('input', ()=>{ if(!tstate.timer){ tEls.msg.textContent='Press Start'; tEls.input.value=''; return; } const ch=tEls.input.value.slice(-1); tEls.input.value=''; tstate.typed++; if(ch===tstate.text[tstate.idx]){ tstate.correct++; tstate.idx++; renderText(); if(tstate.idx>=tstate.text.length) setText(); } });
+    document.getElementById('typeStart').onclick=startTyping;
+    document.getElementById('typeReset').onclick=()=>{ localStorage.removeItem('type_best'); tstate.best=0; tEls.best.textContent=0; updateSide(); };
+    tEls.best.textContent=tstate.best; updateSide();
+
+    // ===== Arcade (Bug Buster) — compact loop =====
+    const CONFIG = { startLives:3, maxLives:5, baseSpeed:2.2, playerSpeed:3.4, fileWorth:10, levelTime:60, spawnBugEvery:1200, spawnFileEvery:950, spawnPowerEvery:6000, slowMoFactor:0.45, slowMoDuration:5000, levelSpeedBoost:0.35, bugSpeedVariance:1.1 };
+    const canvas = document.getElementById('game'); const gtx = canvas.getContext('2d'); const dpr = Math.max(1, Math.min(2, window.devicePixelRatio||1));
+    function resize(){ const r=canvas.getBoundingClientRect(); canvas.width=Math.round(r.width*dpr); canvas.height=Math.round(r.height*dpr);} new ResizeObserver(resize).observe(canvas); resize();
+    const state = { running:false, paused:false, over:false, level:1, score:0, files:0, lives:CONFIG.startLives, tStart:0, tNow:0, tSlowEnd:0, nextBug:0, nextFile:0, nextPower:0, player:{x:200,y:200,r:10*dpr,vx:0,vy:0}, bugs:[], filesArr:[], powers:[], best:Number(localStorage.getItem('bb_best')||0) };
+    function circle(x,y,r,c){gtx.beginPath();gtx.arc(x,y,r,0,Math.PI*2);gtx.fillStyle=c;gtx.fill()} function square(x,y,s,c){gtx.fillStyle=c;gtx.fillRect(x-s/2,y-s/2,s,s)} function tri(x,y,s,c){gtx.beginPath();gtx.moveTo(x, y-s/1.2);gtx.lineTo(x-s/1.4, y+s/1.8);gtx.lineTo(x+s/1.4, y+s/1.8);gtx.closePath();gtx.fillStyle=c;gtx.fill()} function label(t,x,y,s=14){gtx.font=`${s*dpr}px/1.2 ui-sans-serif, system-ui`;gtx.fillStyle='rgba(232,240,255,.9)';gtx.textAlign='center';gtx.fillText(t,x,y)}
+    const keys=new Set(); addEventListener('keydown',e=>{ if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d','W','A','S','D'].includes(e.key)) {keys.add(e.key.toLowerCase()); e.preventDefault();} if(e.key==='p'||e.key==='P') togglePause(); if(e.key==='r'||e.key==='R') startGame(); }); addEventListener('keyup', e=> keys.delete(e.key.toLowerCase()));
+    const touch = document.getElementById('touchControls'); if(matchMedia('(pointer: coarse)').matches) touch.removeAttribute('aria-hidden'); let touchVec={x:0,y:0};
+    touch.addEventListener('click', e=>{ const t=e.target.closest('button'); if(!t) return; if(t.id==='touchPause'){ togglePause(); return;} touchVec={x:Number(t.dataset.dx)||0, y:Number(t.dataset.dy)||0}; setTimeout(()=>touchVec={x:0,y:0}, 120);});
+    function spawnBug(){ const speed=(CONFIG.baseSpeed+(state.level-1)*CONFIG.levelSpeedBoost)*dpr*rnd(.8, CONFIG.bugSpeedVariance); const edge=Math.random()<.5?'x':'y'; let x,y; if(edge==='x'){ x=Math.random()<.5? -20: canvas.width+20; y=rnd(0, canvas.height) } else { y=Math.random()<.5? -20: canvas.height+20; x=rnd(0, canvas.width)} const ang=Math.atan2(state.player.y-y, state.player.x-x); state.bugs.push({x,y,s:18*dpr,vx:Math.cos(ang)*speed,vy:Math.sin(ang)*speed}); }
     function spawnFile(){ state.filesArr.push({x:rnd(30,canvas.width-30), y:rnd(30,canvas.height-30), s:16*dpr}); }
-    function spawnPower(){
-      const kind = Math.random()<.65 ? 'slow' : 'life';
-      state.powers.push({kind, x:rnd(30,canvas.width-30), y:rnd(30,canvas.height-30), s:16*dpr, t:performance.now()+7000});
-    }
-
-    // ======= input ========
-    const keys = new Set();
-    addEventListener('keydown', e=>{
-      if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d','W','A','S','D'].includes(e.key)) {keys.add(e.key.toLowerCase()); e.preventDefault();}
-      if(e.key==='p' || e.key==='P') togglePause();
-      if(e.key==='r' || e.key==='R') startGame();
-    });
-    addEventListener('keyup', e=> keys.delete(e.key.toLowerCase()));
-
-    // Touch controls
-    const touch = document.getElementById('touchControls');
-    const isTouch = matchMedia('(pointer: coarse)').matches; 
-    if(isTouch) touch.removeAttribute('aria-hidden');
-    let touchVec = {x:0,y:0};
-    touch.addEventListener('touchstart', onTouch, {passive:false});
-    touch.addEventListener('touchend', onTouch, {passive:false});
-    touch.addEventListener('touchcancel', onTouch, {passive:false});
-    touch.addEventListener('touchmove', onTouch, {passive:false});
-    function onTouch(e){
-      const t = e.target.closest('button');
-      if(!t) return; e.preventDefault();
-      if(t.id==='touchPause'){ togglePause(); return; }
-      const dx = Number(t.dataset.dx), dy = Number(t.dataset.dy);
-      if(e.type==='touchstart') touchVec={x:dx, y:dy};
-      if(e.type==='touchend' || e.type==='touchcancel') touchVec={x:0,y:0};
-    }
-
-    // ======= game loop ========
-    function startGame(){
-      state.running=true; state.paused=false; state.over=false;
-      state.level=1; state.score=0; state.files=0; state.lives=CONFIG.startLives;
-      state.bugs.length=0; state.filesArr.length=0; state.powers.length=0;
-      state.tStart=performance.now(); state.tNow=state.tStart; state.tSlowEnd=0;
-      state.nextBug=0; state.nextFile=0; state.nextPower=0;
-      const r = canvas.getBoundingClientRect();
-      state.player.x = (r.width*0.5)*dpr; state.player.y = (r.height*0.6)*dpr;
-      hide(startOverlay); hide(gameOverOverlay); hide(pauseOverlay);
-      loop();
-    }
-
-    function togglePause(){ if(!state.running || state.over) return; state.paused = !state.paused; show(pauseOverlay, state.paused); if(!state.paused) loop(); }
-    function gameOver(){
-      state.over = true; state.running=false; show(gameOverOverlay,true);
-      const time = Math.round((state.tNow - state.tStart)/1000);
-      state.longest = Math.max(state.longest, time);
-      localStorage.setItem('bb_longest', state.longest);
-      state.best = Math.max(state.best, state.score);
-      localStorage.setItem('bb_best', state.best);
-      document.getElementById('finalStats').textContent = `You scored ${state.score} points, reached level ${state.level}, and collected ${state.files} files in ${time}s.`;
-      updateHUD();
-    }
-
-    function loop(t){
-      if(!state.running || state.paused) return;
-      requestAnimationFrame(loop);
-      const now = performance.now();
-      const dt = Math.min(32, (now - state.tNow)) * (now < state.tSlowEnd ? CONFIG.slowMoFactor : 1);
-      state.tNow = now;
-
-      // Level timer
-      const elapsed = Math.floor((now - state.tStart)/1000);
-      const remain = Math.max(0, CONFIG.levelTime - (elapsed % CONFIG.levelTime));
-      if(remain===0 && Math.floor((now - state.tStart - (dt))/1000) % CONFIG.levelTime !== 0){ // just ticked
-        state.level++; AudioFX.level();
-      }
-
-      // Spawns
-      if(now > state.nextBug){ spawnBug(); state.nextBug = now + Math.max(350, CONFIG.spawnBugEvery - state.level*60); }
-      if(now > state.nextFile){ spawnFile(); state.nextFile = now + CONFIG.spawnFileEvery; }
-      if(now > state.nextPower){ spawnPower(); state.nextPower = now + CONFIG.spawnPowerEvery; }
-
-      // Input -> velocity
-      const ps = CONFIG.playerSpeed * dpr;
-      const ax = (keys.has('arrowleft')||keys.has('a') ? -1 : 0) + (keys.has('arrowright')||keys.has('d') ? 1 : 0) + touchVec.x;
-      const ay = (keys.has('arrowup')||keys.has('w') ? -1 : 0) + (keys.has('arrowdown')||keys.has('s') ? 1 : 0) + touchVec.y;
-      state.player.vx = ax * ps; state.player.vy = ay * ps;
-
-      // Move player
-      state.player.x = clamp(state.player.x + state.player.vx, 10*dpr, canvas.width-10*dpr);
-      state.player.y = clamp(state.player.y + state.player.vy, 10*dpr, canvas.height-10*dpr);
-
-      // Move bugs
-      const speedMult = now < state.tSlowEnd ? 0.4 : 1;
-      for(const b of state.bugs){ b.x += b.vx * (dt/16) * speedMult; b.y += b.vy * (dt/16) * speedMult; }
-      // Remove offscreen bugs (with margin)
-      state.bugs = state.bugs.filter(b => b.x>-60 && b.x<canvas.width+60 && b.y>-60 && b.y<canvas.height+60);
-
-      // Collisions: player-files
-      state.filesArr = state.filesArr.filter(f=>{
-        const hit = dist(state.player, f) < (state.player.r + f.s*0.7);
-        if(hit){ state.score += CONFIG.fileWorth; state.files++; AudioFX.collect(); }
-        return !hit;
-      });
-
-      // Collisions: player-powers
-      state.powers = state.powers.filter(p=>{
-        const expired = now > p.t; if(expired) return false;
-        const hit = dist(state.player, p) < (state.player.r + p.s*0.7);
-        if(hit){ if(p.kind==='slow'){ state.tSlowEnd = now + CONFIG.slowMoDuration; AudioFX.power(); }
-                 else if(p.kind==='life' && state.lives < CONFIG.maxLives){ state.lives++; AudioFX.power(); }
-        }
-        return !hit;
-      });
-
-      // Collisions: player-bugs
-      for(let i=state.bugs.length-1;i>=0;i--){
-        const b = state.bugs[i];
-        if(dist(state.player, b) < (state.player.r + b.s*0.5)){
-          state.bugs.splice(i,1); state.lives--; AudioFX.hit();
-          if(state.lives<=0){ gameOver(); break; }
-        }
-      }
-
-      // Draw
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      // subtle grid
-      ctx.globalAlpha = 0.07; ctx.strokeStyle = '#7cf1c833'; ctx.lineWidth = 1*dpr; const step=40*dpr;
-      for(let x=step; x<canvas.width; x+=step){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke(); }
-      for(let y=step; y<canvas.height; y+=step){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke(); }
-      ctx.globalAlpha = 1;
-
-      // files (squares)
+    function spawnPower(){ const kind=Math.random()<.65?'slow':'life'; state.powers.push({kind, x:rnd(30,canvas.width-30), y:rnd(30,canvas.height-30), s:16*dpr, t:performance.now()+7000}); }
+    function startGame(){ state.running=true; state.paused=false; state.over=false; state.level=1; state.score=0; state.files=0; state.lives=CONFIG.startLives; state.bugs.length=0; state.filesArr.length=0; state.powers.length=0; state.tStart=performance.now(); state.tNow=state.tStart; state.tSlowEnd=0; state.nextBug=0; state.nextFile=0; state.nextPower=0; const r=canvas.getBoundingClientRect(); state.player.x=(r.width*.5)*dpr; state.player.y=(r.height*.6)*dpr; loop(); }
+    function togglePause(){ if(!state.running || state.over) return; state.paused=!state.paused; if(!state.paused) loop(); }
+    function gameOver(){ state.over=true; state.running=false; state.best=Math.max(state.best,state.score); localStorage.setItem('bb_best', state.best); document.getElementById('bestChip').textContent='Best: '+state.best; document.getElementById('bestSide').textContent=state.best; }
+    function loop(){ if(!state.running || state.paused) return; requestAnimationFrame(loop); const now=performance.now(); const dt=Math.min(32,(now-state.tNow))*(now<state.tSlowEnd?CONFIG.slowMoFactor:1); state.tNow=now; const elapsed=Math.floor((now-state.tStart)/1000); if(elapsed>0 && elapsed%CONFIG.levelTime===0){ state.level++; }
+      if(now>state.nextBug){ spawnBug(); state.nextBug=now+Math.max(350, CONFIG.spawnBugEvery - state.level*60); }
+      if(now>state.nextFile){ spawnFile(); state.nextFile=now+CONFIG.spawnFileEvery; }
+      if(now>state.nextPower){ spawnPower(); state.nextPower=now+CONFIG.spawnPowerEvery; }
+      const ps=CONFIG.playerSpeed*dpr; const ax=(keys.has('arrowleft')||keys.has('a')?-1:0)+(keys.has('arrowright')||keys.has('d')?1:0)+touchVec.x; const ay=(keys.has('arrowup')||keys.has('w')?-1:0)+(keys.has('arrowdown')||keys.has('s')?1:0)+touchVec.y; state.player.vx=ax*ps; state.player.vy=ay*ps; state.player.x=Math.max(10*dpr, Math.min(canvas.width-10*dpr, state.player.x+state.player.vx)); state.player.y=Math.max(10*dpr, Math.min(canvas.height-10*dpr, state.player.y+state.player.vy));
+      const speedMult= now<state.tSlowEnd?0.4:1; for(const b of state.bugs){ b.x+=b.vx*(dt/16)*speedMult; b.y+=b.vy*(dt/16)*speedMult; } state.bugs=state.bugs.filter(b=> b.x>-60 && b.x<canvas.width+60 && b.y>-60 && b.y<canvas.height+60);
+      state.filesArr = state.filesArr.filter(f=>{ const hit = Math.hypot(state.player.x-f.x, state.player.y-f.y) < (state.player.r + f.s*0.7); if(hit){ state.score += CONFIG.fileWorth; state.files++; } return !hit; });
+      state.powers = state.powers.filter(p=>{ const expired=now>p.t; if(expired) return false; const hit=Math.hypot(state.player.x-p.x, state.player.y-p.y) < (state.player.r + p.s*0.7); if(hit){ if(p.kind==='slow'){ state.tSlowEnd=now+CONFIG.slowMoDuration; } else if(state.lives<CONFIG.maxLives){ state.lives++; } } return !hit; });
+      for(let i=state.bugs.length-1;i>=0;i--){ const b=state.bugs[i]; if(Math.hypot(state.player.x-b.x, state.player.y-b.y) < (state.player.r + b.s*0.5)){ state.bugs.splice(i,1); state.lives--; if(state.lives<=0) { gameOver(); break; } } }
+      gtx.clearRect(0,0,canvas.width,canvas.height); gtx.globalAlpha=.07; gtx.strokeStyle='#7cf1c833'; gtx.lineWidth=1*dpr; const step=40*dpr; for(let x=step; x<canvas.width; x+=step){ gtx.beginPath(); gtx.moveTo(x,0); gtx.lineTo(x,canvas.height); gtx.stroke(); } for(let y=step; y<canvas.height; y+=step){ gtx.beginPath(); gtx.moveTo(0,y); gtx.lineTo(canvas.width,y); gtx.stroke(); } gtx.globalAlpha=1;
       for(const f of state.filesArr){ square(f.x, f.y, f.s, '#9bb4ff'); }
-      // powers
       for(const p of state.powers){ if(p.kind==='slow'){ circle(p.x,p.y,10*dpr,'#7cf1c8'); label('★',p.x,p.y+4*dpr,14);} else { circle(p.x,p.y,10*dpr,'#79f28c'); label('❤',p.x,p.y+5*dpr,14);} }
-      // bugs (triangles)
       for(const b of state.bugs){ tri(b.x,b.y,b.s,'#ff7b9c'); }
-      // player
       circle(state.player.x, state.player.y, state.player.r, '#e8f0ff');
-
-      // HUD labels floating
-      label('You', state.player.x, state.player.y - 16*dpr, 12);
-
-      updateHUD(remain);
+      document.getElementById('scoreChip').textContent='Score: '+state.score; document.getElementById('levelChip').textContent='Level: '+state.level; document.getElementById('filesChip').textContent='Files: '+state.files; document.getElementById('bestChip').textContent='Best: '+state.best;
     }
+    document.getElementById('startBtn').onclick=startGame; document.getElementById('pauseBtn').onclick=togglePause; document.getElementById('resetBtn').onclick=()=>{ localStorage.removeItem('bb_best'); state.best=0; document.getElementById('bestChip').textContent='Best: 0'; updateSide(); };
 
-    function updateHUD(remain){
-      document.getElementById('scoreChip').textContent = `Score: ${state.score}`;
-      document.getElementById('levelChip').textContent = `Level: ${state.level}`;
-      document.getElementById('filesChip').textContent = `Files: ${state.files}`;
-      document.getElementById('timeChip').textContent = `Time: ${typeof remain==='number'?remain: Math.max(0, CONFIG.levelTime - Math.floor((state.tNow - state.tStart)/1000)%CONFIG.levelTime)}`;
-      document.getElementById('bestChip').textContent = `Best: ${state.best}`;
-      document.getElementById('bestSide').textContent = state.best;
-      const time = Math.round((state.tNow - state.tStart)/1000);
-      document.getElementById('longestSide').textContent = `${Math.max(state.longest, time)}s`;
-      document.getElementById('filesSide').textContent = state.files;
-
-      const timeChip = document.getElementById('timeChip');
-      const r = (typeof remain==='number')? remain : Math.max(0, CONFIG.levelTime - (Math.floor((state.tNow - state.tStart)/1000)%CONFIG.levelTime));
-      timeChip.classList.toggle('danger', r<=10);
-      timeChip.classList.toggle('warn', r>10);
-    }
-
-    // ======= helpers ========
-    const startOverlay = document.getElementById('startOverlay');
-    const pauseOverlay = document.getElementById('pauseOverlay');
-    const gameOverOverlay = document.getElementById('gameOverOverlay');
-    const overlayStart = document.getElementById('overlayStart');
-    const overlayResume = document.getElementById('overlayResume');
-    const overlayRestart = document.getElementById('overlayRestart');
-    const startBtn = document.getElementById('startBtn');
-    const pauseBtn = document.getElementById('pauseBtn');
-    const resetBtn = document.getElementById('resetBtn');
-
-    function show(el, on=true){ el.hidden = !on; }
-    function hide(el){ el.hidden = true; }
-
-    overlayStart.addEventListener('click', startGame);
-    overlayResume.addEventListener('click', togglePause);
-    overlayRestart.addEventListener('click', startGame);
-    startBtn.addEventListener('click', startGame);
-    pauseBtn.addEventListener('click', togglePause);
-    resetBtn.addEventListener('click', ()=>{ localStorage.removeItem('bb_best'); localStorage.removeItem('bb_longest'); state.best=0; state.longest=0; updateHUD(); });
-
-    // Start with overlay visible
-    show(startOverlay,true);
+    updateSide();
   </script>
 </body>
 </html>
