@@ -1,456 +1,854 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>comp-apps — Game Hub</title>
-  <meta name="description" content="A polished multi‑game hub for Computer Apps: simulated casino, math sprint, typing test, and an arcade mini‑game. Single file for GitHub Pages." />
-  <style>
-    :root{
-      --bg:#0b1020; --panel:#0f1730; --ink:#e8f0ff; --muted:#9fb0d6;
-      --brand:#7cf1c8; --accent:#9bb4ff; --danger:#ff7b9c; --warn:#ffd36e; --ok:#79f28c;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;background:radial-gradient(1400px 800px at 70% -20%, #1a2450 0%, var(--bg) 60%) fixed;color:var(--ink);font:16px/1.5 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial}
-    a{color:var(--brand)}
-
-    .wrap{max-width:1240px;margin-inline:auto;padding:22px;display:grid;gap:22px}
-
-    header{
-      display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
-      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.18));
-      border:1px solid rgba(255,255,255,.10);border-radius:20px;padding:16px 18px;
-      box-shadow:0 24px 60px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.06);
-      backdrop-filter:saturate(130%) blur(8px);
-    }
-    .title{display:flex;align-items:center;gap:14px}
-    .logo{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;
-      background:conic-gradient(from 160deg, var(--brand), var(--accent), var(--brand));
-      color:#0a1226;font-weight:900;text-shadow:0 1px 0 rgba(255,255,255,.5)}
-    h1{font-size:24px;margin:0}
-    .sub{font-size:12px;color:var(--muted)}
-
-    .nav{display:flex;gap:10px;flex-wrap:wrap}
-    .tab{appearance:none;border:none;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer;
-      background:linear-gradient(180deg, #1f2a55, #162044);color:var(--ink);
-      border:1px solid rgba(255,255,255,.14);box-shadow:0 6px 20px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06)}
-    .tab[aria-current="page"]{outline:2px solid var(--brand)}
-
-    .grid{display:grid;grid-template-columns:1fr 360px;gap:22px}
-    @media (max-width: 1080px){.grid{grid-template-columns:1fr}}
-
-    .card{background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.22));
-      border:1px solid rgba(255,255,255,.10);border-radius:20px;padding:18px;
-      box-shadow:0 24px 60px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.06)}
-
-    .stage{position:relative;min-height:460px}
-    .section{display:none}
-    .section.active{display:block}
-
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-    @media (max-width: 920px){.row{grid-template-columns:1fr}}
-
-    .btn{appearance:none;border:none;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer;
-      background:linear-gradient(180deg, #1f2a55, #162044);color:var(--ink);
-      border:1px solid rgba(255,255,255,.14);box-shadow:0 6px 20px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06)}
-    .btn:hover{filter:brightness(1.06)}
-    .btn:active{transform:translateY(1px)}
-
-    .hud{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
-    .chip{padding:6px 10px;border-radius:999px;font-weight:700;background:rgba(0,0,0,.35);
-      border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(5px)}
-    .chip.good{color:var(--ok)}.chip.warn{color:var(--warn)}.chip.danger{color:var(--danger)}
-
-    .stats{display:grid;gap:10px}
-    .stat{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:12px;
-      background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.10)}
-    .muted{color:var(--muted)}
-    footer{opacity:.8;text-align:center;font-size:12px;padding:8px}
-
-    /* Game specific */
-    .reels{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
-    .reel{display:grid;place-items:center;height:120px;border-radius:14px;
-      background:linear-gradient(180deg,#24305e,#151e3f);border:1px solid rgba(255,255,255,.14);font-size:48px}
-    .payout{font-weight:700}
-
-    .cards{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
-    .cardx{width:56px;height:78px;border-radius:8px;display:grid;place-items:center;
-      background:linear-gradient(180deg,#e8f0ff,#c8d4ff);color:#0a1226;font-weight:900;border:2px solid #0a122633}
-
-    .problem{font-size:32px;font-weight:800}
-    input[type="number"], input[type="text"]{width:100%;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);
-      background:#0e1632;color:var(--ink)}
-
-    .typingText{padding:12px;border-radius:14px;background:#0e1632;border:1px solid rgba(255,255,255,.12);min-height:96px}
-    .typingText .done{opacity:.5}
-    .typingText .current{outline:2px solid var(--accent)}
-
-    .canvasWrap{aspect-ratio:16/9;max-height:70vh}
-    canvas{width:100%;height:100%;display:block;border-radius:14px;background:radial-gradient(900px 600px at 20% -10%, #131b3a 0%, #0b112a 50%, #070d21 100%)}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>comp-apps — Game Hub</title>
+<meta name="description" content="comp-apps Game Hub: Slots, Blackjack, Math Sprint, Typing Test, and Bug Buster — single-file, responsive, and touch-friendly." />
+<style>
+  :root{
+    --bg:#071026; --panel:#0f1730; --ink:#e8f0ff; --muted:#9fb0d6;
+    --brand:#7cf1c8; --accent:#9bb4ff; --danger:#ff7b9c; --warn:#ffd36e; --ok:#79f28c;
+    --glass: rgba(255,255,255,0.04);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:
+    radial-gradient(1400px 800px at 70% -20%, #16233f 0%, var(--bg) 60%) fixed;
+    color:var(--ink);font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+    -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+  a{color:var(--brand)}
+  .wrap{max-width:1200px;margin:18px auto;padding:18px;display:grid;gap:18px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;
+    background:linear-gradient(180deg,var(--glass), rgba(0,0,0,0.18));
+    border-radius:14px;padding:12px 14px;border:1px solid rgba(255,255,255,0.06);
+    box-shadow:0 20px 50px rgba(0,0,0,.45)}
+  .brand{display:flex;gap:12px;align-items:center}
+  .logo{width:46px;height:46px;border-radius:10px;display:grid;place-items:center;
+    background:conic-gradient(from 160deg,var(--brand),var(--accent));color:#071026;font-weight:900}
+  h1{font-size:20px;margin:0}
+  .sub{font-size:12px;color:var(--muted)}
+  .nav{display:flex;gap:8px;flex-wrap:wrap}
+  .tab{appearance:none;border:none;border-radius:12px;padding:10px 12px;font-weight:700;cursor:pointer;
+    background:linear-gradient(180deg,#12234a,#0e1a38);color:var(--ink);border:1px solid rgba(255,255,255,.06)}
+  .tab[aria-current="page"]{outline:3px solid rgba(124,241,200,.12);box-shadow:0 6px 20px rgba(0,0,0,.4)}
+  .main{display:grid;grid-template-columns:1fr 320px;gap:18px}
+  @media (max-width:1000px){ .main{grid-template-columns:1fr} .sidebar{order:2} }
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,.18));border-radius:14px;padding:14px;border:1px solid rgba(255,255,255,0.04)}
+  .stage{min-height:480px}
+  .section{display:none}
+  .section.active{display:block}
+  .hud{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+  .chip{padding:6px 10px;border-radius:999px;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.04);font-weight:700}
+  .chip.warn{color:var(--warn)} .chip.good{color:var(--ok)}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media (max-width:820px){ .row{grid-template-columns:1fr} }
+  .reels{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0}
+  .reel{height:120px;border-radius:12px;display:grid;place-items:center;font-size:48px;background:linear-gradient(180deg,#17254a,#0f1a34);border:1px solid rgba(255,255,255,.04)}
+  .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  button.btn{appearance:none;border:none;border-radius:10px;padding:10px 12px;font-weight:800;background:linear-gradient(180deg,#16305d,#0b1a38);color:var(--ink);cursor:pointer;border:1px solid rgba(255,255,255,.04)}
+  button.btn:active{transform:translateY(1px)}
+  input[type="number"], input[type="text"]{padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.06);background:#071229;color:var(--ink);width:100%}
+  .cards{display:flex;gap:8px;flex-wrap:wrap}
+  .cardx{width:56px;height:78px;border-radius:8px;display:grid;place-items:center;background:linear-gradient(180deg,#e8f0ff,#c8d4ff);color:#071026;font-weight:900;border:1px solid #00000020}
+  .problem{font-size:28px;font-weight:800;margin:8px 0}
+  .typingText{padding:12px;border-radius:12px;background:#071229;border:1px solid rgba(255,255,255,.03);min-height:96px;color:var(--ink);font-size:16px}
+  .typingText .done{opacity:.5} .typingText .cur{outline:2px solid rgba(155,180,255,.12)}
+  .canvasWrap{aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:radial-gradient(900px 600px at 20% -10%, #0f1b3b 0%, #071229 50%, #020618 100%)}
+  canvas{width:100%;height:100%;display:block}
+  .touch-row{display:flex;gap:8px;justify-content:center;margin-top:10px}
+  .touch-btn{min-width:54px;padding:12px;border-radius:12px;background:linear-gradient(180deg,#1f3158,#122040);border:1px solid rgba(255,255,255,.04);font-weight:800}
+  footer{opacity:.8;text-align:center;font-size:12px;margin-top:8px;color:var(--muted)}
+  /* Responsive fonts for small devices */
+  @media (max-width:420px){ h1{font-size:16px} .reel{height:96px;font-size:36px} .cardx{width:44px;height:62px} }
+</style>
 </head>
 <body>
-  <!--
-    comp-apps — Game Hub
-    Multi‑game single file built for GitHub Pages.
-    How to deploy: Add this file as index.html → Settings → Pages → Deploy from branch (root).
-    All games save best scores locally (localStorage). No real money; casino games are simulated for fun.
-  -->
-  <div class="wrap">
-    <header class="card">
-      <div class="title">
-        <div class="logo">CA</div>
-        <div>
-          <h1>comp-apps — <span class="muted">Game Hub</span></h1>
-          <div class="sub">Simulated Casino • Math Sprint • Typing Test • Arcade — Pick a game and set a high score.</div>
-        </div>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo">CA</div>
+      <div>
+        <h1>comp-apps — Game Hub</h1>
+        <div class="sub">Slots • Blackjack • Math Sprint • Typing Test • Bug Buster — responsive & touch-friendly</div>
       </div>
-      <nav class="nav" aria-label="Games">
-        <button class="tab" data-tab="slots" aria-current="page">🎰 Slots</button>
-        <button class="tab" data-tab="blackjack">🂡 Blackjack</button>
-        <button class="tab" data-tab="math">➗ Math Sprint</button>
-        <button class="tab" data-tab="typing">⌨️ Typing</button>
-        <button class="tab" data-tab="arcade">🕹️ Bug Buster</button>
-      </nav>
-    </header>
-
-    <div class="grid">
-      <main class="card stage">
-        <!-- SLOTS -->
-        <section id="sec-slots" class="section active" aria-labelledby="tab-slots">
-          <h2>🎰 Lucky Slots <span class="muted">(simulated)</span></h2>
-          <p class="muted">Spin the reels. No money involved — just points. Try to beat your best balance.</p>
-          <div class="hud">
-            <div class="chip">Balance: <strong id="slotsBal">100</strong></div>
-            <div class="chip">Bet: <strong id="slotsBet">5</strong></div>
-            <div class="chip">Best Balance: <strong id="slotsBest">0</strong></div>
-            <div class="chip payout" id="slotsMsg"> </div>
-          </div>
-          <div class="row">
-            <div>
-              <div class="reels">
-                <div class="reel" id="reel1">🍒</div>
-                <div class="reel" id="reel2">🍋</div>
-                <div class="reel" id="reel3">⭐</div>
-              </div>
-              <div style="display:flex; gap:8px; align-items:center">
-                <button class="btn" id="spinBtn">Spin</button>
-                <button class="btn" id="betDown">Bet -</button>
-                <button class="btn" id="betUp">Bet +</button>
-                <button class="btn" id="resetSlots">Reset</button>
-              </div>
-            </div>
-            <div>
-              <h3>Payouts</h3>
-              <ul class="muted">
-                <li>3× ⭐ = 20× bet</li>
-                <li>3× 🍒 = 12× bet</li>
-                <li>3× 🍋 = 8× bet</li>
-                <li>Any 2 match = 3× bet</li>
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        <!-- BLACKJACK -->
-        <section id="sec-blackjack" class="section" aria-labelledby="tab-blackjack">
-          <h2>🂡 Blackjack Lite <span class="muted">(simulated)</span></h2>
-          <p class="muted">Get closer to 21 than the dealer without going over. Aces count 1 or 11 automatically.</p>
-          <div class="hud">
-            <div class="chip">Bank: <strong id="bjBank">100</strong></div>
-            <div class="chip">Bet: <strong id="bjBet">10</strong></div>
-            <div class="chip">Best Bank: <strong id="bjBest">0</strong></div>
-            <div class="chip" id="bjMsg"> </div>
-          </div>
-          <div class="row">
-            <div>
-              <h3>Dealer</h3>
-              <div class="cards" id="dealer"></div>
-              <h3>You</h3>
-              <div class="cards" id="player"></div>
-              <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px">
-                <button class="btn" id="bjDeal">Deal</button>
-                <button class="btn" id="bjHit" disabled>Hit</button>
-                <button class="btn" id="bjStand" disabled>Stand</button>
-                <button class="btn" id="bjBetDown">Bet -</button>
-                <button class="btn" id="bjBetUp">Bet +</button>
-                <button class="btn" id="bjReset">Reset</button>
-              </div>
-            </div>
-            <div>
-              <h3>Rules</h3>
-              <ul class="muted">
-                <li>Face cards = 10; Ace = 1 or 11.</li>
-                <li>Dealer hits to 17 and stands.</li>
-                <li>Blackjack pays 3:2.</li>
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        <!-- MATH -->
-        <section id="sec-math" class="section" aria-labelledby="tab-math">
-          <h2>➗ Math Sprint</h2>
-          <p class="muted">Answer as many as you can in 60 seconds. Streaks add bonus points.</p>
-          <div class="hud">
-            <div class="chip">Score: <strong id="mathScore">0</strong></div>
-            <div class="chip">Streak: <strong id="mathStreak">0</strong></div>
-            <div class="chip warn">Time: <strong id="mathTime">60</strong>s</div>
-            <div class="chip">Best: <strong id="mathBest">0</strong></div>
-          </div>
-          <div class="row">
-            <div>
-              <div class="problem" id="mathQ">3 + 4 = ?</div>
-              <div style="display:flex; gap:8px; margin-top:8px">
-                <input type="number" id="mathA" placeholder="Your answer" />
-                <button class="btn" id="mathSubmit">Submit</button>
-                <button class="btn" id="mathStart">Start</button>
-              </div>
-              <p class="muted" id="mathMsg"> </p>
-            </div>
-            <div>
-              <h3>Operations</h3>
-              <label><input type="checkbox" id="opAdd" checked/> Add</label>
-              <label><input type="checkbox" id="opSub" checked/> Subtract</label>
-              <label><input type="checkbox" id="opMul" checked/> Multiply</label>
-              <label><input type="checkbox" id="opDiv"/> Divide</label>
-            </div>
-          </div>
-        </section>
-
-        <!-- TYPING -->
-        <section id="sec-typing" class="section" aria-labelledby="tab-typing">
-          <h2>⌨️ Type Racer Lite</h2>
-          <p class="muted">Type the text below for 30 seconds. Aim for accuracy and WPM.</p>
-          <div class="hud">
-            <div class="chip">WPM: <strong id="typeWpm">0</strong></div>
-            <div class="chip">Accuracy: <strong id="typeAcc">100%</strong></div>
-            <div class="chip warn">Time: <strong id="typeTime">30</strong>s</div>
-            <div class="chip">Best WPM: <strong id="typeBest">0</strong></div>
-          </div>
-          <div class="typingText" id="typingText" aria-live="polite"></div>
-          <div style="display:flex; gap:8px; margin-top:8px">
-            <input type="text" id="typeInput" placeholder="Start typing here" />
-            <button class="btn" id="typeStart">Start</button>
-            <button class="btn" id="typeReset">Reset</button>
-          </div>
-          <p class="muted" id="typeMsg"> </p>
-        </section>
-
-        <!-- ARCADE -->
-        <section id="sec-arcade" class="section" aria-labelledby="tab-arcade">
-          <h2>🕹️ Bug Buster (Arcade)</h2>
-          <p class="muted">Collect files, dodge bugs, level up. Pause with P, Restart with R. Mobile has on-screen buttons.</p>
-          <div class="hud">
-            <div class="chip" id="scoreChip">Score: 0</div>
-            <div class="chip" id="levelChip">Level: 1</div>
-            <div class="chip warn" id="timeChip">Time: 60</div>
-            <div class="chip" id="filesChip">Files: 0</div>
-            <div class="chip" id="bestChip">Best: 0</div>
-          </div>
-          <div class="canvasWrap card" style="padding:0">
-            <canvas id="game" width="960" height="540" role="img" aria-label="Arcade game canvas"></canvas>
-          </div>
-          <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap">
-            <button class="btn" id="startBtn">▶ Start</button>
-            <button class="btn" id="pauseBtn">⏸︎ Pause</button>
-            <button class="btn" id="resetBtn">↺ Reset Score</button>
-          </div>
-          <div id="startOverlay" hidden></div>
-          <div id="pauseOverlay" hidden></div>
-          <div id="gameOverOverlay" hidden></div>
-          <div class="touch" id="touchControls" aria-hidden="true" style="position:static; display:none"></div>
-        </section>
-      </main>
-
-      <aside class="card">
-        <h3>Player Stats</h3>
-        <div class="stats">
-          <div class="stat"><span>Slots Best Balance</span><strong id="sideSlotsBest">0</strong></div>
-          <div class="stat"><span>Blackjack Best Bank</span><strong id="sideBjBest">0</strong></div>
-          <div class="stat"><span>Math Best</span><strong id="sideMathBest">0</strong></div>
-          <div class="stat"><span>Typing Best WPM</span><strong id="sideTypeBest">0</strong></div>
-          <div class="stat"><span>Arcade Best</span><strong id="bestSide">0</strong></div>
-        </div>
-        <h3 style="margin-top:12px">Notes</h3>
-        <p class="muted">Casino games are for fun only — no real money or prizes. All scores save locally in your browser.</p>
-      </aside>
     </div>
 
-    <footer class="muted">comp-apps — Game Hub · Vanilla HTML/CSS/JS · MIT License</footer>
+    <nav class="nav" role="tablist" aria-label="Games">
+      <button class="tab" data-tab="slots" aria-current="page" role="tab">🎰 Slots</button>
+      <button class="tab" data-tab="blackjack" role="tab">🂡 Blackjack</button>
+      <button class="tab" data-tab="math" role="tab">➗ Math Sprint</button>
+      <button class="tab" data-tab="typing" role="tab">⌨️ Typing</button>
+      <button class="tab" data-tab="arcade" role="tab">🕹️ Bug Buster</button>
+    </nav>
+  </header>
+
+  <div class="main">
+    <main class="card stage" id="stage">
+      <!-- SLOTS -->
+      <section id="sec-slots" class="section active" role="tabpanel">
+        <h2>🎰 Lucky Slots</h2>
+        <p class="sub">Simulated slots — points only. Adjustable bet and saved best balance.</p>
+        <div class="hud">
+          <div class="chip">Balance: <strong id="slotsBal">100</strong></div>
+          <div class="chip">Bet: <strong id="slotsBet">5</strong></div>
+          <div class="chip">Best: <strong id="slotsBest">0</strong></div>
+          <div class="chip" id="slotsMsg"> </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <div class="reels" aria-hidden="false">
+              <div class="reel" id="reel1">🍒</div>
+              <div class="reel" id="reel2">🍋</div>
+              <div class="reel" id="reel3">⭐</div>
+            </div>
+            <div class="controls" role="group" aria-label="Slots controls">
+              <button class="btn" id="spinBtn">Spin</button>
+              <button class="btn" id="betDown">Bet −</button>
+              <button class="btn" id="betUp">Bet +</button>
+              <button class="btn" id="resetSlots">Reset</button>
+            </div>
+          </div>
+          <div>
+            <h3>Payouts</h3>
+            <ul class="sub">
+              <li>3× ⭐ = 20× bet</li>
+              <li>3× 🍒 = 12× bet</li>
+              <li>3× 🍋 = 8× bet</li>
+              <li>Any 2 match = 3× bet</li>
+            </ul>
+            <p class="sub">Tap <strong>Spin</strong> (works by finger on mobile). All data stored locally.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- BLACKJACK -->
+      <section id="sec-blackjack" class="section" role="tabpanel" aria-hidden="true">
+        <h2>🂡 Blackjack Lite</h2>
+        <p class="sub">Aim for 21 — Aces count as 1 or 11. Dealer stands on 17.</p>
+        <div class="hud">
+          <div class="chip">Bank: <strong id="bjBank">100</strong></div>
+          <div class="chip">Bet: <strong id="bjBet">10</strong></div>
+          <div class="chip">Best: <strong id="bjBest">0</strong></div>
+          <div class="chip" id="bjMsg"> </div>
+        </div>
+        <div class="row">
+          <div>
+            <h3>Dealer</h3>
+            <div class="cards" id="dealer"></div>
+            <h3>You</h3>
+            <div class="cards" id="player"></div>
+            <div class="controls">
+              <button class="btn" id="bjDeal">Deal</button>
+              <button class="btn" id="bjHit" disabled>Hit</button>
+              <button class="btn" id="bjStand" disabled>Stand</button>
+              <button class="btn" id="bjBetDown">Bet −</button>
+              <button class="btn" id="bjBetUp">Bet +</button>
+              <button class="btn" id="bjReset">Reset Bank</button>
+            </div>
+          </div>
+          <div>
+            <h3>Rules</h3>
+            <ul class="sub">
+              <li>Face = 10, Ace = 1 or 11.</li>
+              <li>Blackjack pays 3:2.</li>
+              <li>Dealer hits to 16, stands on 17+.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- MATH -->
+      <section id="sec-math" class="section" role="tabpanel" aria-hidden="true">
+        <h2>➗ Math Sprint</h2>
+        <p class="sub">60 second challenge. Correct streaks give bonus points.</p>
+        <div class="hud">
+          <div class="chip">Score: <strong id="mathScore">0</strong></div>
+          <div class="chip">Streak: <strong id="mathStreak">0</strong></div>
+          <div class="chip warn">Time: <strong id="mathTime">60</strong>s</div>
+          <div class="chip">Best: <strong id="mathBest">0</strong></div>
+        </div>
+
+        <div class="row">
+          <div>
+            <div class="problem" id="mathQ">3 + 4 = ?</div>
+            <div style="display:flex;gap:8px">
+              <input id="mathA" type="number" inputmode="numeric" placeholder="Your answer" />
+              <button class="btn" id="mathSubmit">Submit</button>
+              <button class="btn" id="mathStart">Start</button>
+            </div>
+            <p class="sub" id="mathMsg"> </p>
+          </div>
+          <div>
+            <h3>Ops</h3>
+            <label><input type="checkbox" id="opAdd" checked/> Add</label><br/>
+            <label><input type="checkbox" id="opSub" checked/> Subtract</label><br/>
+            <label><input type="checkbox" id="opMul" checked/> Multiply</label><br/>
+            <label><input type="checkbox" id="opDiv"/> Divide</label>
+            <p class="sub">Pick operations to practice. Tap the number field and use the mobile keyboard.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- TYPING -->
+      <section id="sec-typing" class="section" role="tabpanel" aria-hidden="true">
+        <h2>⌨️ Typing Test</h2>
+        <p class="sub">30 seconds — focus on accuracy and steady speed.</p>
+        <div class="hud">
+          <div class="chip">WPM: <strong id="typeWpm">0</strong></div>
+          <div class="chip">Accuracy: <strong id="typeAcc">100%</strong></div>
+          <div class="chip warn">Time: <strong id="typeTime">30</strong>s</div>
+          <div class="chip">Best: <strong id="typeBest">0</strong></div>
+        </div>
+
+        <div class="typingText" id="typingText" aria-live="polite"></div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <input id="typeInput" type="text" inputmode="text" placeholder="Tap Start then type here" />
+          <button class="btn" id="typeStart">Start</button>
+          <button class="btn" id="typeReset">Reset Best</button>
+        </div>
+        <p class="sub" id="typeMsg"> </p>
+      </section>
+
+      <!-- ARCADE -->
+      <section id="sec-arcade" class="section" role="tabpanel" aria-hidden="true">
+        <h2>🕹️ Bug Buster</h2>
+        <p class="sub">Collect files, dodge bugs, level up. Pause with P, Restart with R. Touch controls provided.</p>
+        <div class="hud">
+          <div class="chip" id="scoreChip">Score: 0</div>
+          <div class="chip" id="levelChip">Level: 1</div>
+          <div class="chip warn" id="timeChip">Time: 60</div>
+          <div class="chip" id="filesChip">Files: 0</div>
+          <div class="chip" id="bestChip">Best: 0</div>
+        </div>
+
+        <div class="canvasWrap card" style="padding:0">
+          <canvas id="game" width="960" height="540" role="img" aria-label="Arcade game canvas"></canvas>
+        </div>
+
+        <div class="touch-row" id="arcadeTouch" style="margin-top:10px">
+          <button class="touch-btn" data-dx="0" data-dy="-1">↑</button>
+          <button class="touch-btn" data-dx="-1" data-dy="0">←</button>
+          <button class="touch-btn" data-dx="1" data-dy="0">→</button>
+          <button class="touch-btn" data-dx="0" data-dy="1">↓</button>
+          <button class="touch-btn" id="touchPause">Pause</button>
+        </div>
+
+        <div class="controls" style="margin-top:10px">
+          <button class="btn" id="startBtn">▶ Start</button>
+          <button class="btn" id="pauseBtn">⏸ Pause</button>
+          <button class="btn" id="resetBtn">↺ Reset Best</button>
+        </div>
+      </section>
+    </main>
+
+    <aside class="card sidebar">
+      <h3>Player Stats</h3>
+      <div style="display:grid;gap:8px;margin-top:8px">
+        <div class="chip">Slots Best: <strong id="sideSlotsBest">0</strong></div>
+        <div class="chip">Blackjack Best: <strong id="sideBjBest">0</strong></div>
+        <div class="chip">Math Best: <strong id="sideMathBest">0</strong></div>
+        <div class="chip">Typing Best: <strong id="sideTypeBest">0</strong></div>
+        <div class="chip">Arcade Best: <strong id="bestSide">0</strong></div>
+      </div>
+
+      <h3 style="margin-top:14px">Tips</h3>
+      <ul class="sub">
+        <li>Use the tabs to switch games — works on touch and mouse.</li>
+        <li>All scores are saved locally (no accounts).</li>
+        <li>Casino games are simulated for points only — no real money.</li>
+      </ul>
+
+      <div style="margin-top:12px">
+        <button class="btn" id="clearAll">Clear All Stored Scores</button>
+      </div>
+    </aside>
   </div>
 
-  <script>
-    // ===== Tabs =====
-    const tabs = document.querySelectorAll('.tab');
-    const sections = {
-      slots: document.getElementById('sec-slots'),
-      blackjack: document.getElementById('sec-blackjack'),
-      math: document.getElementById('sec-math'),
-      typing: document.getElementById('sec-typing'),
-      arcade: document.getElementById('sec-arcade'),
-    };
-    tabs.forEach(btn=>btn.addEventListener('click',()=>{
-      tabs.forEach(b=>b.removeAttribute('aria-current'));
-      btn.setAttribute('aria-current','page');
-      Object.values(sections).forEach(s=>s.classList.remove('active'));
-      sections[btn.dataset.tab].classList.add('active');
-    }));
+  <footer>comp-apps — Game Hub · Single-file · Works on iPhone/iPad/Computer</footer>
+</div>
 
-    // ===== Utils =====
-    const rnd = (min,max)=> Math.random()*(max-min)+min;
-    const irnd = (min,max)=> Math.floor(rnd(min,max+1));
+<script>
+/* ------------------------------
+   Tiny utilities & startup
+   ------------------------------ */
+const qs = s=>document.querySelector(s);
+const qsa = s=>Array.from(document.querySelectorAll(s));
+const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+const rnd = (a,b)=>Math.random()*(b-a)+a;
+const irnd = (a,b)=>Math.floor(rnd(a,b+1));
 
-    function updateSide(){
-      document.getElementById('sideSlotsBest').textContent = localStorage.getItem('slots_best')||0;
-      document.getElementById('sideBjBest').textContent = localStorage.getItem('bj_best')||0;
-      document.getElementById('sideMathBest').textContent = localStorage.getItem('math_best')||0;
-      document.getElementById('sideTypeBest').textContent = localStorage.getItem('type_best')||0;
-      document.getElementById('bestSide').textContent = localStorage.getItem('bb_best')||0;
-    }
+/* ------------------------------
+   Tabs
+   ------------------------------ */
+qsa('.tab').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    qsa('.tab').forEach(b=>b.removeAttribute('aria-current'));
+    btn.setAttribute('aria-current','page');
+    const target = btn.dataset.tab;
+    qsa('.section').forEach(s=>{
+      if(s.id === 'sec-'+target){ s.classList.add('active'); s.removeAttribute('aria-hidden'); }
+      else { s.classList.remove('active'); s.setAttribute('aria-hidden','true'); }
+    });
+    // focus first control for accessibility
+    setTimeout(()=>{
+      const first = document.querySelector(`#sec-${target} button, #sec-${target} input`);
+      if(first) first.focus();
+    },100);
+  });
+});
 
-    // ===== Slots =====
-    const sym = ['🍒','🍋','⭐','🔔','🍇'];
-    const reelEls = [document.getElementById('reel1'),document.getElementById('reel2'),document.getElementById('reel3')];
-    const slotsBalEl = document.getElementById('slotsBal');
-    const slotsBetEl = document.getElementById('slotsBet');
-    const slotsBestEl = document.getElementById('slotsBest');
-    const slotsMsg = document.getElementById('slotsMsg');
-    let slots = {bal: Number(localStorage.getItem('slots_bal')||100), bet:5, best:Number(localStorage.getItem('slots_best')||0)};
-    function saveSlots(){ localStorage.setItem('slots_bal', slots.bal); slots.best=Math.max(slots.best, slots.bal); localStorage.setItem('slots_best', slots.best); updateSide(); renderSlots(); }
-    function renderSlots(){ slotsBalEl.textContent=slots.bal; slotsBetEl.textContent=slots.bet; slotsBestEl.textContent=slots.best; }
-    function spin(){
-      if(slots.bet<1 || slots.bet>slots.bal){ slotsMsg.textContent='Adjust your bet'; return; }
-      slots.bal -= slots.bet; const r=[0,0,0].map(()=> sym[irnd(0,sym.length-1)]);
-      reelEls.forEach((el,i)=>{ el.textContent=''; el.animate([{filter:'blur(8px)'},{filter:'blur(0)'}],{duration:300, easing:'ease-out'}).onfinish=()=>el.textContent=r[i]; });
-      let award=0; const set=new Set(r);
-      if(set.size===1){ // 3 match
-        const s=r[0]; award = (s==='⭐'?20:(s==='🍒'?12:(s==='🍋'?8:6))) * slots.bet;
-        slotsMsg.textContent = `Triple ${s}! +${award}`;
-      } else if(set.size===2){ award = 3*slots.bet; slotsMsg.textContent = `Pair! +${award}`; }
-      else { slotsMsg.textContent = `No match`; }
-      slots.bal += award; saveSlots();
-    }
-    document.getElementById('spinBtn').onclick=spin;
-    document.getElementById('betUp').onclick=()=>{ slots.bet=Math.min(slots.bet+1, 50); renderSlots(); };
-    document.getElementById('betDown').onclick=()=>{ slots.bet=Math.max(slots.bet-1, 1); renderSlots(); };
-    document.getElementById('resetSlots').onclick=()=>{ slots={bal:100,bet:5,best:slots.best}; saveSlots(); };
-    renderSlots();
+/* ------------------------------
+   Persistent UI update helper
+   ------------------------------ */
+function updateSide(){
+  document.getElementById('sideSlotsBest').textContent = localStorage.getItem('slots_best')||0;
+  document.getElementById('sideBjBest').textContent = localStorage.getItem('bj_best')||0;
+  document.getElementById('sideMathBest').textContent = localStorage.getItem('math_best')||0;
+  document.getElementById('sideTypeBest').textContent = localStorage.getItem('type_best')||0;
+  document.getElementById('bestSide').textContent = localStorage.getItem('bb_best')||0;
+}
+updateSide();
 
-    // ===== Blackjack =====
-    const bj = {
-      bank: Number(localStorage.getItem('bj_bank')||100), bet:10, best:Number(localStorage.getItem('bj_best')||0), deck:[], player:[], dealer:[],
-    };
-    const bjEls = {
-      bank: document.getElementById('bjBank'), bet: document.getElementById('bjBet'), best: document.getElementById('bjBest'), msg: document.getElementById('bjMsg'),
-      dealer: document.getElementById('dealer'), player: document.getElementById('player'),
-      deal: document.getElementById('bjDeal'), hit: document.getElementById('bjHit'), stand: document.getElementById('bjStand'),
-    };
-    function bjSave(){ localStorage.setItem('bj_bank', bj.bank); bj.best=Math.max(bj.best,bj.bank); localStorage.setItem('bj_best', bj.best); bjRenderTop(); updateSide(); }
-    function bjRenderTop(){ bjEls.bank.textContent=bj.bank; bjEls.bet.textContent=bj.bet; bjEls.best.textContent=bj.best; }
-    function freshDeck(){ const suits=['♠','♥','♦','♣']; const ranks=['A','2','3','4','5','6','7','8','9','10','J','Q','K']; bj.deck=[]; suits.forEach(s=>ranks.forEach(r=>bj.deck.push(r+s))); for(let i=0;i<bj.deck.length;i++){ const j=irnd(0,bj.deck.length-1); [bj.deck[i],bj.deck[j]]=[bj.deck[j],bj.deck[i]]; } }
-    function val(hand){ let total=0, aces=0; for(const c of hand){ let r=c.slice(0,-1); if(['J','Q','K'].includes(r)) total+=10; else if(r==='A'){ total+=11; aces++; } else total+=Number(r); } while(total>21 && aces){ total-=10; aces--; } return total; }
-    function renderHand(el, hand, hideFirst=false){ el.innerHTML=''; hand.forEach((c,i)=>{ const d=document.createElement('div'); d.className='cardx'; d.textContent = (hideFirst && i===0 ? '🂠' : c); el.appendChild(d); }); }
-    function resetRound(){ bj.player=[]; bj.dealer=[]; }
-    function deal(){ if(bj.bet<1 || bj.bet>bj.bank) { bjEls.msg.textContent='Adjust your bet'; return; } freshDeck(); resetRound(); bj.bank-=bj.bet; bjSave(); bjEls.msg.textContent='Good luck!';
-      bj.player.push(bj.deck.pop(), bj.deck.pop()); bj.dealer.push(bj.deck.pop(), bj.deck.pop());
-      bjRender(); bjEls.hit.disabled=false; bjEls.stand.disabled=false; }
-    function bjRender(){ renderHand(bjEls.player,bj.player,false); renderHand(bjEls.dealer,bj.dealer,true); }
-    function endDealer(){
-      renderHand(bjEls.dealer,bj.dealer,false);
-      while(val(bj.dealer)<17){ bj.dealer.push(bj.deck.pop()); renderHand(bjEls.dealer,bj.dealer,false); }
-      const pv=val(bj.player), dv=val(bj.dealer);
-      let win=0; let msg='';
-      const blackjack = (hand)=> hand.length===2 && val(hand)===21;
-      if(blackjack(bj.player) && !blackjack(bj.dealer)) { win = Math.round(bj.bet*2.5); msg='Blackjack! +'+(win-bj.bet); }
-      else if(dv>21 || pv>dv){ win = bj.bet*2; msg='You win! +'+(win-bj.bet); }
-      else if(pv===dv){ win = bj.bet; msg='Push'; }
-      else { win = 0; msg='Dealer wins'; }
-      bj.bank += win; bjEls.msg.textContent = msg; bjEls.hit.disabled=true; bjEls.stand.disabled=true; bjSave();
-    }
-    bjEls.deal.onclick=deal;
-    bjEls.hit.onclick=()=>{ bj.player.push(bj.deck.pop()); renderHand(bjEls.player,bj.player,false); if(val(bj.player)>21){ bjEls.msg.textContent='Bust!'; bjEls.hit.disabled=true; bjEls.stand.disabled=true; bjSave(); } };
-    bjEls.stand.onclick=endDealer;
-    document.getElementById('bjBetUp').onclick=()=>{ bj.bet=Math.min(50,bj.bet+1); bjRenderTop(); };
-    document.getElementById('bjBetDown').onclick=()=>{ bj.bet=Math.max(1,bj.bet-1); bjRenderTop(); };
-    document.getElementById('bjReset').onclick=()=>{ bj.bank=100; bj.bet=10; bjSave(); bjEls.msg.textContent='Bank reset'; };
-    bjRenderTop();
+/* ============================
+   SLOTS
+   ============================ */
+(() => {
+  const symbols = ['🍒','🍋','⭐','🔔','🍇'];
+  const reelEls = [qs('#reel1'), qs('#reel2'), qs('#reel3')];
+  const slotsBalEl = qs('#slotsBal');
+  const slotsBetEl = qs('#slotsBet');
+  const slotsBestEl = qs('#slotsBest');
+  const slotsMsg = qs('#slotsMsg');
 
-    // ===== Math Sprint =====
-    const math= {score:0, streak:0, time:60, timer:0, best:Number(localStorage.getItem('math_best')||0)};
-    const mq = document.getElementById('mathQ'), ma=document.getElementById('mathA'), mscore=document.getElementById('mathScore'), mstreak=document.getElementById('mathStreak'), mtime=document.getElementById('mathTime'), mbest=document.getElementById('mathBest'), mmsg=document.getElementById('mathMsg');
-    function mathSave(){ math.best=Math.max(math.best, math.score); localStorage.setItem('math_best', math.best); mbest.textContent=math.best; updateSide(); }
-    function nextQ(){ const ops=[]; if(opAdd.checked) ops.push('+'); if(opSub.checked) ops.push('-'); if(opMul.checked) ops.push('×'); if(opDiv.checked) ops.push('÷'); if(ops.length===0) ops.push('+');
-      const op=ops[irnd(0,ops.length-1)]; let a=irnd(1,12), b=irnd(1,12); let text='', ans=0;
-      if(op==='÷'){ ans=irnd(1,12); b=irnd(1,12); a=ans*b; text=`${a} ÷ ${b} = ?`; }
-      else if(op==='×'){ ans=a*b; text=`${a} × ${b} = ?`; }
-      else if(op==='+'){ ans=a+b; text=`${a} + ${b} = ?`; }
-      else { ans=a-b; text=`${a} − ${b} = ?`; }
-      mq.dataset.ans=ans; mq.textContent=text; ma.value=''; ma.focus(); }
-    function mathTick(){ math.time--; mtime.textContent=math.time; if(math.time<=0){ clearInterval(math.timer); math.timer=0; mmsg.textContent=`Time! Final score ${math.score}`; mathSave(); }
-      if(math.time===10) mtime.parentElement.classList.add('danger'); }
-    document.getElementById('mathStart').onclick=()=>{ math.score=0; math.streak=0; math.time=60; mscore.textContent=0; mstreak.textContent=0; mtime.textContent=60; mmsg.textContent=''; nextQ(); if(math.timer) clearInterval(math.timer); math.timer=setInterval(mathTick,1000); };
-    document.getElementById('mathSubmit').onclick=()=>{ const val=Number(ma.value); const ans=Number(mq.dataset.ans); if(!math.timer){ mmsg.textContent='Press Start'; return; }
-      if(val===ans){ math.streak++; const gain=10+Math.floor(Math.max(0,math.streak-1)*2); math.score+=gain; mmsg.textContent=`Correct! +${gain}`; } else { math.streak=0; mmsg.textContent=`Oops! Answer was ${ans}`; }
-      mscore.textContent=math.score; mstreak.textContent=math.streak; nextQ(); };
-    ma.addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('mathSubmit').click(); });
-    mbest.textContent = math.best; updateSide();
+  let state = {
+    bal: Number(localStorage.getItem('slots_bal') || 100),
+    bet: Number(localStorage.getItem('slots_bet') || 5),
+    best: Number(localStorage.getItem('slots_best') || 0)
+  };
 
-    // ===== Typing Test =====
-    const samples=[
-      'Practice makes progress. Keep your eyes forward and your fingers light.',
-      'Computers follow instructions exactly. Great code is clear and simple.',
-      'Stay calm, type steady, and let accuracy lead your speed.',
-      'Small habits repeated daily build big skills over time.'
-    ];
-    const tstate={text:'', idx:0, time:30, timer:0, correct:0, typed:0, best:Number(localStorage.getItem('type_best')||0)};
-    const tEls={wrap:document.getElementById('typingText'), input:document.getElementById('typeInput'), wpm:document.getElementById('typeWpm'), acc:document.getElementById('typeAcc'), time:document.getElementById('typeTime'), msg:document.getElementById('typeMsg'), best:document.getElementById('typeBest')};
-    function setText(){ tstate.text = samples[irnd(0,samples.length-1)]; tstate.idx=0; renderText(); }
-    function renderText(){ const before=tstate.text.slice(0,tstate.idx); const cur=tstate.text[tstate.idx]||''; const after=tstate.text.slice(tstate.idx+1);
-      tEls.wrap.innerHTML = `<span class="done">${escapeHtml(before)}</span><span class="current">${escapeHtml(cur)}</span>${escapeHtml(after)}`; }
-    function escapeHtml(s){ return s.replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
-    function tTick(){ tstate.time--; tEls.time.textContent=tstate.time; if(tstate.time<=0){ clearInterval(tstate.timer); tstate.timer=0; finish(); } if(tstate.time===10) tEls.time.parentElement.classList.add('danger'); }
-    function startTyping(){ tstate.time=30; tstate.correct=0; tstate.typed=0; tEls.time.textContent=30; tEls.wpm.textContent=0; tEls.acc.textContent='100%'; tEls.msg.textContent=''; tEls.input.value=''; setText(); tEls.input.focus(); if(tstate.timer) clearInterval(tstate.timer); tstate.timer=setInterval(tTick,1000); }
-    function finish(){ const wpm = Math.round((tstate.typed/5) * (60/30)); const acc = tstate.typed? Math.round((tstate.correct/tstate.typed)*100):100; tEls.wpm.textContent=wpm; tEls.acc.textContent=acc+'%'; tEls.msg.textContent=`Done! WPM ${wpm}, Accuracy ${acc}%`; tstate.best=Math.max(tstate.best,wpm); localStorage.setItem('type_best', tstate.best); tEls.best.textContent=tstate.best; updateSide(); }
-    tEls.input.addEventListener('input', ()=>{ if(!tstate.timer){ tEls.msg.textContent='Press Start'; tEls.input.value=''; return; } const ch=tEls.input.value.slice(-1); tEls.input.value=''; tstate.typed++; if(ch===tstate.text[tstate.idx]){ tstate.correct++; tstate.idx++; renderText(); if(tstate.idx>=tstate.text.length) setText(); } });
-    document.getElementById('typeStart').onclick=startTyping;
-    document.getElementById('typeReset').onclick=()=>{ localStorage.removeItem('type_best'); tstate.best=0; tEls.best.textContent=0; updateSide(); };
-    tEls.best.textContent=tstate.best; updateSide();
-
-    // ===== Arcade (Bug Buster) — compact loop =====
-    const CONFIG = { startLives:3, maxLives:5, baseSpeed:2.2, playerSpeed:3.4, fileWorth:10, levelTime:60, spawnBugEvery:1200, spawnFileEvery:950, spawnPowerEvery:6000, slowMoFactor:0.45, slowMoDuration:5000, levelSpeedBoost:0.35, bugSpeedVariance:1.1 };
-    const canvas = document.getElementById('game'); const gtx = canvas.getContext('2d'); const dpr = Math.max(1, Math.min(2, window.devicePixelRatio||1));
-    function resize(){ const r=canvas.getBoundingClientRect(); canvas.width=Math.round(r.width*dpr); canvas.height=Math.round(r.height*dpr);} new ResizeObserver(resize).observe(canvas); resize();
-    const state = { running:false, paused:false, over:false, level:1, score:0, files:0, lives:CONFIG.startLives, tStart:0, tNow:0, tSlowEnd:0, nextBug:0, nextFile:0, nextPower:0, player:{x:200,y:200,r:10*dpr,vx:0,vy:0}, bugs:[], filesArr:[], powers:[], best:Number(localStorage.getItem('bb_best')||0) };
-    function circle(x,y,r,c){gtx.beginPath();gtx.arc(x,y,r,0,Math.PI*2);gtx.fillStyle=c;gtx.fill()} function square(x,y,s,c){gtx.fillStyle=c;gtx.fillRect(x-s/2,y-s/2,s,s)} function tri(x,y,s,c){gtx.beginPath();gtx.moveTo(x, y-s/1.2);gtx.lineTo(x-s/1.4, y+s/1.8);gtx.lineTo(x+s/1.4, y+s/1.8);gtx.closePath();gtx.fillStyle=c;gtx.fill()} function label(t,x,y,s=14){gtx.font=`${s*dpr}px/1.2 ui-sans-serif, system-ui`;gtx.fillStyle='rgba(232,240,255,.9)';gtx.textAlign='center';gtx.fillText(t,x,y)}
-    const keys=new Set(); addEventListener('keydown',e=>{ if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d','W','A','S','D'].includes(e.key)) {keys.add(e.key.toLowerCase()); e.preventDefault();} if(e.key==='p'||e.key==='P') togglePause(); if(e.key==='r'||e.key==='R') startGame(); }); addEventListener('keyup', e=> keys.delete(e.key.toLowerCase()));
-    const touch = document.getElementById('touchControls'); if(matchMedia('(pointer: coarse)').matches) touch.removeAttribute('aria-hidden'); let touchVec={x:0,y:0};
-    touch.addEventListener('click', e=>{ const t=e.target.closest('button'); if(!t) return; if(t.id==='touchPause'){ togglePause(); return;} touchVec={x:Number(t.dataset.dx)||0, y:Number(t.dataset.dy)||0}; setTimeout(()=>touchVec={x:0,y:0}, 120);});
-    function spawnBug(){ const speed=(CONFIG.baseSpeed+(state.level-1)*CONFIG.levelSpeedBoost)*dpr*rnd(.8, CONFIG.bugSpeedVariance); const edge=Math.random()<.5?'x':'y'; let x,y; if(edge==='x'){ x=Math.random()<.5? -20: canvas.width+20; y=rnd(0, canvas.height) } else { y=Math.random()<.5? -20: canvas.height+20; x=rnd(0, canvas.width)} const ang=Math.atan2(state.player.y-y, state.player.x-x); state.bugs.push({x,y,s:18*dpr,vx:Math.cos(ang)*speed,vy:Math.sin(ang)*speed}); }
-    function spawnFile(){ state.filesArr.push({x:rnd(30,canvas.width-30), y:rnd(30,canvas.height-30), s:16*dpr}); }
-    function spawnPower(){ const kind=Math.random()<.65?'slow':'life'; state.powers.push({kind, x:rnd(30,canvas.width-30), y:rnd(30,canvas.height-30), s:16*dpr, t:performance.now()+7000}); }
-    function startGame(){ state.running=true; state.paused=false; state.over=false; state.level=1; state.score=0; state.files=0; state.lives=CONFIG.startLives; state.bugs.length=0; state.filesArr.length=0; state.powers.length=0; state.tStart=performance.now(); state.tNow=state.tStart; state.tSlowEnd=0; state.nextBug=0; state.nextFile=0; state.nextPower=0; const r=canvas.getBoundingClientRect(); state.player.x=(r.width*.5)*dpr; state.player.y=(r.height*.6)*dpr; loop(); }
-    function togglePause(){ if(!state.running || state.over) return; state.paused=!state.paused; if(!state.paused) loop(); }
-    function gameOver(){ state.over=true; state.running=false; state.best=Math.max(state.best,state.score); localStorage.setItem('bb_best', state.best); document.getElementById('bestChip').textContent='Best: '+state.best; document.getElementById('bestSide').textContent=state.best; }
-    function loop(){ if(!state.running || state.paused) return; requestAnimationFrame(loop); const now=performance.now(); const dt=Math.min(32,(now-state.tNow))*(now<state.tSlowEnd?CONFIG.slowMoFactor:1); state.tNow=now; const elapsed=Math.floor((now-state.tStart)/1000); if(elapsed>0 && elapsed%CONFIG.levelTime===0){ state.level++; }
-      if(now>state.nextBug){ spawnBug(); state.nextBug=now+Math.max(350, CONFIG.spawnBugEvery - state.level*60); }
-      if(now>state.nextFile){ spawnFile(); state.nextFile=now+CONFIG.spawnFileEvery; }
-      if(now>state.nextPower){ spawnPower(); state.nextPower=now+CONFIG.spawnPowerEvery; }
-      const ps=CONFIG.playerSpeed*dpr; const ax=(keys.has('arrowleft')||keys.has('a')?-1:0)+(keys.has('arrowright')||keys.has('d')?1:0)+touchVec.x; const ay=(keys.has('arrowup')||keys.has('w')?-1:0)+(keys.has('arrowdown')||keys.has('s')?1:0)+touchVec.y; state.player.vx=ax*ps; state.player.vy=ay*ps; state.player.x=Math.max(10*dpr, Math.min(canvas.width-10*dpr, state.player.x+state.player.vx)); state.player.y=Math.max(10*dpr, Math.min(canvas.height-10*dpr, state.player.y+state.player.vy));
-      const speedMult= now<state.tSlowEnd?0.4:1; for(const b of state.bugs){ b.x+=b.vx*(dt/16)*speedMult; b.y+=b.vy*(dt/16)*speedMult; } state.bugs=state.bugs.filter(b=> b.x>-60 && b.x<canvas.width+60 && b.y>-60 && b.y<canvas.height+60);
-      state.filesArr = state.filesArr.filter(f=>{ const hit = Math.hypot(state.player.x-f.x, state.player.y-f.y) < (state.player.r + f.s*0.7); if(hit){ state.score += CONFIG.fileWorth; state.files++; } return !hit; });
-      state.powers = state.powers.filter(p=>{ const expired=now>p.t; if(expired) return false; const hit=Math.hypot(state.player.x-p.x, state.player.y-p.y) < (state.player.r + p.s*0.7); if(hit){ if(p.kind==='slow'){ state.tSlowEnd=now+CONFIG.slowMoDuration; } else if(state.lives<CONFIG.maxLives){ state.lives++; } } return !hit; });
-      for(let i=state.bugs.length-1;i>=0;i--){ const b=state.bugs[i]; if(Math.hypot(state.player.x-b.x, state.player.y-b.y) < (state.player.r + b.s*0.5)){ state.bugs.splice(i,1); state.lives--; if(state.lives<=0) { gameOver(); break; } } }
-      gtx.clearRect(0,0,canvas.width,canvas.height); gtx.globalAlpha=.07; gtx.strokeStyle='#7cf1c833'; gtx.lineWidth=1*dpr; const step=40*dpr; for(let x=step; x<canvas.width; x+=step){ gtx.beginPath(); gtx.moveTo(x,0); gtx.lineTo(x,canvas.height); gtx.stroke(); } for(let y=step; y<canvas.height; y+=step){ gtx.beginPath(); gtx.moveTo(0,y); gtx.lineTo(canvas.width,y); gtx.stroke(); } gtx.globalAlpha=1;
-      for(const f of state.filesArr){ square(f.x, f.y, f.s, '#9bb4ff'); }
-      for(const p of state.powers){ if(p.kind==='slow'){ circle(p.x,p.y,10*dpr,'#7cf1c8'); label('★',p.x,p.y+4*dpr,14);} else { circle(p.x,p.y,10*dpr,'#79f28c'); label('❤',p.x,p.y+5*dpr,14);} }
-      for(const b of state.bugs){ tri(b.x,b.y,b.s,'#ff7b9c'); }
-      circle(state.player.x, state.player.y, state.player.r, '#e8f0ff');
-      document.getElementById('scoreChip').textContent='Score: '+state.score; document.getElementById('levelChip').textContent='Level: '+state.level; document.getElementById('filesChip').textContent='Files: '+state.files; document.getElementById('bestChip').textContent='Best: '+state.best;
-    }
-    document.getElementById('startBtn').onclick=startGame; document.getElementById('pauseBtn').onclick=togglePause; document.getElementById('resetBtn').onclick=()=>{ localStorage.removeItem('bb_best'); state.best=0; document.getElementById('bestChip').textContent='Best: 0'; updateSide(); };
-
+  function save(){
+    localStorage.setItem('slots_bal', state.bal);
+    localStorage.setItem('slots_bet', state.bet);
+    state.best = Math.max(state.best, state.bal);
+    localStorage.setItem('slots_best', state.best);
+    render();
     updateSide();
-  </script>
+  }
+  function render(){
+    slotsBalEl.textContent = state.bal;
+    slotsBetEl.textContent = state.bet;
+    slotsBestEl.textContent = state.best;
+  }
+  function spin(){
+    if(state.bet < 1 || state.bet > state.bal){
+      slotsMsg.textContent = 'Adjust your bet';
+      return;
+    }
+    state.bal -= state.bet;
+    // animate reels quickly and then show results
+    const results = [symbols[irnd(0,symbols.length-1)], symbols[irnd(0,symbols.length-1)], symbols[irnd(0,symbols.length-1)]];
+    reelEls.forEach((el,i)=>{
+      el.textContent = '';
+      // short spin animation
+      const frames = 8;
+      let f = 0;
+      const int = setInterval(()=>{
+        el.textContent = symbols[irnd(0,symbols.length-1)];
+        f++;
+        if(f>=frames){ clearInterval(int); el.textContent = results[i]; }
+      }, 40 + (i*30));
+    });
+
+    // evaluate payout slightly delayed to match animation
+    setTimeout(()=>{
+      let award = 0;
+      const set = new Set(results);
+      if(set.size === 1){
+        const s = results[0];
+        award = (s === '⭐' ? 20 : (s === '🍒' ? 12 : (s === '🍋' ? 8 : 6))) * state.bet;
+        slotsMsg.textContent = `Triple ${s}! +${award}`;
+      } else if(set.size === 2){
+        award = 3 * state.bet;
+        slotsMsg.textContent = `Pair! +${award}`;
+      } else {
+        slotsMsg.textContent = 'No match';
+      }
+      state.bal += award;
+      save();
+    }, 600);
+  }
+
+  // controls
+  qs('#spinBtn').addEventListener('click', spin);
+  qs('#betUp').addEventListener('click', ()=>{ state.bet = clamp(state.bet + 1, 1, 1000); save(); });
+  qs('#betDown').addEventListener('click', ()=>{ state.bet = clamp(state.bet - 1, 1, state.bal || 1); save(); });
+  qs('#resetSlots').addEventListener('click', ()=>{ state.bal = 100; state.bet = 5; save(); });
+
+  render();
+})();
+
+/* ============================
+   BLACKJACK
+   ============================ */
+(() => {
+  const deckSuits = ['♠','♥','♦','♣'];
+  const deckRanks = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+  const dealerEl = qs('#dealer'), playerEl = qs('#player');
+  const bankEl = qs('#bjBank'), betEl = qs('#bjBet'), bestEl = qs('#bjBest'), msgEl = qs('#bjMsg');
+
+  let state = {
+    bank: Number(localStorage.getItem('bj_bank')||100),
+    bet: Number(localStorage.getItem('bj_bet')||10),
+    best: Number(localStorage.getItem('bj_best')||0),
+    deck: [], player: [], dealer: []
+  };
+
+  function save(){
+    localStorage.setItem('bj_bank', state.bank);
+    localStorage.setItem('bj_bet', state.bet);
+    state.best = Math.max(state.best, state.bank);
+    localStorage.setItem('bj_best', state.best);
+    renderTop();
+    updateSide();
+  }
+  function renderTop(){
+    bankEl.textContent = state.bank;
+    betEl.textContent = state.bet;
+    bestEl.textContent = state.best;
+  }
+  function buildDeck(){
+    state.deck = [];
+    deckSuits.forEach(s => deckRanks.forEach(r => state.deck.push(r + s)));
+    // shuffle
+    for(let i=state.deck.length-1;i>0;i--){
+      const j = irnd(0,i);
+      [state.deck[i], state.deck[j]] = [state.deck[j], state.deck[i]];
+    }
+  }
+  function value(hand){
+    let total = 0, aces = 0;
+    for(const c of hand){
+      const r = c.slice(0, -1);
+      if(['J','Q','K'].includes(r)) total += 10;
+      else if(r === 'A'){ total += 11; aces++; }
+      else total += Number(r);
+    }
+    while(total > 21 && aces){ total -= 10; aces--; }
+    return total;
+  }
+  function renderHand(el, hand, hideFirst=false){
+    el.innerHTML = '';
+    hand.forEach((c,i) => {
+      const d = document.createElement('div');
+      d.className = 'cardx';
+      d.textContent = (hideFirst && i === 0) ? '🂠' : c;
+      el.appendChild(d);
+    });
+  }
+  function resetRound(){
+    state.player = []; state.dealer = [];
+    renderHand(playerEl, state.player);
+    renderHand(dealerEl, state.dealer);
+  }
+  function deal(){
+    if(state.bet < 1 || state.bet > state.bank){ msgEl.textContent = 'Adjust your bet'; return; }
+    buildDeck();
+    resetRound();
+    state.bank -= state.bet;
+    save();
+    msgEl.textContent = '';
+    // initial deals
+    state.player.push(state.deck.pop(), state.deck.pop());
+    state.dealer.push(state.deck.pop(), state.deck.pop());
+    renderHand(playerEl, state.player, false);
+    renderHand(dealerEl, state.dealer, true);
+    qs('#bjHit').disabled = false; qs('#bjStand').disabled = false;
+    // auto blackjack check
+    if(value(state.player) === 21){
+      // immediate settle
+      settleDealer();
+    }
+  }
+  function settleDealer(){
+    // reveal dealer, hit to 17
+    renderHand(dealerEl, state.dealer, false);
+    while(value(state.dealer) < 17){
+      state.dealer.push(state.deck.pop());
+      renderHand(dealerEl, state.dealer, false);
+    }
+    const pv = value(state.player), dv = value(state.dealer);
+    let win = 0, txt = '';
+    const blackjack = (hand)=> hand.length === 2 && value(hand) === 21;
+    if(blackjack(state.player) && !blackjack(state.dealer)){
+      win = Math.round(state.bet * 2.5); txt = `Blackjack! +${win - state.bet}`;
+    } else if(dv > 21 || pv > dv){
+      win = state.bet * 2; txt = `You win! +${win - state.bet}`;
+    } else if(pv === dv){
+      win = state.bet; txt = `Push`;
+    } else {
+      win = 0; txt = `Dealer wins`;
+    }
+    state.bank += win;
+    msgEl.textContent = txt;
+    qs('#bjHit').disabled = true; qs('#bjStand').disabled = true;
+    save();
+  }
+
+  qs('#bjDeal').addEventListener('click', deal);
+  qs('#bjHit').addEventListener('click', ()=>{
+    state.player.push(state.deck.pop());
+    renderHand(playerEl, state.player);
+    if(value(state.player) > 21){
+      msgEl.textContent = 'Bust!';
+      qs('#bjHit').disabled = true; qs('#bjStand').disabled = true;
+      save();
+    }
+  });
+  qs('#bjStand').addEventListener('click', settleDealer);
+  qs('#bjBetUp').addEventListener('click', ()=>{ state.bet = clamp(state.bet + 1, 1, 500); renderTop(); localStorage.setItem('bj_bet', state.bet); });
+  qs('#bjBetDown').addEventListener('click', ()=>{ state.bet = clamp(state.bet - 1, 1, 500); renderTop(); localStorage.setItem('bj_bet', state.bet); });
+  qs('#bjReset').addEventListener('click', ()=>{ state.bank = 100; state.bet = 10; save(); msgEl.textContent = 'Bank reset'; });
+
+  renderTop();
+})();
+
+/* ============================
+   MATH SPRINT
+   ============================ */
+(() => {
+  const qEl = qs('#mathQ'), aEl = qs('#mathA'), scoreEl = qs('#mathScore'), streakEl = qs('#mathStreak');
+  const timeEl = qs('#mathTime'), bestEl = qs('#mathBest'), msgEl = qs('#mathMsg');
+  let state = { score: 0, streak: 0, time: 60, timer: 0, best: Number(localStorage.getItem('math_best')||0) };
+
+  function nextQuestion(){
+    const ops = [];
+    if(qs('#opAdd').checked) ops.push('+');
+    if(qs('#opSub').checked) ops.push('-');
+    if(qs('#opMul').checked) ops.push('*');
+    if(qs('#opDiv').checked) ops.push('/');
+    if(ops.length === 0) ops.push('+');
+    const op = ops[irnd(0, ops.length-1)];
+    let a = irnd(1, 12), b = irnd(1, 12), ans = 0, text = '';
+    if(op === '/'){ ans = irnd(1,12); b = irnd(1,12); a = ans * b; text = `${a} ÷ ${b} = ?`; }
+    else if(op === '*'){ ans = a * b; text = `${a} × ${b} = ?`; }
+    else if(op === '+'){ ans = a + b; text = `${a} + ${b} = ?`; }
+    else { ans = a - b; text = `${a} − ${b} = ?`; }
+    qEl.dataset.ans = ans;
+    qEl.textContent = text;
+    aEl.value = '';
+    aEl.focus();
+  }
+
+  function tick(){
+    state.time--;
+    timeEl.textContent = state.time;
+    if(state.time <= 0){ clearInterval(state.timer); state.timer = 0; finish(); }
+    if(state.time === 10) timeEl.parentElement.classList.add('danger');
+  }
+  function start(){
+    state.score = 0; state.streak = 0; state.time = 60;
+    scoreEl.textContent = 0; streakEl.textContent = 0; timeEl.textContent = 60;
+    msgEl.textContent = '';
+    if(state.timer) clearInterval(state.timer);
+    state.timer = setInterval(tick, 1000);
+    nextQuestion();
+  }
+  function submit(){
+    if(!state.timer){ msgEl.textContent = 'Press Start'; return; }
+    const val = Number(aEl.value);
+    const ans = Number(qEl.dataset.ans);
+    if(val === ans){
+      state.streak++;
+      const gain = 10 + Math.floor(Math.max(0, state.streak - 1) * 2);
+      state.score += gain;
+      msgEl.textContent = `Correct +${gain}`;
+    } else {
+      state.streak = 0;
+      msgEl.textContent = `Wrong — answer ${ans}`;
+    }
+    scoreEl.textContent = state.score;
+    streakEl.textContent = state.streak;
+    nextQuestion();
+  }
+  function finish(){
+    msgEl.textContent = `Time! Final score ${state.score}`;
+    state.best = Math.max(state.best, state.score);
+    localStorage.setItem('math_best', state.best);
+    bestEl.textContent = state.best;
+    updateSide();
+  }
+
+  qs('#mathStart').addEventListener('click', start);
+  qs('#mathSubmit').addEventListener('click', submit);
+  aEl.addEventListener('keydown', e=>{ if(e.key === 'Enter') submit(); });
+
+  bestEl.textContent = state.best;
+})();
+
+/* ============================
+   TYPING TEST
+   ============================ */
+(() => {
+  const samples = [
+    'Practice makes progress. Keep your fingers light and your thoughts steady.',
+    'Computers follow instructions exactly. Clear code is the best gift to future you.',
+    'Small habits repeated daily build big skills over time.',
+    'Stay calm, type steady, and let accuracy lead your speed.'
+  ];
+  const wrap = qs('#typingText'), input = qs('#typeInput'), wpmEl = qs('#typeWpm'), accEl = qs('#typeAcc'), timeEl = qs('#typeTime'), bestEl = qs('#typeBest'), msgEl = qs('#typeMsg');
+  let state = { text: '', idx: 0, time: 30, timer: 0, correct: 0, typed: 0, best: Number(localStorage.getItem('type_best')||0) };
+
+  function pickText(){ state.text = samples[irnd(0, samples.length-1)]; state.idx = 0; renderText(); }
+  function renderText(){
+    const before = state.text.slice(0, state.idx);
+    const cur = state.text[state.idx] || '';
+    const after = state.text.slice(state.idx + 1);
+    wrap.innerHTML = `<span class="done">${escapeHtml(before)}</span><span class="cur">${escapeHtml(cur)}</span>${escapeHtml(after)}`;
+  }
+  function escapeHtml(s){ return s.replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+  function tick(){
+    state.time--;
+    timeEl.textContent = state.time;
+    if(state.time <= 0){ clearInterval(state.timer); state.timer = 0; end(); }
+  }
+  function start(){
+    state.time = 30; state.correct = 0; state.typed = 0; state.idx = 0;
+    timeEl.textContent = 30; wpmEl.textContent = 0; accEl.textContent = '100%'; msgEl.textContent = '';
+    pickText();
+    input.value = '';
+    input.focus();
+    if(state.timer) clearInterval(state.timer);
+    state.timer = setInterval(tick, 1000);
+  }
+  function end(){
+    const minutes = 30/60;
+    const wpm = Math.round((state.typed/5) / minutes);
+    const acc = state.typed ? Math.round((state.correct/state.typed)*100) : 100;
+    wpmEl.textContent = wpm;
+    accEl.textContent = acc + '%';
+    msgEl.textContent = `Done — WPM ${wpm}, Accuracy ${acc}%`;
+    state.best = Math.max(state.best, wpm);
+    localStorage.setItem('type_best', state.best);
+    bestEl.textContent = state.best;
+    updateSide();
+  }
+
+  input.addEventListener('input', ()=>{
+    if(!state.timer){ msgEl.textContent = 'Press Start'; input.value = ''; return; }
+    const ch = input.value.slice(-1);
+    input.value = '';
+    state.typed++;
+    if(ch === state.text[state.idx]){ state.correct++; state.idx++; renderText(); if(state.idx >= state.text.length) pickText(); }
+  });
+
+  qs('#typeStart').addEventListener('click', start);
+  qs('#typeReset').addEventListener('click', ()=>{ localStorage.removeItem('type_best'); state.best = 0; bestEl.textContent = 0; updateSide(); });
+
+  bestEl.textContent = state.best;
+})();
+
+/* ============================
+   ARCADE: BUG BUSTER (Canvas)
+   Responsive & touch friendly
+   ============================ */
+(() => {
+  const CONFIG = {
+    startLives: 3, maxLives: 5, baseSpeed: 2.2, playerSpeed: 3.4,
+    fileWorth: 10, levelTime: 60, spawnBugEvery: 1200, spawnFileEvery: 1000,
+    spawnPowerEvery: 7000, slowMoFactor: 0.45, slowMoDuration: 5000, levelSpeedBoost: 0.35
+  };
+  const canvas = qs('#game');
+  const g = canvas.getContext('2d');
+  let dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+  function resizeCanvas(){
+    const r = canvas.getBoundingClientRect();
+    canvas.width = Math.round(r.width * dpr);
+    canvas.height = Math.round(r.height * dpr);
+  }
+  new ResizeObserver(resizeCanvas).observe(canvas);
+  resizeCanvas();
+
+  const state = {
+    running: false, paused: false, over: false, level: 1, score: 0, files: 0, lives: CONFIG.startLives,
+    tStart: 0, tNow: 0, tSlowEnd: 0, nextBug: 0, nextFile: 0, nextPower: 0,
+    player: { x: 200, y: 200, r: 12 * dpr, vx: 0, vy: 0 }, bugs: [], filesArr: [], powers: [], best: Number(localStorage.getItem('bb_best')||0)
+  };
+
+  // small drawing helpers
+  function circle(x,y,r,col){ g.beginPath(); g.arc(x,y,r,0,Math.PI*2); g.fillStyle = col; g.fill(); }
+  function square(x,y,s,col){ g.fillStyle = col; g.fillRect(x - s/2, y - s/2, s, s); }
+  function tri(x,y,s,col){ g.beginPath(); g.moveTo(x, y - s/1.2); g.lineTo(x - s/1.4, y + s/1.8); g.lineTo(x + s/1.4, y + s/1.8); g.closePath(); g.fillStyle = col; g.fill(); }
+  function label(t,x,y,size=12){ g.font = `${size * dpr}px system-ui, sans-serif`; g.fillStyle = 'rgba(232,240,255,.95)'; g.textAlign = 'center'; g.fillText(t, x, y); }
+
+  // input
+  const keys = new Set();
+  window.addEventListener('keydown', e=>{
+    if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d','W','A','S','D'].includes(e.key)){ keys.add(e.key.toLowerCase()); e.preventDefault(); }
+    if(e.key === 'p' || e.key === 'P') togglePause();
+    if(e.key === 'r' || e.key === 'R') startGame();
+  });
+  window.addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
+
+  // touch controls
+  let touchVec = { x: 0, y: 0 };
+  qs('#arcadeTouch').querySelectorAll('button[data-dx]').forEach(btn=>{
+    btn.addEventListener('touchstart', e=>{
+      e.preventDefault();
+      touchVec.x = Number(btn.dataset.dx) || 0;
+      touchVec.y = Number(btn.dataset.dy) || 0;
+    }, {passive:false});
+    btn.addEventListener('touchend', e=>{
+      e.preventDefault();
+      touchVec.x = 0; touchVec.y = 0;
+    }, {passive:false});
+    // also allow click for desktop
+    btn.addEventListener('mousedown', ()=>{
+      touchVec.x = Number(btn.dataset.dx) || 0;
+      touchVec.y = Number(btn.dataset.dy) || 0;
+    });
+    btn.addEventListener('mouseup', ()=>{ touchVec.x = 0; touchVec.y = 0; });
+  });
+  qs('#touchPause').addEventListener('click', togglePause);
+
+  // entities spawn
+  function spawnBug(){
+    const speed = (CONFIG.baseSpeed + (state.level - 1) * CONFIG.levelSpeedBoost) * dpr * rnd(0.8, 1.15);
+    const edge = Math.random() < 0.5 ? 'x' : 'y';
+    let x,y;
+    if(edge === 'x'){ x = Math.random() < 0.5 ? -30 : canvas.width + 30; y = rnd(0, canvas.height); }
+    else { y = Math.random() < 0.5 ? -30 : canvas.height + 30; x = rnd(0, canvas.width); }
+    const ang = Math.atan2(state.player.y - y, state.player.x - x);
+    state.bugs.push({ x, y, s: 16 * dpr, vx: Math.cos(ang) * speed, vy: Math.sin(ang) * speed });
+  }
+  function spawnFile(){ state.filesArr.push({ x: rnd(40, canvas.width - 40), y: rnd(40, canvas.height - 40), s: 14 * dpr }); }
+  function spawnPower(){ const kind = Math.random() < 0.7 ? 'slow' : 'life'; state.powers.push({ kind, x: rnd(40, canvas.width - 40), y: rnd(40, canvas.height - 40), s: 12 * dpr, t: performance.now() + 7000 }); }
+
+  // core loop
+  function startGame(){
+    state.running = true; state.paused = false; state.over = false;
+    state.level = 1; state.score = 0; state.files = 0; state.lives = CONFIG.startLives;
+    state.bugs.length = 0; state.filesArr.length = 0; state.powers.length = 0;
+    state.tStart = performance.now(); state.tNow = state.tStart; state.tSlowEnd = 0;
+    state.nextBug = 0; state.nextFile = 0; state.nextPower = 0;
+    const r = canvas.getBoundingClientRect();
+    state.player.x = (r.width * 0.5) * dpr; state.player.y = (r.height * 0.6) * dpr; state.player.r = 12 * dpr;
+    loop();
+  }
+  function togglePause(){ if(!state.running || state.over) return; state.paused = !state.paused; if(!state.paused) loop(); }
+  function endGame(){ state.over = true; state.running = false; state.best = Math.max(state.best, state.score); localStorage.setItem('bb_best', state.best); qs('#bestChip').textContent = 'Best: ' + state.best; updateSide(); }
+
+  function loop(t){
+    if(!state.running || state.paused) return;
+    requestAnimationFrame(loop);
+    const now = performance.now();
+    const dtRaw = Math.min(32, now - state.tNow);
+    const dt = dtRaw * (now < state.tSlowEnd ? CONFIG.slowMoFactor : 1);
+    state.tNow = now;
+    // level increment on time
+    const elapsed = Math.floor((now - state.tStart) / 1000);
+    const remain = Math.max(0, CONFIG.levelTime - (elapsed % CONFIG.levelTime));
+    if(remain === CONFIG.levelTime - 1 && elapsed > 0){ /* crossed */ }
+    // spawn
+    if(now > state.nextBug){ spawnBug(); state.nextBug = now + Math.max(300, CONFIG.spawnBugEvery - state.level * 60); }
+    if(now > state.nextFile){ spawnFile(); state.nextFile = now + CONFIG.spawnFileEvery; }
+    if(now > state.nextPower){ spawnPower(); state.nextPower = now + CONFIG.spawnPowerEvery; }
+    // input -> velocity
+    const ps = CONFIG.playerSpeed * dpr;
+    const ax = (keys.has('arrowleft') || keys.has('a') ? -1 : 0) + (keys.has('arrowright') || keys.has('d') ? 1 : 0) + touchVec.x;
+    const ay = (keys.has('arrowup') || keys.has('w') ? -1 : 0) + (keys.has('arrowdown') || keys.has('s') ? 1 : 0) + touchVec.y;
+    state.player.vx = ax * ps;
+    state.player.vy = ay * ps;
+    // move player
+    state.player.x = clamp(state.player.x + state.player.vx * (dt / 16), 12 * dpr, canvas.width - 12 * dpr);
+    state.player.y = clamp(state.player.y + state.player.vy * (dt / 16), 12 * dpr, canvas.height - 12 * dpr);
+    // move bugs
+    const speedMult = now < state.tSlowEnd ? 0.4 : 1;
+    state.bugs.forEach(b => { b.x += b.vx * (dt / 16) * speedMult; b.y += b.vy * (dt / 16) * speedMult; });
+    state.bugs = state.bugs.filter(b => b.x > -60 && b.x < canvas.width + 60 && b.y > -60 && b.y < canvas.height + 60);
+    // collisions: files
+    state.filesArr = state.filesArr.filter(f => {
+      const hit = Math.hypot(state.player.x - f.x, state.player.y - f.y) < (state.player.r + f.s * 0.7);
+      if(hit){ state.score += CONFIG.fileWorth; state.files++; }
+      return !hit;
+    });
+    // collisions: powers
+    state.powers = state.powers.filter(p => {
+      const expired = now > p.t;
+      if(expired) return false;
+      const hit = Math.hypot(state.player.x - p.x, state.player.y - p.y) < (state.player.r + p.s * 0.7);
+      if(hit){ if(p.kind === 'slow'){ state.tSlowEnd = now + CONFIG.slowMoDuration; } else if(state.lives < CONFIG.maxLives){ state.lives++; } }
+      return !hit;
+    });
+    // collisions: bugs
+    for(let i = state.bugs.length - 1; i >= 0; i--){
+      const b = state.bugs[i];
+      if(Math.hypot(state.player.x - b.x, state.player.y - b.y) < (state.player.r + b.s * 0.5)){
+        state.bugs.splice(i,1);
+        state.lives--;
+        if(state.lives <= 0){ endGame(); break; }
+      }
+    }
+    // draw
+    g.clearRect(0,0,canvas.width,canvas.height);
+    // subtle grid background
+    g.globalAlpha = 0.06; g.strokeStyle = '#7cf1c833'; g.lineWidth = 1 * dpr;
+    const step = 48 * dpr;
+    for(let x = step; x < canvas.width; x += step){ g.beginPath(); g.moveTo(x,0); g.lineTo(x,canvas.height); g.stroke(); }
+    for(let y = step; y < canvas.height; y += step){ g.beginPath(); g.moveTo(0,y); g.lineTo(canvas.width,y); g.stroke(); }
+    g.globalAlpha = 1;
+    // draw files
+    state.filesArr.forEach(f => square(f.x, f.y, f.s, '#9bb4ff'));
+    // draw powers
+    state.powers.forEach(p => {
+      if(p.kind === 'slow'){ circle(p.x, p.y, 10 * dpr, '#7cf1c8'); label('★', p.x, p.y + 4 * dpr, 14); }
+      else { circle(p.x, p.y, 10 * dpr, '#79f28c'); label('❤', p.x, p.y + 5 * dpr, 14); }
+    });
+    // bugs
+    state.bugs.forEach(b => tri(b.x, b.y, b.s, '#ff7b9c'));
+    // player
+    circle(state.player.x, state.player.y, state.player.r, '#e8f0ff');
+    label('You', state.player.x, state.player.y - (state.player.r + 8 * dpr), 12);
+
+    // HUD updates
+    qs('#scoreChip').textContent = 'Score: ' + state.score;
+    qs('#levelChip').textContent = 'Level: ' + state.level;
+    qs('#filesChip').textContent = 'Files: ' + state.files;
+    qs('#bestChip').textContent = 'Best: ' + state.best;
+  }
+
+  qs('#startBtn').addEventListener('click', startGame);
+  qs('#pauseBtn').addEventListener('click', togglePause);
+  qs('#resetBtn').addEventListener('click', ()=>{
+    localStorage.removeItem('bb_best');
+    state.best = 0; qs('#bestChip').textContent = 'Best: 0'; updateSide();
+  });
+
+  // expose best score initialization
+  qs('#bestChip').textContent = 'Best: ' + state.best;
+})();
+
+/* ------------------------------
+  Clear all storage
+  ------------------------------ */
+qs('#clearAll').addEventListener('click', ()=>{
+  if(confirm('Clear all saved scores and balances? This will remove local saved data.')){
+    localStorage.removeItem('slots_bal'); localStorage.removeItem('slots_best'); localStorage.removeItem('slots_bet');
+    localStorage.removeItem('bj_bank'); localStorage.removeItem('bj_best'); localStorage.removeItem('bj_bet');
+    localStorage.removeItem('math_best'); localStorage.removeItem('type_best'); localStorage.removeItem('bb_best');
+    updateSide();
+    location.reload();
+  }
+});
+
+/* ------------------------------
+  Polite mobile tweaks
+  ------------------------------ */
+(function mobileFocus(){
+  // On iOS Safari, focusing inputs can zoom the page. Keep fonts large enough to reduce zoom.
+  // No-op placeholder to show we've considered mobile UX.
+})();
+</script>
 </body>
 </html>
