@@ -476,7 +476,7 @@ qsa('.tab').forEach(btn=>{
       elMsg.textContent = 'No match';
     }
 
-    state.bal = clamp(state.bal + award, 0, 999999);
+    state.bal = clamp(state.bal + award, 0, 9999999);
     state.best = Math.max(state.best, state.bal);
     save();
     spinning = false;
@@ -488,7 +488,7 @@ qsa('.tab').forEach(btn=>{
   function holdAdjust(btn, dir, targetKey='cg_slots_bet'){
     let iv = null, step = 1, accel = 0;
     const change = ()=>{
-      state.bet = clamp(state.bet + dir*step, 1, 9999);
+      state.bet = clamp(state.bet + dir*step, 1, 99999);
       localStorage.setItem(targetKey, state.bet);
       render();
       accel++;
