@@ -1,78 +1,229 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Devin's Games</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Devin's Games — Game Hub</title>
+  <meta name="description" content="Devin's Games — Slots, Blackjack, Math Sprint, Typing. Responsive, polished, single-page app with customization." />
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header>
-    <h1>Devin's Games</h1>
-    <div id="hud">
-      Money: <span id="money"></span> | Bet: <span id="bet"></span>
-      <button id="increaseBet">Hold to Increase Bet</button>
-    </div>
-    <nav>
-      <button class="tab" data-tab="blackjack" aria-current="page">Blackjack</button>
-      <button class="tab" data-tab="slots">Slots</button>
-      <button class="tab" data-tab="math">Math</button>
-      <button class="tab" data-tab="typing">Typing</button>
-      <button class="tab" data-tab="about">About</button>
-    </nav>
-  </header>
-
-  <main>
-    <!-- BLACKJACK -->
-    <section id="blackjack" class="section active">
-      <h2>Blackjack</h2>
-      <p id="blackjackCards"></p>
-      <p id="blackjackTotal"></p>
-      <button onclick="blackjackHit()">Hit</button>
-      <button onclick="blackjackStand()">Stand</button>
-      <button onclick="blackjackStart()">Restart Hand</button>
-    </section>
-
-    <!-- SLOTS -->
-    <section id="slots" class="section">
-      <h2>Slots</h2>
-      <div class="slots-board">
-        <span class="reel">🍒</span>
-        <span class="reel">🍋</span>
-        <span class="reel">🍊</span>
+  <div id="app" class="app">
+    <header class="top">
+      <div class="brand">
+        <div class="logo">DG</div>
+        <div>
+          <h1>Devin’s Games</h1>
+          <p class="tag">Fun practice games — made by Devin Slifer</p>
+        </div>
       </div>
-      <button onclick="spinSlots()">Spin</button>
-      <p>Thank You James For The Triple 🍋</p>
-    </section>
 
-    <!-- MATH -->
-    <section id="math" class="section">
-      <h2>Math Challenge</h2>
-      <p id="mathQuestion"></p>
-      <input type="number" id="mathInput" placeholder="Answer">
-      <button onclick="checkMath()">Submit</button>
-    </section>
+      <nav class="tabs" role="tablist">
+        <button class="tab" data-tab="slots" aria-current="page">🎰 Slots</button>
+        <button class="tab" data-tab="blackjack">🂡 Blackjack</button>
+        <button class="tab" data-tab="math">➗ Math Sprint</button>
+        <button class="tab" data-tab="typing">⌨️ Typing</button>
+        <button class="tab" data-tab="custom">⚙️ Customize</button>
+      </nav>
+    </header>
 
-    <!-- TYPING -->
-    <section id="typing" class="section">
-      <h2>Typing Challenge</h2>
-      <p id="typingText"></p>
-      <input type="text" id="typingInput" placeholder="Type here">
-    </section>
+    <main class="main">
+      <!-- SLOTS -->
+      <section id="sec-slots" class="panel active" role="tabpanel">
+        <h2>Lucky Slots</h2>
+        <p class="slots-note">Thank You James For The Triple 🍋</p>
+        <div class="hud">
+          <div class="pill">Balance: <strong id="slotsBal">100</strong></div>
+          <div class="pill">Bet: <strong id="slotsBet">5</strong></div>
+          <div class="pill">Best: <strong id="slotsBest">0</strong></div>
+        </div>
 
-    <!-- ABOUT -->
-    <section id="about" class="section">
-      <h2>About Devin's Games</h2>
-      <p>Created by: <strong>Devin Slifer</strong></p>
-      <p>School: Jefferson County North High School USD #339</p>
-      <p>Teacher: Mrs. Cindy Johnson</p>
-      <p>Check out my shop for AirPods, AirPods Max, Apple Pencils, and cologne: 
-        <a href="https://cuesshop.myshopify.com" target="_blank">Cue's Shop</a>
-      </p>
-      <p>Have fun playing the games and earning virtual money!</p>
-    </section>
-  </main>
+        <div class="layout two-col">
+          <div>
+            <div class="reels">
+              <div class="reel" id="reel1">🍒</div>
+              <div class="reel" id="reel2">🍋</div>
+              <div class="reel" id="reel3">⭐</div>
+            </div>
 
-  <script src="script.js"></script>
+            <div class="controls">
+              <button class="btn primary" id="spinBtn">Spin</button>
+              <div class="bet-controls">
+                <button class="btn" id="betDown" data-dir="-">−</button>
+                <div class="bet-display" id="betDisplay">5</div>
+                <button class="btn" id="betUp" data-dir="+">+</button>
+              </div>
+              <button class="btn ghost" id="resetSlots">Reset</button>
+            </div>
+
+            <div id="slotsMsg" class="message muted">Ready to play.</div>
+          </div>
+
+          <aside>
+            <div class="card small">
+              <h3>Payouts</h3>
+              <ul>
+                <li>3× ⭐ = 20× bet</li>
+                <li>3× 🍒 = 12× bet</li>
+                <li>3× 🍋 = 8× bet</li>
+                <li>Any 2 matching = 3× bet</li>
+              </ul>
+              <p class="muted">No cash limits — bets and balances can grow large. Values stored locally in your browser.</p>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- BLACKJACK -->
+      <section id="sec-blackjack" class="panel" role="tabpanel" aria-hidden="true">
+        <h2>Blackjack</h2>
+        <div class="hud">
+          <div class="pill">Bank: <strong id="bjBank">100</strong></div>
+          <div class="pill">Bet: <strong id="bjBet">10</strong></div>
+          <div class="pill">Best: <strong id="bjBest">0</strong></div>
+        </div>
+
+        <div class="layout two-col">
+          <div>
+            <h4>Dealer (<span id="dVal">?</span>)</h4>
+            <div class="cards" id="dealer"></div>
+
+            <h4>You (<span id="pVal">0</span>)</h4>
+            <div class="cards" id="player"></div>
+
+            <div class="controls">
+              <button class="btn primary" id="bjDeal">Deal</button>
+              <button class="btn" id="bjHit" disabled>Hit</button>
+              <button class="btn" id="bjStand" disabled>Stand</button>
+
+              <div class="bet-controls small">
+                <button class="btn ghost" id="bjBetDown" data-dir="-">−</button>
+                <div class="bet-display" id="bjBetDisplay">10</div>
+                <button class="btn ghost" id="bjBetUp" data-dir="+">+</button>
+              </div>
+              <button class="btn ghost" id="bjReset">Reset Bank</button>
+            </div>
+
+            <div id="bjMsg" class="message muted">Good luck!</div>
+          </div>
+
+          <aside>
+            <div class="card small">
+              <h3>Rules</h3>
+              <ul>
+                <li>Ace is 1 or 11.</li>
+                <li>Dealer hits to 16 and stands on 17+</li>
+                <li>Blackjack pays 3:2 on an initial winning hand.</li>
+              </ul>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- MATH -->
+      <section id="sec-math" class="panel" role="tabpanel" aria-hidden="true">
+        <h2>Math Sprint</h2>
+        <div class="hud">
+          <div class="pill">Score: <strong id="mathScore">0</strong></div>
+          <div class="pill">Streak: <strong id="mathStreak">0</strong></div>
+          <div class="pill">Time: <strong id="mathTime">60</strong>s</div>
+          <div class="pill">Best: <strong id="mathBest">0</strong></div>
+        </div>
+
+        <div class="layout two-col">
+          <div>
+            <div class="problem" id="mathQ">Loading...</div>
+            <div class="controls">
+              <input id="mathA" type="number" placeholder="Answer" />
+              <button class="btn primary" id="mathSubmit">Submit</button>
+              <button class="btn" id="mathStart">Start</button>
+              <button class="btn ghost" id="mathReset">Reset Best</button>
+            </div>
+            <div id="mathMsg" class="message muted"></div>
+          </div>
+
+          <aside>
+            <div class="card small">
+              <h3>Math Settings</h3>
+              <label><input type="checkbox" id="mAdd" checked> Add</label><br/>
+              <label><input type="checkbox" id="mSub" checked> Subtract</label><br/>
+              <label><input type="checkbox" id="mMul" checked> Multiply</label><br/>
+              <label><input type="checkbox" id="mDiv"> Divide</label><br/>
+              <label>Difficulty:
+                <select id="mDiff">
+                  <option value="easy">Easy</option>
+                  <option value="medium" selected>Medium</option>
+                  <option value="hard">Hard</option>
+                </select>
+              </label>
+              <p class="muted">Hard mode includes multi-step/chained problems and larger numbers.</p>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- TYPING -->
+      <section id="sec-typing" class="panel" role="tabpanel" aria-hidden="true">
+        <h2>Typing Test</h2>
+        <div class="hud">
+          <div class="pill">WPM: <strong id="typeWpm">0</strong></div>
+          <div class="pill">Accuracy: <strong id="typeAcc">100%</strong></div>
+          <div class="pill">Time: <strong id="typeTime">30</strong>s</div>
+          <div class="pill">Best: <strong id="typeBest">0</strong></div>
+        </div>
+
+        <div class="typing-area">
+          <div id="typingText" class="typingText" aria-live="polite"></div>
+          <div class="controls">
+            <input id="typeInput" type="text" placeholder="Tap Start then type here" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+            <button class="btn primary" id="typeStart">Start</button>
+            <button class="btn ghost" id="typeReset">Reset Best</button>
+          </div>
+          <div id="typeMsg" class="message muted"></div>
+        </div>
+      </section>
+
+      <!-- CUSTOMIZATION -->
+      <section id="sec-custom" class="panel" role="tabpanel" aria-hidden="true">
+        <h2>Customization</h2>
+
+        <div class="card">
+          <label>Theme:
+            <select id="themeSelect">
+              <option value="dark" selected>Dark</option>
+              <option value="light">Light</option>
+            </select>
+          </label>
+
+          <label>Accent:
+            <input type="color" id="accentPicker" value="#7cf1c8" />
+          </label>
+
+          <label>Font size:
+            <input id="fontSize" type="range" min="13" max="20" value="16">
+          </label>
+
+          <label>Typing time:
+            <select id="typingDur">
+              <option value="15">15s</option>
+              <option value="30" selected>30s</option>
+              <option value="60">60s</option>
+            </select>
+          </label>
+
+          <div style="margin-top:.75rem">
+            <button class="btn" id="resetCustom">Reset to defaults</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div>Created by Devin Slifer</div>
+      <div class="muted small">For Computer Apps — have fun & good luck!</div>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
 </body>
 </html>
