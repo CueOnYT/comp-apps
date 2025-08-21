@@ -1,229 +1,153 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Devin's Games — Game Hub</title>
-  <meta name="description" content="Devin's Games — Slots, Blackjack, Math Sprint, Typing. Responsive, polished, single-page app with customization." />
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="app" class="app">
-    <header class="top">
-      <div class="brand">
+  <div class="wrap">
+    <header class="card">
+      <div class="title">
         <div class="logo">DG</div>
         <div>
-          <h1>Devin’s Games</h1>
-          <p class="tag">Fun practice games — made by Devin Slifer</p>
+          <h1>Devin's Games — <span class="muted">Game Hub</span></h1>
+          <div class="sub">Fun Games Hub for Students & Friends</div>
         </div>
       </div>
-
-      <nav class="tabs" role="tablist">
+      <nav class="nav" aria-label="Games Navigation">
         <button class="tab" data-tab="slots" aria-current="page">🎰 Slots</button>
         <button class="tab" data-tab="blackjack">🂡 Blackjack</button>
         <button class="tab" data-tab="math">➗ Math Sprint</button>
-        <button class="tab" data-tab="typing">⌨️ Typing</button>
-        <button class="tab" data-tab="custom">⚙️ Customize</button>
+        <button class="tab" data-tab="typing">⌨️ Typing Test</button>
+        <button class="tab" data-tab="about">ℹ️ About</button>
       </nav>
     </header>
 
-    <main class="main">
-      <!-- SLOTS -->
-      <section id="sec-slots" class="panel active" role="tabpanel">
-        <h2>Lucky Slots</h2>
-        <p class="slots-note">Thank You James For The Triple 🍋</p>
-        <div class="hud">
-          <div class="pill">Balance: <strong id="slotsBal">100</strong></div>
-          <div class="pill">Bet: <strong id="slotsBet">5</strong></div>
-          <div class="pill">Best: <strong id="slotsBest">0</strong></div>
-        </div>
-
-        <div class="layout two-col">
-          <div>
-            <div class="reels">
-              <div class="reel" id="reel1">🍒</div>
-              <div class="reel" id="reel2">🍋</div>
-              <div class="reel" id="reel3">⭐</div>
-            </div>
-
-            <div class="controls">
-              <button class="btn primary" id="spinBtn">Spin</button>
-              <div class="bet-controls">
-                <button class="btn" id="betDown" data-dir="-">−</button>
-                <div class="bet-display" id="betDisplay">5</div>
-                <button class="btn" id="betUp" data-dir="+">+</button>
+    <div class="grid">
+      <main class="card stage">
+        <!-- Slots -->
+        <section id="sec-slots" class="section active">
+          <h2>🎰 Lucky Slots</h2>
+          <p class="muted">Spin the reels, win points, and have fun! Thank You James For The Triple 🍋</p>
+          <div class="hud">
+            <div class="chip">Balance: <strong id="slotsBal">100</strong></div>
+            <div class="chip">Bet: <strong id="slotsBet">5</strong></div>
+            <div class="chip payout" id="slotsMsg"> </div>
+          </div>
+          <div class="row">
+            <div>
+              <div class="reels">
+                <div class="reel" id="reel1">🍒</div>
+                <div class="reel" id="reel2">🍋</div>
+                <div class="reel" id="reel3">⭐</div>
               </div>
-              <button class="btn ghost" id="resetSlots">Reset</button>
-            </div>
-
-            <div id="slotsMsg" class="message muted">Ready to play.</div>
-          </div>
-
-          <aside>
-            <div class="card small">
-              <h3>Payouts</h3>
-              <ul>
-                <li>3× ⭐ = 20× bet</li>
-                <li>3× 🍒 = 12× bet</li>
-                <li>3× 🍋 = 8× bet</li>
-                <li>Any 2 matching = 3× bet</li>
-              </ul>
-              <p class="muted">No cash limits — bets and balances can grow large. Values stored locally in your browser.</p>
-            </div>
-          </aside>
-        </div>
-      </section>
-
-      <!-- BLACKJACK -->
-      <section id="sec-blackjack" class="panel" role="tabpanel" aria-hidden="true">
-        <h2>Blackjack</h2>
-        <div class="hud">
-          <div class="pill">Bank: <strong id="bjBank">100</strong></div>
-          <div class="pill">Bet: <strong id="bjBet">10</strong></div>
-          <div class="pill">Best: <strong id="bjBest">0</strong></div>
-        </div>
-
-        <div class="layout two-col">
-          <div>
-            <h4>Dealer (<span id="dVal">?</span>)</h4>
-            <div class="cards" id="dealer"></div>
-
-            <h4>You (<span id="pVal">0</span>)</h4>
-            <div class="cards" id="player"></div>
-
-            <div class="controls">
-              <button class="btn primary" id="bjDeal">Deal</button>
-              <button class="btn" id="bjHit" disabled>Hit</button>
-              <button class="btn" id="bjStand" disabled>Stand</button>
-
-              <div class="bet-controls small">
-                <button class="btn ghost" id="bjBetDown" data-dir="-">−</button>
-                <div class="bet-display" id="bjBetDisplay">10</div>
-                <button class="btn ghost" id="bjBetUp" data-dir="+">+</button>
+              <div class="btn-group">
+                <button class="btn" id="spinBtn">Spin</button>
+                <button class="btn" id="betDown">Bet -</button>
+                <button class="btn" id="betUp">Bet +</button>
+                <button class="btn ghost" id="resetSlots">Reset</button>
               </div>
-              <button class="btn ghost" id="bjReset">Reset Bank</button>
             </div>
-
-            <div id="bjMsg" class="message muted">Good luck!</div>
           </div>
+        </section>
 
-          <aside>
-            <div class="card small">
-              <h3>Rules</h3>
-              <ul>
-                <li>Ace is 1 or 11.</li>
-                <li>Dealer hits to 16 and stands on 17+</li>
-                <li>Blackjack pays 3:2 on an initial winning hand.</li>
-              </ul>
-            </div>
-          </aside>
-        </div>
-      </section>
-
-      <!-- MATH -->
-      <section id="sec-math" class="panel" role="tabpanel" aria-hidden="true">
-        <h2>Math Sprint</h2>
-        <div class="hud">
-          <div class="pill">Score: <strong id="mathScore">0</strong></div>
-          <div class="pill">Streak: <strong id="mathStreak">0</strong></div>
-          <div class="pill">Time: <strong id="mathTime">60</strong>s</div>
-          <div class="pill">Best: <strong id="mathBest">0</strong></div>
-        </div>
-
-        <div class="layout two-col">
-          <div>
-            <div class="problem" id="mathQ">Loading...</div>
-            <div class="controls">
-              <input id="mathA" type="number" placeholder="Answer" />
-              <button class="btn primary" id="mathSubmit">Submit</button>
-              <button class="btn" id="mathStart">Start</button>
-              <button class="btn ghost" id="mathReset">Reset Best</button>
-            </div>
-            <div id="mathMsg" class="message muted"></div>
+        <!-- Blackjack -->
+        <section id="sec-blackjack" class="section">
+          <h2>🂡 Blackjack</h2>
+          <p class="muted">Get closer to 21 than the dealer without going over.</p>
+          <div class="hud">
+            <div class="chip">Bank: <strong id="bjBank">100</strong></div>
+            <div class="chip">Bet: <strong id="bjBet">10</strong></div>
+            <div class="chip" id="bjMsg"></div>
           </div>
-
-          <aside>
-            <div class="card small">
-              <h3>Math Settings</h3>
-              <label><input type="checkbox" id="mAdd" checked> Add</label><br/>
-              <label><input type="checkbox" id="mSub" checked> Subtract</label><br/>
-              <label><input type="checkbox" id="mMul" checked> Multiply</label><br/>
-              <label><input type="checkbox" id="mDiv"> Divide</label><br/>
-              <label>Difficulty:
-                <select id="mDiff">
-                  <option value="easy">Easy</option>
-                  <option value="medium" selected>Medium</option>
-                  <option value="hard">Hard</option>
-                </select>
-              </label>
-              <p class="muted">Hard mode includes multi-step/chained problems and larger numbers.</p>
+          <div class="row">
+            <div>
+              <h3>Dealer (<span id="dVal">0</span>)</h3>
+              <div class="cards" id="dealer"></div>
+              <h3>You (<span id="pVal">0</span>)</h3>
+              <div class="cards" id="player"></div>
+              <div class="btn-group">
+                <button class="btn" id="bjDeal">Deal</button>
+                <button class="btn" id="bjHit" disabled>Hit</button>
+                <button class="btn" id="bjStand" disabled>Stand</button>
+                <button class="btn ghost" id="bjBetDown">Bet -</button>
+                <button class="btn ghost" id="bjBetUp">Bet +</button>
+                <button class="btn ghost" id="bjReset">Reset Bank</button>
+              </div>
             </div>
-          </aside>
-        </div>
-      </section>
+          </div>
+        </section>
 
-      <!-- TYPING -->
-      <section id="sec-typing" class="panel" role="tabpanel" aria-hidden="true">
-        <h2>Typing Test</h2>
-        <div class="hud">
-          <div class="pill">WPM: <strong id="typeWpm">0</strong></div>
-          <div class="pill">Accuracy: <strong id="typeAcc">100%</strong></div>
-          <div class="pill">Time: <strong id="typeTime">30</strong>s</div>
-          <div class="pill">Best: <strong id="typeBest">0</strong></div>
-        </div>
+        <!-- Math Sprint -->
+        <section id="sec-math" class="section">
+          <h2>➗ Math Sprint</h2>
+          <p class="muted">Answer as many problems as you can in 60 seconds. Challenge yourself!</p>
+          <div class="hud">
+            <div class="chip">Score: <strong id="mathScore">0</strong></div>
+            <div class="chip warn">Time: <strong id="mathTime">60</strong>s</div>
+            <div class="chip">Best: <strong id="mathBest">0</strong></div>
+          </div>
+          <div class="row">
+            <div>
+              <div class="problem" id="mathQ">3 + 4 = ?</div>
+              <div class="btn-group">
+                <input type="number" id="mathA" placeholder="Your answer" />
+                <button class="btn" id="mathSubmit">Submit</button>
+                <button class="btn" id="mathStart">Start</button>
+                <button class="btn ghost" id="mathReset">Reset Best</button>
+              </div>
+              <p class="muted" id="mathMsg"></p>
+            </div>
+          </div>
+        </section>
 
-        <div class="typing-area">
-          <div id="typingText" class="typingText" aria-live="polite"></div>
-          <div class="controls">
-            <input id="typeInput" type="text" placeholder="Tap Start then type here" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
-            <button class="btn primary" id="typeStart">Start</button>
+        <!-- Typing Test -->
+        <section id="sec-typing" class="section">
+          <h2>⌨️ Typing Test</h2>
+          <p class="muted">Type accurately for 30 seconds. Your WPM and accuracy are tracked.</p>
+          <div class="hud">
+            <div class="chip">WPM: <strong id="typeWpm">0</strong></div>
+            <div class="chip">Accuracy: <strong id="typeAcc">100%</strong></div>
+            <div class="chip warn">Time: <strong id="typeTime">30</strong>s</div>
+            <div class="chip">Best WPM: <strong id="typeBest">0</strong></div>
+          </div>
+          <div class="typingText" id="typingText"></div>
+          <div class="btn-group">
+            <input type="text" id="typeInput" placeholder="Start typing here" />
+            <button class="btn" id="typeStart">Start</button>
             <button class="btn ghost" id="typeReset">Reset Best</button>
           </div>
-          <div id="typeMsg" class="message muted"></div>
+          <p class="muted" id="typeMsg"></p>
+        </section>
+
+        <!-- About Section -->
+        <section id="sec-about" class="section">
+          <h2>ℹ️ About Devin's Games</h2>
+          <p>Welcome to Devin's Games! This hub was made for fun and learning, perfect for students at Jefferson County North High School USD #339.</p>
+          <p>A special shoutout to <strong>Mrs. Johnson</strong> for supporting our projects and learning!</p>
+          <p>Check out Devin’s Shop for tech and accessories: <a href="https://cuesshop.myshopify.com" target="_blank">cuesshop.myshopify.com</a></p>
+          <p>Credits: Devin Slifer</p>
+        </section>
+      </main>
+
+      <aside class="card">
+        <h3>Player Stats</h3>
+        <div class="stats">
+          <div class="stat"><span>Slots Balance</span><strong id="sideSlotsBal">0</strong></div>
+          <div class="stat"><span>Blackjack Bank</span><strong id="sideBjBank">0</strong></div>
+          <div class="stat"><span>Math Best</span><strong id="sideMathBest">0</strong></div>
+          <div class="stat"><span>Typing Best WPM</span><strong id="sideTypeBest">0</strong></div>
         </div>
-      </section>
+        <h3 style="margin-top:12px">Notes</h3>
+        <p class="muted">All games are for fun — no real money. Scores save in your browser.</p>
+      </aside>
+    </div>
 
-      <!-- CUSTOMIZATION -->
-      <section id="sec-custom" class="panel" role="tabpanel" aria-hidden="true">
-        <h2>Customization</h2>
-
-        <div class="card">
-          <label>Theme:
-            <select id="themeSelect">
-              <option value="dark" selected>Dark</option>
-              <option value="light">Light</option>
-            </select>
-          </label>
-
-          <label>Accent:
-            <input type="color" id="accentPicker" value="#7cf1c8" />
-          </label>
-
-          <label>Font size:
-            <input id="fontSize" type="range" min="13" max="20" value="16">
-          </label>
-
-          <label>Typing time:
-            <select id="typingDur">
-              <option value="15">15s</option>
-              <option value="30" selected>30s</option>
-              <option value="60">60s</option>
-            </select>
-          </label>
-
-          <div style="margin-top:.75rem">
-            <button class="btn" id="resetCustom">Reset to defaults</button>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <footer class="footer">
-      <div>Created by Devin Slifer</div>
-      <div class="muted small">For Computer Apps — have fun & good luck!</div>
-    </footer>
+    <footer class="muted">Devin's Games — Vanilla HTML/CSS/JS — Made by Devin Slifer</footer>
   </div>
 
-  <script src="app.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
