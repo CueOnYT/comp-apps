@@ -1,5 +1,6 @@
-// app.js — logic for Devin's Games
-// Features: Slots (hold-to-increase w/ acceleration), Blackjack (improved), Math (harder), Typing (stable), customization
+// app.js — logic for Devin's Games (complete, ready-to-run)
+// All features run locally (no external configuration required).
+// Includes: login (local), leaderboards (localStorage), customization, improved games, no negative balances.
 
 /* small helpers */
 const $ = sel => document.querySelector(sel);
@@ -18,26 +19,43 @@ const S = {
   del(k){ localStorage.removeItem('dg_'+k); }
 };
 
-/* apply saved customization */
-function applyCustom() {
-  const theme = S.get('theme','dark');
-  const accent = S.get('accent','#7cf1c8');
-  const font = S.get('fontsize',16);
-
-  document.documentElement.style.setProperty('--accent', accent);
-  document.documentElement.style.setProperty('--accent-2', shadeColor(accent, 30));
-  document.documentElement.style.fontSize = font + 'px';
-
-  if(theme === 'light') {
-    document.documentElement.style.setProperty('--bg','#f3f6fb');
-    document.documentElement.style.setProperty('--ink','#071026');
-    document.documentElement.style.setProperty('--muted','#4a596e');
+/* -------------------------
+   AUTH (local simple sign-in)
+   ------------------------- */
+function currentUser(){ return S.get('user', {name: null}); }
+function updateUserUI(){
+  const u = currentUser();
+  if(u && u.name){
+    $('#currentUser').textContent = `Signed in: ${u.name}`;
+    $('#signInBtn').textContent = 'Sign out';
   } else {
-    document.documentElement.style.setProperty('--bg','#071026');
-    document.documentElement.style.setProperty('--ink','#e8f0ff');
-    document.documentElement.style.setProperty('--muted','#9fb0d6');
+    $('#currentUser').textContent = 'Not signed in';
+    $('#signInBtn').textContent = 'Sign in';
   }
 }
+$('#signInBtn').addEventListener('click', ()=>{
+  const u = currentUser();
+  if(u && u.name){
+    if(confirm('Sign out?')) { S.del('user'); updateUserUI(); }
+  } else {
+    $('#signinModal').setAttribute('aria-hidden','false');
+    $('#signinName').value = '';
+    $('#signinName').focus();
+  }
+});
+$('#cancelSignin').addEventListener('click', ()=>{ $('#signinModal').setAttribute('aria-hidden','true'); });
+$('#doSignin').addEventListener('click', ()=>{
+  const name = $('#signinName').value.trim();
+  if(!name){ alert('Enter a display name'); $('#signinName').focus(); return; }
+  S.set('user', {name: name});
+  $('#signinModal').setAttribute('aria-hidden','true');
+  updateUserUI();
+});
+updateUserUI();
+
+/* =========================
+   CUSTOMIZATION
+   ========================= */
 function shadeColor(hex, percent) {
   hex = hex.replace('#','');
   const num = parseInt(hex,16);
@@ -48,17 +66,58 @@ function shadeColor(hex, percent) {
   return '#'+( (1<<24) + (r<<16) + (g<<8) + b ).toString(16).slice(1);
 }
 
+function applyCustom() {
+  const theme = S.get('theme','dark');
+  const accent = S.get('accent','#7cf1c8');
+  const font = S.get('fontsize',16);
+  const fontFamily = S.get('fontfamily', "Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial");
+  const bgPattern = S.get('bgpattern','radial');
+  const disableAnim = S.get('disableAnim', false);
+
+  document.documentElement.style.setProperty('--accent', accent);
+  document.documentElement.style.setProperty('--accent-2', shadeColor(accent, 30));
+  document.documentElement.style.fontSize = font + 'px';
+  document.documentElement.style.fontFamily = fontFamily;
+
+  if(theme === 'light') {
+    document.documentElement.style.setProperty('--bg','#f3f6fb');
+    document.documentElement.style.setProperty('--ink','#071026');
+    document.documentElement.style.setProperty('--muted','#4a596e');
+  } else {
+    document.documentElement.style.setProperty('--bg','#071026');
+    document.documentElement.style.setProperty('--ink','#e8f0ff');
+    document.documentElement.style.setProperty('--muted','#9fb0d6');
+  }
+
+  // background patterns
+  document.body.classList.remove('bg-stripes','bg-flat');
+  if(bgPattern === 'stripes') document.body.classList.add('bg-stripes');
+  if(bgPattern === 'flat') document.body.classList.add('bg-flat');
+
+  if(disableAnim) document.documentElement.classList.add('no-anim'); else document.documentElement.classList.remove('no-anim');
+}
+
 /* initialize customization UI */
 (function setupCustomization() {
   const themeSel = $('#themeSelect');
   const accentPicker = $('#accentPicker');
   const fontSize = $('#fontSize');
   const typingDur = $('#typingDur');
+  const preset = $('#presetSelect');
+  const fontFamily = $('#fontFamily');
+  const bgPattern = $('#bgPattern');
+  const enableSound = $('#enableSound');
+  const disableAnim = $('#disableAnim');
 
   themeSel.value = S.get('theme','dark');
   accentPicker.value = S.get('accent','#7cf1c8');
   fontSize.value = S.get('fontsize',16);
   typingDur.value = S.get('typingDur',30);
+  preset.value = S.get('preset','default');
+  fontFamily.value = S.get('fontfamily', "Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial");
+  bgPattern.value = S.get('bgpattern','radial');
+  enableSound.checked = S.get('enableSound', true);
+  disableAnim.checked = S.get('disableAnim', false);
 
   applyCustom();
 
@@ -66,10 +125,24 @@ function shadeColor(hex, percent) {
   accentPicker.addEventListener('input', e => { S.set('accent', e.target.value); applyCustom(); });
   fontSize.addEventListener('input', e => { S.set('fontsize', Number(e.target.value)); applyCustom(); });
   typingDur.addEventListener('change', e => { S.set('typingDur', Number(e.target.value)); });
+  preset.addEventListener('change', e=>{
+    const v = e.target.value;
+    S.set('preset', v);
+    if(v === 'ocean'){ S.set('accent','#7cf1c8'); S.set('bgpattern','radial'); }
+    else if(v === 'sunset'){ S.set('accent','#ffa87d'); S.set('bgpattern','stripes'); }
+    else { S.set('accent','#7cf1c8'); S.set('bgpattern','radial'); }
+    applyCustom();
+    $('#accentPicker').value = S.get('accent');
+    $('#bgPattern').value = S.get('bgpattern');
+  });
+  fontFamily.addEventListener('change', e => { S.set('fontfamily', e.target.value); applyCustom(); });
+  bgPattern.addEventListener('change', e => { S.set('bgpattern', e.target.value); applyCustom(); });
+  enableSound.addEventListener('change', e => { S.set('enableSound', e.target.checked); });
+  disableAnim.addEventListener('change', e => { S.set('disableAnim', e.target.checked); applyCustom(); });
 
   $('#resetCustom').addEventListener('click', ()=>{
     if(confirm('Reset customization to defaults?')){
-      ['theme','accent','fontsize','typingDur'].forEach(k => S.del(k));
+      ['theme','accent','fontsize','typingDur','preset','fontfamily','bgpattern','enableSound','disableAnim'].forEach(k => S.del(k));
       location.reload();
     }
   });
@@ -116,9 +189,17 @@ $$('.tab').forEach(btn=>{
 
   async function spin(){
     if(state.spinning) return;
+    if(Number(state.bet) > Number(state.bal)){
+      msgEl.textContent = 'Bet exceeds balance — reduce bet.';
+      return;
+    }
+    if(state.bal <= 0){
+      msgEl.textContent = 'Insufficient balance.';
+      return;
+    }
     state.spinning = true;
     msgEl.textContent = 'Spinning...';
-    // remove hard limit — allow big numbers
+    // subtract bet (won't go below 0 because bet <= bal)
     state.bal = Number(state.bal) - Number(state.bet);
     render();
 
@@ -128,7 +209,7 @@ $$('.tab').forEach(btn=>{
     // animate
     for(let i=0;i<3;i++){
       const el = reels[i];
-      el.classList.add('spin');
+      if(!S.get('disableAnim', false)) el.classList.add('spin');
       for(let f=0; f<9; f++){
         el.textContent = symbols[irnd(0,symbols.length-1)];
         await new Promise(r=>setTimeout(r, 40 + i*25));
@@ -153,18 +234,34 @@ $$('.tab').forEach(btn=>{
     state.bal = Number(state.bal) + Number(award);
     state.best = Math.max(state.best, state.bal);
     save();
+
+    // sound
+    if(S.get('enableSound', true)){
+      try{
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(500 + Math.min(2000, state.bet), ctx.currentTime);
+        const g = ctx.createGain();
+        g.gain.value = 0.02;
+        osc.connect(g); g.connect(ctx.destination);
+        osc.start(); osc.stop(ctx.currentTime + 0.05);
+      }catch(e){}
+    }
+
     state.spinning = false;
   }
 
   $('#spinBtn').addEventListener('click', spin);
 
-  // Hold-to-increase bet with acceleration.
+  // Hold-to-increase bet with acceleration, but clamp to balance
   function holdAdjust(btn, dir){
     let iv = null, step = 1, accel = 0;
     const change = ()=>{
-      // NO limit
       state.bet = Number(state.bet) + dir*step;
-      if(state.bet < 1) state.bet = 1; // minimum 1
+      if(state.bet < 1) state.bet = 1;
+      // clamp: bet must be at most balance (but minimum 1)
+      state.bet = Math.min(state.bet, Math.max(1, state.bal));
       S.set('slots_bet', state.bet);
       render();
       accel++;
@@ -255,7 +352,6 @@ $$('.tab').forEach(btn=>{
     pValEl.textContent = state.player.length ? handValue(state.player) : 0;
     if(revealDealer) dValEl.textContent = state.dealer.length ? handValue(state.dealer) : '?';
     else {
-      // show value of visible dealer cards (i.e., excluding first face-down)
       if(state.dealer.length >= 2){
         const visible = state.dealer.slice(1);
         let sum = 0, aces = 0;
@@ -303,7 +399,11 @@ $$('.tab').forEach(btn=>{
   function deal(){
     if(state.inRound) return;
     if(state.bet < 1){ msgEl.textContent = 'Set a bet first'; return; }
-    if(state.bet > Number.MAX_SAFE_INTEGER) { /* allow very large bets — user asked no limits */ }
+    // Prevent dealing if bet exceeds bank
+    if(Number(state.bet) > Number(state.bank)){
+      msgEl.textContent = 'Bet exceeds bank — reduce bet.';
+      return;
+    }
     newDeck();
     resetRound();
     state.bank = Number(state.bank) - Number(state.bet);
@@ -321,7 +421,6 @@ $$('.tab').forEach(btn=>{
 
   function dealerPlay(){
     renderHand(dealerEl, state.dealer, false); updateVals(true);
-    // Dealer hits until 17+, but use soft 17 rule: dealer stands on soft 17 as per description
     while(handValue(state.dealer) < 17){
       state.dealer.push(state.deck.pop());
       renderHand(dealerEl, state.dealer, false);
@@ -357,12 +456,14 @@ $$('.tab').forEach(btn=>{
   });
   $('#bjStand').addEventListener('click', ()=>{ if(!state.inRound) return; dealerPlay(); });
 
-  // hold-to-adjust for blackjack bet
+  // hold-to-adjust for blackjack bet (clamp to bank)
   function holdAdjust(btn, dir){
     let iv=null, step=1, accel=0;
     const change = ()=>{
       state.bet = Number(state.bet) + dir*step;
       if(state.bet < 1) state.bet = 1;
+      // clamp to bank so you can't bet more than you have
+      state.bet = Math.min(state.bet, Math.max(1, state.bank));
       S.set('bj_bet', state.bet);
       renderTop();
       accel++;
@@ -415,13 +516,11 @@ $$('.tab').forEach(btn=>{
 
     // choose whether to make a chained problem if hard
     if(diff === 'hard' && Math.random() < 0.45){
-      // chained two-operator expression: (a op b) op2 c
       const a = irnd(minN, maxN);
       const b = irnd(minN, Math.min(maxN, 20));
       const c = irnd(minN, Math.min(maxN, 20));
       const op1 = ops[irnd(0, ops.length-1)];
       const op2 = ops[irnd(0, ops.length-1)];
-      // if division, make it integer-friendly
       let expr = '';
       let ans = 0;
       if(op1 === '/'){
@@ -430,13 +529,11 @@ $$('.tab').forEach(btn=>{
         expr = `${ans1*bb} ÷ ${bb}`;
       } else expr = `${a} ${op1} ${b}`;
 
-      // second op
       if(op2 === '/'){
         const denom = irnd(1,12);
         expr = `(${expr}) ÷ ${denom}`;
       } else expr = `(${expr}) ${op2} ${c}`;
 
-      // Try to evaluate safely by replacing × and ÷
       const safeExpr = expr.replace(/×/g, '*').replace(/÷/g, '/');
       try { ans = Math.round(eval(safeExpr)); } catch(e){ ans = 0; }
       qEl.textContent = expr + ' = ?';
@@ -523,7 +620,8 @@ $$('.tab').forEach(btn=>{
     'Practice makes progress. Keep your fingers light and your focus steady.',
     'Clear instructions and clean code make everything easier to fix later.',
     'Small daily habits add up to big improvements over time.',
-    'Stay calm. Type steady. Let accuracy build your speed.'
+    'Stay calm. Type steady. Let accuracy build your speed.',
+    'Read the problem first, then write code with intent and tests.'
   ];
   const textWrap = $('#typingText'), input = $('#typeInput'), wpmEl = $('#typeWpm'), accEl = $('#typeAcc'), timeEl = $('#typeTime'), bestEl = $('#typeBest'), msg = $('#typeMsg');
 
@@ -617,12 +715,80 @@ $$('.tab').forEach(btn=>{
 })();
 
 /* =========================
+   Leaderboards (local-only)
+   ========================= */
+(function(){
+  // store structure: { slots: [{name, score, t}], blackjack: [...], math: [...], typing: [...] }
+  const LB_KEY = 'leaderboards_v1';
+  function readLB(){ return S.get('lb_data', { slots: [], blackjack: [], math: [], typing: [] }); }
+  function writeLB(obj){ S.set('lb_data', obj); }
+
+  function submitScore(game, name, score){
+    if(!name) return { ok:false, msg:'Sign in to submit' };
+    const data = readLB();
+    if(!data[game]) data[game] = [];
+    data[game].push({ name, score: Number(score), t: Date.now() });
+    // keep only top 100 entries to avoid unlimited growth
+    data[game].sort((a,b)=>b.score - a.score || a.t - b.t);
+    data[game] = data[game].slice(0,100);
+    writeLB(data);
+    return { ok:true };
+  }
+
+  function getTop(game, count=10){
+    const data = readLB();
+    return (data[game] || []).slice(0, count);
+  }
+
+  // UI
+  const lbList = $('#lbList'), lbGame = $('#lbGame'), refreshBtn = $('#refreshLb'), submitBtn = $('#submitLb');
+
+  function renderLB(){
+    const game = lbGame.value;
+    const top = getTop(game, 10);
+    lbList.innerHTML = '';
+    if(top.length === 0) {
+      lbList.innerHTML = '<li class="muted">No scores yet</li>';
+      return;
+    }
+    top.forEach((e, i)=>{
+      const li = document.createElement('li');
+      li.textContent = `${i+1}. ${e.name} — ${fmt(e.score)}`;
+      lbList.appendChild(li);
+    });
+  }
+
+  refreshBtn.addEventListener('click', renderLB);
+
+  submitBtn.addEventListener('click', ()=>{
+    const u = currentUser();
+    if(!u || !u.name){ if(confirm('You are not signed in. Sign in now?')) { $('#signinModal').setAttribute('aria-hidden','false'); } return; }
+    const name = u.name;
+    // pick game and corresponding score
+    const g = lbGame.value;
+    let score = 0;
+    if(g === 'slots') score = Number(S.get('slots_bal',100));
+    else if(g === 'blackjack') score = Number(S.get('bj_bank',100));
+    else if(g === 'math') score = Number(S.get('math_best',0));
+    else if(g === 'typing') score = Number(S.get('type_best',0));
+    const res = submitScore(g, name, score);
+    if(res.ok){ alert('Score submitted!'); renderLB(); } else alert(res.msg || 'Error');
+  });
+
+  // initial render
+  renderLB();
+
+  // switch game -> render
+  lbGame.addEventListener('change', renderLB);
+})();
+
+/* =========================
    init: set defaults on first load
    ========================= */
 (function initDefaults(){
   if(S.get('firstRun', true)){
     S.set('firstRun', false);
-    // defaults preserved elsewhere
+    // sensible defaults already set elsewhere
   }
   // populate UI elements that reflect stored values
   $('#slotsBal').textContent = fmt(Number(S.get('slots_bal',100)));
