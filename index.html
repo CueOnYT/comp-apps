@@ -5,9 +5,40 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Devin's Games — Game Hub</title>
   <meta name="description" content="Devin's Games — Slots, Blackjack, Math Sprint, Typing, 3D Retro Drift. Shared wallet, shop, customization." />
-  <link rel="stylesheet" href="styles.css">
-  <!-- Three.js (no build config required) -->
+  <!-- Three.js -->
   <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+
+  <style>
+    body { margin:0; font-family: sans-serif; background:#111; color:#eee; }
+    .app { display:flex; flex-direction:column; min-height:100vh; }
+    header { background:#222; padding:1rem; display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; }
+    .brand { display:flex; gap:1rem; align-items:center; }
+    .logo { background:#7cf1c8; color:#111; font-weight:bold; padding:.5rem; border-radius:50%; }
+    nav.tabs { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:1rem; }
+    nav.tabs .tab { background:#333; color:#eee; border:none; padding:.5rem 1rem; border-radius:.5rem; cursor:pointer; }
+    nav.tabs .tab[aria-current="page"] { background:#7cf1c8; color:#111; font-weight:bold; }
+    main { flex:1; padding:1rem; }
+    .panel { display:none; }
+    .panel.active { display:block; }
+    .hud { display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:1rem; }
+    .pill { background:#333; padding:.5rem 1rem; border-radius:2rem; }
+    .pill.small { font-size:.8rem; }
+    .layout.two-col { display:grid; grid-template-columns:1fr 200px; gap:1rem; }
+    .controls { margin-top:1rem; display:flex; gap:.5rem; flex-wrap:wrap; }
+    .btn { background:#333; border:none; color:#eee; padding:.5rem 1rem; border-radius:.5rem; cursor:pointer; }
+    .btn.primary { background:#7cf1c8; color:#111; font-weight:bold; }
+    .bet-controls { display:flex; gap:.5rem; align-items:center; }
+    .bet-display { min-width:2rem; text-align:center; }
+    .message { margin-top:.5rem; }
+    .cards { display:flex; gap:.5rem; margin-bottom:.5rem; }
+    .cards .cardEl { background:#fff; color:#000; padding:.5rem; border-radius:.25rem; }
+    .typing-area { margin-top:1rem; }
+    .typingText { background:#222; padding:1rem; border-radius:.5rem; margin-bottom:.5rem; min-height:3rem; }
+    .shop-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:1rem; }
+    .shop-item { background:#222; padding:1rem; border-radius:.5rem; text-align:center; }
+    footer { background:#222; padding:1rem; text-align:center; }
+    input, select { padding:.3rem; border-radius:.3rem; border:none; }
+  </style>
 </head>
 <body>
   <div id="app" class="app">
@@ -21,258 +52,164 @@
       </div>
 
       <nav class="tabs" role="tablist" aria-label="Game Tabs">
-        <button class="tab" data-tab="slots" aria-current="page" title="1">🎰 Slots</button>
-        <button class="tab" data-tab="blackjack" title="2">🂡 Blackjack</button>
-        <button class="tab" data-tab="math" title="3">➗ Math Sprint</button>
-        <button class="tab" data-tab="typing" title="4">⌨️ Typing</button>
-        <button class="tab" data-tab="game" title="5">🚗 Game</button>
-        <button class="tab" data-tab="shop" title="6">🛒 Shop</button>
-        <button class="tab" data-tab="custom" title="7">⚙️ Customize</button>
+        <button class="tab" data-tab="slots" aria-current="page">🎰 Slots</button>
+        <button class="tab" data-tab="blackjack">🂡 Blackjack</button>
+        <button class="tab" data-tab="math">➗ Math Sprint</button>
+        <button class="tab" data-tab="typing">⌨️ Typing</button>
+        <button class="tab" data-tab="shop">🛒 Shop</button>
+        <button class="tab" data-tab="custom">⚙️ Customize</button>
       </nav>
     </header>
 
     <main class="main">
       <!-- WALLET HUD -->
-      <section class="panel active" id="sec-home" role="region" aria-label="Wallet">
+      <section class="panel active" id="sec-slots">
         <div class="hud sticky">
           <div class="pill">Coins: <strong id="walletVal" class="walletVal">100</strong></div>
-          <div class="pill small">Shortcuts: <span class="muted">1-7 switch tabs • S spin • D deal • H hit • J stand • M math start • Enter answer • T typing start • G go Game • P open Shop</span></div>
         </div>
-      </section>
 
-      <!-- SLOTS -->
-      <section id="sec-slots" class="panel active" role="tabpanel" aria-labelledby="tab-slots">
         <h2>Lucky Slots</h2>
-        <p class="slots-note">My janitor at my school — his name is James — he’s really chill and he used the slot machine for me and got me a triple 🍋 — thank you James!</p>
-
         <div class="hud">
-          <div class="pill">Coins: <strong id="slotsBal" class="walletVal">100</strong></div>
           <div class="pill">Bet: <strong id="slotsBet">5</strong></div>
           <div class="pill">Best: <strong id="slotsBest">0</strong></div>
         </div>
 
-        <div class="layout two-col">
-          <div>
-            <div class="reels">
-              <div class="reel" id="reel1">🍒</div>
-              <div class="reel" id="reel2">🍋</div>
-              <div class="reel" id="reel3">⭐</div>
-            </div>
-
-            <div class="controls">
-              <button class="btn primary" id="spinBtn" title="S">Spin</button>
-              <div class="bet-controls">
-                <button class="btn hold" id="betDown" data-dir="-" title="-">−</button>
-                <div class="bet-display" id="betDisplay">5</div>
-                <button class="btn hold" id="betUp" data-dir="+" title="+">+</button>
-              </div>
-            </div>
-
-            <div id="slotsMsg" class="message muted">Ready to play.</div>
-          </div>
-
-          <aside>
-            <div class="card small">
-              <h3>Payouts</h3>
-              <ul>
-                <li>3× ⭐ = 20× bet</li>
-                <li>3× 🍒 = 12× bet</li>
-                <li>3× 🍋 = 8× bet</li>
-                <li>Any 2 matching = 4× bet</li>
-              </ul>
-              <p class="muted">No negatives — you can’t bet coins you don’t have.</p>
-            </div>
-
-            <div class="card small">
-              <h4>Thanks</h4>
-              <p class="muted">Big thanks to James — triple 🍋 legend.</p>
-            </div>
-          </aside>
+        <div class="reels">
+          <div class="reel" id="reel1">🍒</div>
+          <div class="reel" id="reel2">🍋</div>
+          <div class="reel" id="reel3">⭐</div>
         </div>
+
+        <div class="controls">
+          <button class="btn primary" id="spinBtn">Spin</button>
+          <div class="bet-controls">
+            <button class="btn" id="betDown">−</button>
+            <div class="bet-display" id="betDisplay">5</div>
+            <button class="btn" id="betUp">+</button>
+          </div>
+        </div>
+        <div id="slotsMsg" class="message muted">Ready to play.</div>
       </section>
 
-      <!-- BLACKJACK -->
-      <section id="sec-blackjack" class="panel" role="tabpanel" aria-hidden="true">
-        <h2>Blackjack</h2>
+      <section id="sec-blackjack" class="panel">
         <div class="hud">
-          <div class="pill">Coins: <strong id="bjBank" class="walletVal">100</strong></div>
           <div class="pill">Bet: <strong id="bjBet">10</strong></div>
         </div>
-
-        <div class="layout two-col">
-          <div>
-            <h4>Dealer (<span id="dVal">?</span>)</h4>
-            <div class="cards" id="dealer"></div>
-
-            <h4>You (<span id="pVal">0</span>)</h4>
-            <div class="cards" id="player"></div>
-
-            <div class="controls">
-              <button class="btn primary hold" id="bjDeal" title="D">Deal</button>
-              <button class="btn" id="bjHit" disabled title="H">Hit</button>
-              <button class="btn" id="bjStand" disabled title="J">Stand</button>
-
-              <div class="bet-controls small">
-                <button class="btn ghost hold" id="bjBetDown" data-dir="-" title="-">−</button>
-                <div class="bet-display" id="bjBetDisplay">10</div>
-                <button class="btn ghost hold" id="bjBetUp" data-dir="+" title="+">+</button>
-              </div>
-            </div>
-
-            <div id="bjMsg" class="message muted">Good luck!</div>
-          </div>
-
-          <aside>
-            <div class="card small">
-              <h3>Rules</h3>
-              <ul>
-                <li>Ace is 1 or 11</li>
-                <li>Dealer hits to 16 and stands on 17+</li>
-                <li>Blackjack pays 3:2</li>
-              </ul>
-            </div>
-          </aside>
+        <h2>Blackjack</h2>
+        <h4>Dealer (<span id="dVal">?</span>)</h4>
+        <div class="cards" id="dealer"></div>
+        <h4>You (<span id="pVal">0</span>)</h4>
+        <div class="cards" id="player"></div>
+        <div class="controls">
+          <button class="btn primary" id="bjDeal">Deal</button>
+          <button class="btn" id="bjHit" disabled>Hit</button>
+          <button class="btn" id="bjStand" disabled>Stand</button>
         </div>
+        <div id="bjMsg" class="message muted">Good luck!</div>
       </section>
 
-      <!-- MATH -->
-      <section id="sec-math" class="panel" role="tabpanel" aria-hidden="true">
+      <section id="sec-math" class="panel">
         <h2>Math Sprint</h2>
         <div class="hud">
           <div class="pill">Score: <strong id="mathScore">0</strong></div>
           <div class="pill">Streak: <strong id="mathStreak">0</strong></div>
           <div class="pill">Time: <strong id="mathTime">60</strong>s</div>
         </div>
-
-        <div class="layout two-col">
-          <div>
-            <div class="problem" id="mathQ">Loading...</div>
-            <div class="controls">
-              <input id="mathA" type="number" placeholder="Answer" />
-              <button class="btn primary" id="mathSubmit" title="Enter">Submit</button>
-              <button class="btn" id="mathStart" title="M">Start</button>
-            </div>
-            <div id="mathMsg" class="message muted"></div>
-          </div>
-
-          <aside>
-            <div class="card small">
-              <h3>Math Settings</h3>
-              <label><input type="checkbox" id="mAdd" checked> Add</label><br/>
-              <label><input type="checkbox" id="mSub" checked> Subtract</label><br/>
-              <label><input type="checkbox" id="mMul" checked> Multiply</label><br/>
-              <label><input type="checkbox" id="mDiv"> Divide</label><br/>
-              <label>Difficulty:
-                <select id="mDiff">
-                  <option value="easy">Easy</option>
-                  <option value="medium" selected>Medium</option>
-                  <option value="hard">Hard</option>
-                </select>
-              </label>
-              <p class="muted">Hard mode includes chained problems.</p>
-            </div>
-          </aside>
+        <div id="mathQ">Click start</div>
+        <div class="controls">
+          <input id="mathA" type="number" placeholder="Answer" />
+          <button class="btn primary" id="mathSubmit">Submit</button>
+          <button class="btn" id="mathStart">Start</button>
         </div>
+        <div id="mathMsg" class="message muted"></div>
       </section>
 
-      <!-- TYPING -->
-      <section id="sec-typing" class="panel" role="tabpanel" aria-hidden="true">
+      <section id="sec-typing" class="panel">
         <h2>Typing Test</h2>
         <div class="hud">
           <div class="pill">WPM: <strong id="typeWpm">0</strong></div>
           <div class="pill">Accuracy: <strong id="typeAcc">100%</strong></div>
           <div class="pill">Time: <strong id="typeTime">30</strong>s</div>
         </div>
-
-        <div class="typing-area">
-          <div id="typingText" class="typingText" aria-live="polite"></div>
-          <div class="controls">
-            <input id="typeInput" type="text" placeholder="Tap Start then type here" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
-            <button class="btn primary" id="typeStart" title="T">Start</button>
-          </div>
-          <div id="typeMsg" class="message muted"></div>
+        <div id="typingText" class="typingText"></div>
+        <div class="controls">
+          <input id="typeInput" type="text" />
+          <button class="btn primary" id="typeStart">Start</button>
         </div>
+        <div id="typeMsg" class="message muted"></div>
       </section>
 
-      <!-- 3D DRIFT GAME -->
-      <section id="sec-game" class="panel" role="tabpanel" aria-hidden="true">
-        <h2>Retro Drift — Low-poly City</h2>
-        <div class="hud">
-          <div class="pill">Style Points: <strong id="driftScore">0</strong></div>
-          <div class="pill">Best: <strong id="driftBest">0</strong></div>
-          <div class="pill">Car: <strong id="driftCarName">Classic</strong></div>
-        </div>
-
-        <div class="game-wrap">
-          <canvas id="driftCanvas"></canvas>
-          <!-- tire marks overlay (2D) -->
-          <canvas id="marksCanvas" class="marks"></canvas>
-
-          <!-- virtual joysticks: left = steering, right = throttle/brake -->
-          <div class="joysticks" id="joysticks">
-            <div class="stick" id="stickLeft" aria-hidden="true"></div>
-            <div class="stick" id="stickRight" aria-hidden="true"></div>
-          </div>
-
-          <!-- mobile simple buttons fallback -->
-          <div class="mobile-controls" id="mobileCtrls">
-            <button class="pad" id="btnLeft">◀</button>
-            <button class="pad" id="btnRight">▶</button>
-            <button class="pad" id="btnAccel">▲</button>
-            <button class="pad" id="btnBrake">■</button>
-          </div>
-        </div>
-
-        <div class="message muted">Use WASD or arrows on desktop, dual joysticks or buttons on mobile. Drift to make tire marks & earn style points.</div>
-      </section>
-
-      <!-- SHOP -->
-      <section id="sec-shop" class="panel" role="tabpanel" aria-hidden="true">
+      <section id="sec-shop" class="panel">
         <h2>Shop</h2>
-        <p class="muted">Spend your coins on cosmetics, boosts, themes. Items persist locally.</p>
-
-        <div class="shop-grid" id="shopGrid">
-          <!-- populated by JS -->
-        </div>
+        <p class="muted">Spend your coins.</p>
+        <div class="shop-grid" id="shopGrid"></div>
       </section>
 
-      <!-- CUSTOMIZATION -->
-      <section id="sec-custom" class="panel" role="tabpanel" aria-hidden="true">
+      <section id="sec-custom" class="panel">
         <h2>Customization</h2>
-
-        <div class="card">
-          <label>Theme:
-            <select id="themeSelect">
-              <option value="dark" selected>Dark</option>
-              <option value="light">Light</option>
-            </select>
-          </label>
-
-          <label>Accent:
-            <input type="color" id="accentPicker" value="#7cf1c8" />
-          </label>
-
-          <label>Font size:
-            <input id="fontSize" type="range" min="13" max="20" value="16">
-          </label>
-
-          <label>Typing time:
-            <select id="typingDur">
-              <option value="15">15s</option>
-              <option value="30" selected>30s</option>
-              <option value="60">60s</option>
-            </select>
-          </label>
-        </div>
+        <label>Theme:
+          <select id="themeSelect">
+            <option value="dark" selected>Dark</option>
+            <option value="light">Light</option>
+          </select>
+        </label>
+        <label>Accent:
+          <input type="color" id="accentPicker" value="#7cf1c8" />
+        </label>
       </section>
     </main>
 
     <footer class="footer">
-      <div>Created by Devin Slifer — <a href="https://cuesshop.myshopify.com" target="_blank" rel="noopener">cuesshop.myshopify.com</a></div>
-      <div class="muted small">For Computer Apps — have fun & good luck!</div>
+      <div>Created by Devin Slifer</div>
     </footer>
   </div>
 
-  <script src="app.js"></script>
+<script>
+// === TABS ===
+const tabs=document.querySelectorAll(".tab"),panels=document.querySelectorAll(".panel");
+tabs.forEach(t=>t.addEventListener("click",()=>{tabs.forEach(tb=>tb.removeAttribute("aria-current"));panels.forEach(p=>p.classList.remove("active"));t.setAttribute("aria-current","page");document.getElementById("sec-"+t.dataset.tab).classList.add("active")}));
+// === WALLET ===
+let wallet=100;const updateWallet=()=>document.querySelectorAll(".walletVal").forEach(e=>e.textContent=wallet);updateWallet();
+
+// === SLOTS ===
+let slotsBet=5,slotsBest=0;
+const betDisplay=document.getElementById("betDisplay"),slotsMsg=document.getElementById("slotsMsg"),slotsBestEl=document.getElementById("slotsBest"),reelsEls=[reel1,reel2,reel3];
+function updateBetDisplay(){betDisplay.textContent=slotsBet;document.getElementById("slotsBet").textContent=slotsBet}
+betUp.onclick=()=>{if(slotsBet<wallet){slotsBet++;updateBetDisplay()}};
+betDown.onclick=()=>{if(slotsBet>1){slotsBet--;updateBetDisplay()}};
+spinBtn.onclick=()=>{if(slotsBet>wallet){slotsMsg.textContent="Not enough coins";return}wallet-=slotsBet;updateWallet();const symbols=["🍒","🍋","⭐","🍊","🔔"],res=reelsEls.map(r=>r.textContent=symbols[Math.floor(Math.random()*symbols.length)]||"");let payout=0;if(res[0]==res[1]&&res[1]==res[2]){if(res[0]=="⭐")payout=slotsBet*20;else if(res[0]=="🍒")payout=slotsBet*12;else if(res[0]=="🍋")payout=slotsBet*8;else payout=slotsBet*6}else if(res[0]==res[1]||res[1]==res[2]||res[0]==res[2])payout=slotsBet*4;if(payout){wallet+=payout;updateWallet();slotsMsg.textContent="You won "+payout; if(payout>slotsBest){slotsBest=payout;slotsBestEl.textContent=slotsBest}}else slotsMsg.textContent="No match";};
+
+// === BLACKJACK ===
+const deck=()=>["A","2","3","4","5","6","7","8","9","10","J","Q","K"].flatMap(v=>["♠","♥","♦","♣"].map(s=>v+s));
+let bjDeck=[],player=[],dealer=[],bjBet=10;
+function value(hand){let t=0,a=0;hand.forEach(c=>{let v=c.slice(0,-1);if(v=="A"){t+=11;a++}else if(["K","Q","J"].includes(v))t+=10;else t+=+v});while(t>21&&a>0){t-=10;a--}return t}
+function render(){playerDiv=document.getElementById("player");dealerDiv=document.getElementById("dealer");playerDiv.innerHTML="";dealerDiv.innerHTML="";player.forEach(c=>{let e=document.createElement("div");e.className="cardEl";e.textContent=c;playerDiv.appendChild(e)});dealer.forEach(c=>{let e=document.createElement("div");e.className="cardEl";e.textContent=c;dealerDiv.appendChild(e)});pVal.textContent=value(player);dVal.textContent=value(dealer)}
+bjDeal.onclick=()=>{if(bjBet>wallet){bjMsg.textContent="Not enough coins";return}bjDeck=deck().sort(()=>Math.random()-.5);player=[bjDeck.pop(),bjDeck.pop()];dealer=[bjDeck.pop(),bjDeck.pop()];wallet-=bjBet;updateWallet();bjHit.disabled=bjStand.disabled=false;render();bjMsg.textContent="Hit or Stand?"}
+bjHit.onclick=()=>{player.push(bjDeck.pop());render();if(value(player)>21){bjMsg.textContent="Bust!";bjHit.disabled=bjStand.disabled=true}}
+bjStand.onclick=()=>{while(value(dealer)<17)dealer.push(bjDeck.pop());render();let pv=value(player),dv=value(dealer);if(dv>21||pv>dv){wallet+=bjBet*2;updateWallet();bjMsg.textContent="You win!"}else if(pv==dv){wallet+=bjBet;updateWallet();bjMsg.textContent="Push"}else bjMsg.textContent="Dealer wins";bjHit.disabled=bjStand.disabled=true};
+
+// === MATH ===
+let score=0,streak=0,time=60,timer=null,answer=0;
+mathStart.onclick=()=>{score=0;streak=0;time=60;updateMath();nextQ();if(timer)clearInterval(timer);timer=setInterval(()=>{time--;updateMath();if(time<=0){clearInterval(timer);mathMsg.textContent="Time up!"}},1000)}
+function updateMath(){mathScore.textContent=score;mathStreak.textContent=streak;mathTime.textContent=time}
+function nextQ(){let a=Math.floor(Math.random()*10)+1,b=Math.floor(Math.random()*10)+1;answer=a+b;mathQ.textContent=a+" + "+b+" = ?";mathA.value=""}
+mathSubmit.onclick=()=>{if(+mathA.value===answer){score+=10;streak++;wallet+=2;mathMsg.textContent="Correct! +2 coins"}else{streak=0;mathMsg.textContent="Wrong!"}updateWallet();updateMath();nextQ()}
+
+// === TYPING ===
+const texts=["hello world","javascript game hub","practice typing test"];
+let typingIndex=0,target="",typed="",typeTimer=null,typeTime=30,startTime;
+typeStart.onclick=()=>{target=texts[Math.floor(Math.random()*texts.length)];typingText.textContent=target;typed="";typeInput.value="";typeInput.focus();startTime=Date.now();typeTime=30;typeTimer=setInterval(()=>{typeTime--;typeTime<=0&&endTyping();typeTime>0&&(typeTimeEl.textContent=typeTime)},1000)}
+function endTyping(){clearInterval(typeTimer);let words=typed.trim().split(/\s+/).length;let minutes=(Date.now()-startTime)/60000;let wpm=Math.round(words/minutes);typeWpm.textContent=wpm;typeAcc.textContent=Math.round((typed===target?100:50))+"%";if(typed===target){wallet+=10;updateWallet();typeMsg.textContent="Perfect! +10 coins"}else typeMsg.textContent="Try again"}
+typeInput.oninput=()=>{typed=typeInput.value}
+
+// === SHOP ===
+const items=[{name:"Hat",cost:20},{name:"Car Skin",cost:50},{name:"Theme Pack",cost:30}];
+shopGrid.innerHTML=items.map(i=>`<div class="shop-item"><strong>${i.name}</strong><br>${i.cost}c<br><button onclick="buy('${i.name}',${i.cost})">Buy</button></div>`).join("");
+function buy(n,c){if(wallet>=c){wallet-=c;updateWallet();alert("Bought "+n)}else alert("Not enough coins")}
+
+// === CUSTOM ===
+themeSelect.onchange=()=>{document.body.style.background=themeSelect.value=="dark"?"#111":"#fff";document.body.style.color=themeSelect.value=="dark"?"#eee":"#000";}
+accentPicker.oninput=()=>{document.querySelectorAll(".btn.primary").forEach(b=>b.style.background=accentPicker.value);}
+</script>
 </body>
 </html>
