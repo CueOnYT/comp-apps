@@ -1,4 +1,4 @@
-/* styles.css — polished casino-like theme, responsive */
+/* styles.css — polished casino/arcade theme, responsive */
 
 /* variables */
 :root{
@@ -24,10 +24,6 @@ a{color:var(--accent)}
 .logo{width:56px;height:56px;border-radius:12px;display:grid;place-items:center;background:conic-gradient(from 160deg,var(--accent),var(--accent-2));color:#071026;font-weight:900;font-size:18px}
 h1{font-size:20px;margin:0}
 .tag{font-size:12px;color:var(--muted);margin:0}
-
-/* user area */
-.user-area{display:flex;gap:8px;align-items:center}
-.small{font-size:12px}
 
 /* tabs */
 .tabs{display:flex;gap:8px;flex-wrap:wrap}
@@ -64,7 +60,10 @@ h1{font-size:20px;margin:0}
 .btn{appearance:none;border:none;border-radius:10px;padding:10px 12px;font-weight:800;background:linear-gradient(180deg,#17325a,#0b1a33);color:var(--ink);cursor:pointer;border:1px solid rgba(255,255,255,.04);transition:transform .08s}
 .btn.primary{background:linear-gradient(180deg,var(--accent),var(--accent-2));color:#071026;font-weight:900}
 .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,.06)}
+.btn.circle{border-radius:999px;width:56px;height:56px;display:grid;place-items:center;font-size:20px}
+.btn.pill{border-radius:999px;padding:12px 18px}
 
+/* bet display */
 .bet-controls{display:flex;align-items:center;gap:8px}
 .bet-controls.small .bet-display{padding:4px 8px}
 .bet-display{min-width:56px;text-align:center;background:rgba(0,0,0,0.22);padding:6px 10px;border-radius:8px;font-weight:900}
@@ -84,12 +83,9 @@ h1{font-size:20px;margin:0}
 /* footer */
 .footer{display:flex;justify-content:space-between;align-items:center;padding:10px;color:var(--muted);font-size:13px;border-radius:8px}
 
-/* modal for sign in */
-.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);z-index:60}
-.modal[aria-hidden="false"], .modal.show{display:flex}
-.modal-content{background:var(--panel);padding:18px;border-radius:12px;max-width:400px;width:92%;border:1px solid rgba(255,255,255,0.04)}
+/* modal removed (login removed) */
 
-/* small tweaks for customization controls */
+/* customization */
 .card label, .card select, .card input[type="color"], .card input[type="range"]{display:block;margin:8px 0}
 
 /* disable animations toggle class */
@@ -100,10 +96,17 @@ body.bg-stripes{background-image: linear-gradient(135deg, rgba(255,255,255,0.02)
 body.bg-flat{background-image:none; background:var(--bg)}
 
 /* header compacting on small screens*/
-@media(max-width:680px){ .top{flex-direction:column;align-items:flex-start} .user-area{align-self:flex-end} }
+@media(max-width:680px){ .top{flex-direction:column;align-items:flex-start} }
 
 /* responsive tweaks */
 @media(max-width:640px){
   .logo{width:44px;height:44px}
   .reel{height:96px;font-size:36px}
 }
+
+/* === Retro Drift game === */
+.game-wrap{position:relative; display:grid; place-items:center; background:rgba(0,0,0,.18); border:1px solid rgba(255,255,255,.06); border-radius:12px; padding:6px; overflow:hidden}
+#driftCanvas{width:100%; height:auto; border-radius:10px; background:linear-gradient(#0b1630 40%, #2d4f8a)}
+.touch-controls{position:absolute; inset:auto 0 8px 0; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none}
+.touch-controls .row{display:flex; gap:10px; pointer-events:auto}
+@media(min-width:900px){ .touch-controls{display:none} }
