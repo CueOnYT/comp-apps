@@ -24,7 +24,13 @@
         <button class="tab" data-tab="math">➗ Math Sprint</button>
         <button class="tab" data-tab="typing">⌨️ Typing</button>
         <button class="tab" data-tab="custom">⚙️ Customize</button>
+        <button class="tab" data-tab="leaderboard">🏆 Leaderboards</button>
       </nav>
+
+      <div class="user-area" id="userArea">
+        <span id="currentUser" class="muted small">Not signed in</span>
+        <button class="btn" id="signInBtn">Sign in</button>
+      </div>
     </header>
 
     <main class="main">
@@ -68,7 +74,7 @@
                 <li>3× 🍋 = 8× bet</li>
                 <li>Any 2 matching = 3× bet</li>
               </ul>
-              <p class="muted">No cash limits — bets and balances can grow large. Values stored locally in your browser.</p>
+              <p class="muted">Bets are clamped to your balance so you cannot go below $0. Values stored locally in your browser.</p>
             </div>
           </aside>
         </div>
@@ -195,12 +201,44 @@
             </select>
           </label>
 
+          <label>Preset:
+            <select id="presetSelect">
+              <option value="default" selected>Default</option>
+              <option value="ocean">Ocean</option>
+              <option value="sunset">Sunset</option>
+            </select>
+          </label>
+
           <label>Accent:
             <input type="color" id="accentPicker" value="#7cf1c8" />
           </label>
 
+          <label>Font family:
+            <select id="fontFamily">
+              <option value="Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial">Inter</option>
+              <option value="Georgia, serif">Georgia</option>
+              <option value="'Courier New', monospace">Monospace</option>
+            </select>
+          </label>
+
           <label>Font size:
             <input id="fontSize" type="range" min="13" max="20" value="16">
+          </label>
+
+          <label>Background:
+            <select id="bgPattern">
+              <option value="radial">Radial Gradient</option>
+              <option value="stripes">Subtle Stripes</option>
+              <option value="flat">Flat Color</option>
+            </select>
+          </label>
+
+          <label>Enable sounds:
+            <input type="checkbox" id="enableSound" checked>
+          </label>
+
+          <label>Disable animations:
+            <input type="checkbox" id="disableAnim">
           </label>
 
           <label>Typing time:
@@ -216,12 +254,60 @@
           </div>
         </div>
       </section>
+
+      <!-- LEADERBOARDS -->
+      <section id="sec-leaderboard" class="panel" role="tabpanel" aria-hidden="true">
+        <h2>Leaderboards</h2>
+        <p class="muted">Leaderboards are local (saved in your browser). Sign in to attach a display name to your submissions.</p>
+
+        <div class="layout two-col">
+          <div>
+            <div class="controls">
+              <label>Game:
+                <select id="lbGame">
+                  <option value="slots">Slots (Balance)</option>
+                  <option value="blackjack">Blackjack (Bank)</option>
+                  <option value="math">Math (Score)</option>
+                  <option value="typing">Typing (WPM)</option>
+                </select>
+              </label>
+              <button class="btn" id="refreshLb">Refresh</button>
+              <button class="btn primary" id="submitLb">Submit my score</button>
+            </div>
+
+            <div id="leaderboardList" class="card small">
+              <h3>Top scores</h3>
+              <ol id="lbList"></ol>
+            </div>
+          </div>
+
+          <aside>
+            <div class="card small">
+              <h3>Notes</h3>
+              <p class="muted">Local leaderboards let you compare scores between users of the same device. Use the sign-in button to set a display name before submitting.</p>
+            </div>
+          </aside>
+        </div>
+      </section>
     </main>
 
     <footer class="footer">
       <div>Created by Devin Slifer</div>
       <div class="muted small">For Computer Apps — have fun & good luck!</div>
     </footer>
+  </div>
+
+  <!-- Simple sign-in modal -->
+  <div id="signinModal" class="modal" aria-hidden="true">
+    <div class="modal-content">
+      <h3>Sign in</h3>
+      <p class="muted">Enter a display name to sign in. This will be saved locally.</p>
+      <input id="signinName" type="text" placeholder="Display name (e.g., CueGaming)" />
+      <div style="margin-top:.5rem">
+        <button class="btn primary" id="doSignin">Sign in</button>
+        <button class="btn ghost" id="cancelSignin">Cancel</button>
+      </div>
+    </div>
   </div>
 
   <script src="app.js"></script>
