@@ -6,8 +6,38 @@
   <title>Devin's Games — Game Hub</title>
   <meta name="description" content="Devin's Games — Slots, Blackjack, Math Sprint, Typing, 3D Retro Drift. Shared wallet, shop, customization." />
   <link rel="stylesheet" href="styles.css">
-  <!-- Three.js (no build config required) -->
+  <!-- Three.js -->
   <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+
+  <!-- Immediate fixes to prevent canvas blocking the whole page:
+       - UI elements get higher z-index
+       - Game canvas only accepts pointer events when its panel is active
+       - marks overlay never receives pointer events
+  -->
+  <style>
+    /* Ensure interactive UI is above the game canvas */
+    header.top, nav.tabs, .tab, .controls, .btn, .shop-item, footer.footer {
+      position: relative;
+      z-index: 1000;
+      pointer-events: auto;
+    }
+
+    /* Game area isolation:
+       - canvas won't capture clicks unless the game panel has .active
+       - the 2D marks overlay never captures pointer events (it is purely visual)
+    */
+    #sec-game:not(.active) #driftCanvas,
+    #sec-game:not(.active) #marksCanvas {
+      pointer-events: none !important;
+    }
+
+    /* When active, the canvas can receive events */
+    #sec-game.active #driftCanvas { pointer-events: auto !important; }
+    #marksCanvas { pointer-events: none; }
+
+    /* Small safety for mobile: disable tap highlight while holding bet buttons */
+    .no-select{ user-select:none; -webkit-user-select:none; -ms-user-select:none; -moz-user-select:none; }
+  </style>
 </head>
 <body>
   <div id="app" class="app">
@@ -205,16 +235,16 @@
 
         <div class="game-wrap">
           <canvas id="driftCanvas"></canvas>
-          <!-- tire marks overlay (2D) -->
+          <!-- 2D marks overlay -->
           <canvas id="marksCanvas" class="marks"></canvas>
 
-          <!-- virtual joysticks: left = steering, right = throttle/brake -->
-          <div class="joysticks" id="joysticks">
+          <!-- virtual joysticks -->
+          <div class="joysticks" id="joysticks" aria-hidden="true">
             <div class="stick" id="stickLeft" aria-hidden="true"></div>
             <div class="stick" id="stickRight" aria-hidden="true"></div>
           </div>
 
-          <!-- mobile simple buttons fallback -->
+          <!-- mobile buttons fallback -->
           <div class="mobile-controls" id="mobileCtrls">
             <button class="pad" id="btnLeft">◀</button>
             <button class="pad" id="btnRight">▶</button>
@@ -272,6 +302,30 @@
       <div class="muted small">For Computer Apps — have fun & good luck!</div>
     </footer>
   </div>
+
+  <!-- Small script so canvas pointer-events follow the active tab immediately -->
+  <script>
+    function updateGameCanvasPointer(){
+      const sec = document.getElementById('sec-game');
+      const canvas = document.getElementById('driftCanvas');
+      const marks = document.getElementById('marksCanvas');
+      if(!canvas || !sec) return;
+      if(sec.classList.contains('active')){
+        canvas.style.pointerEvents = 'auto';
+      } else {
+        canvas.style.pointerEvents = 'none';
+      }
+      if(marks) marks.style.pointerEvents = 'none';
+    }
+    document.addEventListener('DOMContentLoaded', ()=>{
+      updateGameCanvasPointer();
+      // Tabs are buttons that set .active on panels in app.js — also listen for clicks and update after
+      document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', ()=> setTimeout(updateGameCanvasPointer, 60)));
+      // also update when panels change (in case app.js toggles classes later)
+      const obs = new MutationObserver(()=> updateGameCanvasPointer());
+      document.querySelectorAll('.panel').forEach(p=> obs.observe(p, { attributes: true, attributeFilter: ['class'] }));
+    });
+  </script>
 
   <script src="app.js"></script>
 </body>
