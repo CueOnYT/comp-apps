@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Devin's Games — Game Hub</title>
-  <meta name="description" content="Devin's Games — Slots, Blackjack, Math Sprint, Typing. Responsive, polished, single-page app with customization." />
+  <meta name="description" content="Devin's Games — Slots, Blackjack, Math Sprint, Typing, and a retro 3D drifting game. Responsive, polished, single-page app with customization." />
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -19,22 +19,52 @@
       </div>
 
       <nav class="tabs" role="tablist">
-        <button class="tab" data-tab="slots" aria-current="page">🎰 Slots</button>
+        <button class="tab" data-tab="game" aria-current="page">🚗 Game</button>
+        <button class="tab" data-tab="slots">🎰 Slots</button>
         <button class="tab" data-tab="blackjack">🂡 Blackjack</button>
         <button class="tab" data-tab="math">➗ Math Sprint</button>
         <button class="tab" data-tab="typing">⌨️ Typing</button>
         <button class="tab" data-tab="custom">⚙️ Customize</button>
       </nav>
 
-      <div class="user-area" id="userArea">
-        <span id="currentUser" class="muted small">Not signed in</span>
-        <button class="btn" id="signInBtn">Sign in</button>
-      </div>
+      <!-- Login removed per your request -->
     </header>
 
     <main class="main">
+      <!-- RETRO DRIFTING GAME -->
+      <section id="sec-game" class="panel active" role="tabpanel">
+        <h2>Retro Drift</h2>
+        <p class="muted small">
+          Keyboard: Arrow keys or A/D to steer, Up to accelerate, Down to brake, Space = handbrake.  
+          Shortcuts: 1=Game, 2=Slots, 3=Blackjack, 4=Math, 5=Typing, 6=Customize.
+        </p>
+
+        <div class="game-wrap">
+          <canvas id="driftCanvas" width="960" height="540" aria-label="Retro drifting game"></canvas>
+
+          <!-- Mobile touch controls -->
+          <div class="touch-controls" id="touchControls" aria-hidden="false">
+            <div class="row">
+              <button class="btn circle" id="btnLeft" aria-label="Steer Left">⟵</button>
+              <button class="btn circle" id="btnRight" aria-label="Steer Right">⟶</button>
+            </div>
+            <div class="row">
+              <button class="btn pill" id="btnBrake" aria-label="Brake">Brake</button>
+              <button class="btn pill primary" id="btnGas" aria-label="Accelerate">Gas</button>
+              <button class="btn pill" id="btnEbrake" aria-label="Handbrake">E-Brake</button>
+            </div>
+          </div>
+        </div>
+        <div id="driftHud" class="hud">
+          <div class="pill">Speed: <strong id="hudSpeed">0</strong> km/h</div>
+          <div class="pill">Drift: <strong id="hudDrift">0%</strong></div>
+          <div class="pill">Lap: <strong id="hudLap">0</strong></div>
+        </div>
+        <div id="driftMsg" class="message muted"></div>
+      </section>
+
       <!-- SLOTS -->
-      <section id="sec-slots" class="panel active" role="tabpanel">
+      <section id="sec-slots" class="panel" role="tabpanel" aria-hidden="true">
         <h2>Lucky Slots</h2>
         <p class="slots-note">Thank You James For The Triple 🍋</p>
         <div class="hud">
@@ -52,7 +82,7 @@
             </div>
 
             <div class="controls">
-              <button class="btn primary" id="spinBtn">Spin</button>
+              <button class="btn primary" id="spinBtn">Spin (Space)</button>
               <div class="bet-controls">
                 <button class="btn" id="betDown" data-dir="-">−</button>
                 <div class="bet-display" id="betDisplay">5</div>
@@ -96,9 +126,9 @@
             <div class="cards" id="player"></div>
 
             <div class="controls">
-              <button class="btn primary" id="bjDeal">Deal</button>
-              <button class="btn" id="bjHit" disabled>Hit</button>
-              <button class="btn" id="bjStand" disabled>Stand</button>
+              <button class="btn primary" id="bjDeal">Deal (D)</button>
+              <button class="btn" id="bjHit" disabled>Hit (H)</button>
+              <button class="btn" id="bjStand" disabled>Stand (S)</button>
 
               <div class="bet-controls small">
                 <button class="btn ghost" id="bjBetDown" data-dir="-">−</button>
@@ -138,8 +168,8 @@
             <div class="problem" id="mathQ">Loading...</div>
             <div class="controls">
               <input id="mathA" type="number" placeholder="Answer" />
-              <button class="btn primary" id="mathSubmit">Submit</button>
-              <button class="btn" id="mathStart">Start</button>
+              <button class="btn primary" id="mathSubmit">Submit (Enter)</button>
+              <button class="btn" id="mathStart">Start (Shift+Enter)</button>
             </div>
             <div id="mathMsg" class="message muted"></div>
           </div>
@@ -178,7 +208,7 @@
           <div id="typingText" class="typingText" aria-live="polite"></div>
           <div class="controls">
             <input id="typeInput" type="text" placeholder="Tap Start then type here" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
-            <button class="btn primary" id="typeStart">Start</button>
+            <button class="btn primary" id="typeStart">Start (Enter)</button>
           </div>
           <div id="typeMsg" class="message muted"></div>
         </div>
@@ -243,7 +273,6 @@
               <option value="60">60s</option>
             </select>
           </label>
-
         </div>
       </section>
     </main>
@@ -252,19 +281,6 @@
       <div>Created by Devin Slifer</div>
       <div class="muted small">For Computer Apps — have fun & good luck!</div>
     </footer>
-  </div>
-
-  <!-- Simple sign-in modal -->
-  <div id="signinModal" class="modal" aria-hidden="true">
-    <div class="modal-content">
-      <h3>Sign in</h3>
-      <p class="muted">Enter a display name to sign in. This will be saved locally.</p>
-      <input id="signinName" type="text" placeholder="Display name (e.g., CueGaming)" />
-      <div style="margin-top:.5rem">
-        <button class="btn primary" id="doSignin">Sign in</button>
-        <button class="btn ghost" id="cancelSignin">Cancel</button>
-      </div>
-    </div>
   </div>
 
   <script src="app.js"></script>
