@@ -1,4 +1,4 @@
-/* styles.css — polished arcade theme, responsive */
+/* styles.css — polished arcade + mobile-friendly UI */
 
 /* variables */
 :root{
@@ -8,16 +8,15 @@
   --muted: #9fb0d6;
   --accent: #7cf1c8;
   --accent-2: #9bb4ff;
-  --card-bg: rgba(255,255,255,0.03);
-  --glass: rgba(255,255,255,0.03);
-  --primary: #1c2f58;
 }
 
-/* basic layout */
-*{box-sizing:border-box}
+/* base */
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;margin:0;background:radial-gradient(1400px 800px at 70% -20%, #16233f 0%, var(--bg) 60%) fixed;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial;color:var(--ink);-webkit-font-smoothing:antialiased}
 a{color:var(--accent)}
+.no-select{user-select:none;-webkit-user-select:none;-ms-user-select:none}
 
+/* app container */
 .app{max-width:1160px;margin:18px auto;padding:16px;display:grid;gap:16px}
 .top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border-radius:12px;background:var(--panel);border:1px solid rgba(255,255,255,0.03)}
 .brand{display:flex;gap:12px;align-items:center}
@@ -31,14 +30,14 @@ h1{font-size:20px;margin:0}
 .tab[aria-current="page"]{box-shadow:0 10px 40px rgba(0,0,0,.5), 0 0 0 4px rgba(124,241,200,0.06)}
 .tab:active{transform:translateY(1px)}
 
-/* main layout */
+/* main */
 .main{display:block}
 .panel{display:none;padding:14px;border-radius:12px;background:var(--panel);border:1px solid rgba(255,255,255,0.03);box-shadow:0 20px 60px rgba(0,0,0,.4)}
 .panel.active{display:block}
 
-/* sticky HUD */
+/* HUD */
 .hud{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
-.hud.sticky{position:sticky;top:8px;z-index:2}
+.hud.sticky{position:sticky;top:8px;z-index:5}
 .pill{background:rgba(0,0,0,0.22);padding:8px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.03);font-weight:700}
 .pill.small{font-size:12px}
 
@@ -48,11 +47,11 @@ h1{font-size:20px;margin:0}
 
 /* reels */
 .reels{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0}
-.reel{height:120px;border-radius:12px;display:grid;place-items:center;font-size:48px;background:linear-gradient(180deg,#20345a,#0f1930);border:1px solid rgba(255,255,255,.04);transition:transform .3s}
+.reel{height:120px;border-radius:12px;display:grid;place-items:center;font-size:48px;background:linear-gradient(180deg,#20345a,#0f1930);border:1px solid rgba(255,255,255,.04);transition:transform .12s}
 .reel.spin{animation:spin-reel .45s linear}
 @keyframes spin-reel{0%{transform:translateY(-10px) scale(.98)}50%{transform:translateY(8px) scale(1.02)}100%{transform:none}}
 
-/* cards */
+/* cards / controls */
 .cards{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
 .cardx{width:64px;height:90px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(180deg,#f6fbff,#dfe8ff);color:#071026;font-weight:900;border:1px solid rgba(10,12,20,.06);box-shadow:0 8px 18px rgba(0,0,0,.24)}
 .cardx.back{background:linear-gradient(180deg,#0b213f,#06112a);color:#fff}
@@ -63,15 +62,11 @@ h1{font-size:20px;margin:0}
 .btn{appearance:none;border:none;border-radius:10px;padding:10px 12px;font-weight:800;background:linear-gradient(180deg,#17325a,#0b1a33);color:var(--ink);cursor:pointer;border:1px solid rgba(255,255,255,.04);transition:transform .08s}
 .btn.primary{background:linear-gradient(180deg,var(--accent),var(--accent-2));color:#071026;font-weight:900}
 .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,.06)}
+.btn.hold{touch-action:manipulation}
 
+/* bet display */
 .bet-controls{display:flex;align-items:center;gap:8px}
-.bet-controls.small .bet-display{padding:4px 8px}
 .bet-display{min-width:56px;text-align:center;background:rgba(0,0,0,0.22);padding:6px 10px;border-radius:8px;font-weight:900}
-
-/* small card */
-.card.small{padding:10px;border-radius:10px;background:rgba(0,0,0,0.18);border:1px solid rgba(255,255,255,.03)}
-.muted{color:var(--muted)}
-.message{margin-top:8px}
 
 /* typing */
 .typing-area{margin-top:8px}
@@ -80,27 +75,36 @@ h1{font-size:20px;margin:0}
 .typingText .cur{outline:2px solid rgba(155,180,255,.12)}
 .typingText .wrong{background:#5b0f22;color:#fff;padding:0 2px;border-radius:2px}
 
-/* game */
-.game-wrap{position:relative;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.04);background:#041025}
-#driftCanvas{width:100%;height:420px;display:block}
-.mobile-controls{position:absolute;inset:auto 0 10px 0;display:flex;justify-content:center;gap:10px;padding:8px}
-.pad{width:64px;height:64px;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.05);color:var(--ink);font-weight:900}
+/* game area */
+.game-wrap{position:relative;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.04);background:#041025;min-height:360px}
+#driftCanvas{display:block;width:100%;height:420px}
+.marks{position:absolute;left:0;top:0;width:100%;height:420px;pointer-events:none}
 
-/* shop */
+/* joysticks */
+.joysticks{position:absolute;inset:auto 0 8px 0;display:flex;justify-content:space-between;padding:12px;pointer-events:none}
+.stick{width:120px;height:120px;border-radius:999px;background:rgba(0,0,0,0.18);margin:0 12px;pointer-events:auto;display:flex;align-items:center;justify-content:center;position:relative}
+.stick .knob{position:absolute;width:48px;height:48px;border-radius:999px;background:rgba(255,255,255,0.08);border:2px solid rgba(255,255,255,0.12)}
+
+/* mobile buttons fallback */
+.mobile-controls{position:absolute;right:12px;bottom:12px;display:flex;flex-direction:column;gap:8px;pointer-events:auto}
+.pad{width:56px;height:56px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.05);color:var(--ink);font-weight:900}
+
+/* shop grid */
 .shop-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 @media(max-width:900px){ .shop-grid{grid-template-columns:repeat(2,1fr)} }
 @media(max-width:620px){ .shop-grid{grid-template-columns:1fr} }
 .shop-item{padding:12px;border-radius:12px;background:rgba(0,0,0,0.18);border:1px solid rgba(255,255,255,.04)}
 .shop-item h4{margin:0 0 6px 0}
-.shop-item .price{font-weight:900}
-.shop-item .owned{color:#7cf1c8;font-weight:800}
-.shop-item .actions{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
+.price{font-weight:900}
+.owned{color:#7cf1c8;font-weight:800}
 
 /* footer */
 .footer{display:flex;justify-content:space-between;align-items:center;padding:10px;color:var(--muted);font-size:13px;border-radius:8px}
 
-/* responsive tweaks */
+/* responsive */
 @media(max-width:640px){
   .logo{width:44px;height:44px}
   .reel{height:96px;font-size:36px}
+  .joysticks .stick{width:90px;height:90px}
+  #driftCanvas, .marks{height:320px}
 }
