@@ -1,6 +1,5 @@
-// app.js — logic for Devin's Games (complete, ready-to-run)
-// All features run locally (no external configuration required).
-// Includes: login (local), leaderboards (localStorage), customization, improved games, no negative balances.
+// app.js — logic for Devin's Games (updated: leaderboards removed, reset buttons removed)
+// Features: Slots (hold-to-increase w/ acceleration), Blackjack (improved), Math (harder), Typing (robust), customization, login (local), no-negative-balance.
 
 /* small helpers */
 const $ = sel => document.querySelector(sel);
@@ -140,12 +139,6 @@ function applyCustom() {
   enableSound.addEventListener('change', e => { S.set('enableSound', e.target.checked); });
   disableAnim.addEventListener('change', e => { S.set('disableAnim', e.target.checked); applyCustom(); });
 
-  $('#resetCustom').addEventListener('click', ()=>{
-    if(confirm('Reset customization to defaults?')){
-      ['theme','accent','fontsize','typingDur','preset','fontfamily','bgpattern','enableSound','disableAnim'].forEach(k => S.del(k));
-      location.reload();
-    }
-  });
 })();
 
 /* === Tabs behavior === */
@@ -275,12 +268,6 @@ $$('.tab').forEach(btn=>{
   }
   holdAdjust($('#betUp'), +1);
   holdAdjust($('#betDown'), -1);
-
-  $('#resetSlots').addEventListener('click', ()=>{
-    if(confirm('Reset slots balance to 100?')) {
-      state.bal = 100; state.bet = 5; save(); msgEl.textContent = 'Balance reset';
-    }
-  });
 
   render();
 })();
@@ -478,12 +465,6 @@ $$('.tab').forEach(btn=>{
   holdAdjust($('#bjBetUp'), +1);
   holdAdjust($('#bjBetDown'), -1);
 
-  $('#bjReset').addEventListener('click', ()=>{
-    if(confirm('Reset bank to 100?')) {
-      state.bank = 100; state.bet = 10; save(); msgEl.textContent = 'Bank reset';
-    }
-  });
-
   renderTop();
 })();
 
@@ -502,7 +483,6 @@ $$('.tab').forEach(btn=>{
     return [1,200];
   }
 
-  // generate problems; hard mode may produce chained problems like (a * b) + c
   function nextQ(){
     const ops = [];
     if(mAdd.checked) ops.push('+');
@@ -514,7 +494,6 @@ $$('.tab').forEach(btn=>{
     const diff = mDiff.value;
     const [minN, maxN] = numberRange(diff);
 
-    // choose whether to make a chained problem if hard
     if(diff === 'hard' && Math.random() < 0.45){
       const a = irnd(minN, maxN);
       const b = irnd(minN, Math.min(maxN, 20));
@@ -543,7 +522,6 @@ $$('.tab').forEach(btn=>{
       return;
     }
 
-    // single op
     const op = ops[irnd(0, ops.length-1)];
     let a = irnd(minN, maxN);
     let b = irnd(minN, maxN);
@@ -603,10 +581,6 @@ $$('.tab').forEach(btn=>{
     scoreEl.textContent = state.score;
     streakEl.textContent = state.streak;
     nextQ();
-  });
-
-  $('#mathReset').addEventListener('click', ()=>{
-    if(confirm('Reset math best?')){ S.set('math_best', 0); bestEl.textContent = 0; }
   });
 
   bestEl.textContent = state.best;
@@ -707,79 +681,7 @@ $$('.tab').forEach(btn=>{
     render();
   });
 
-  $('#typeReset').addEventListener('click', ()=>{
-    if(confirm('Reset best WPM?')){ S.set('type_best', 0); bestEl.textContent = 0; }
-  });
-
   bestEl.textContent = state.best;
-})();
-
-/* =========================
-   Leaderboards (local-only)
-   ========================= */
-(function(){
-  // store structure: { slots: [{name, score, t}], blackjack: [...], math: [...], typing: [...] }
-  const LB_KEY = 'leaderboards_v1';
-  function readLB(){ return S.get('lb_data', { slots: [], blackjack: [], math: [], typing: [] }); }
-  function writeLB(obj){ S.set('lb_data', obj); }
-
-  function submitScore(game, name, score){
-    if(!name) return { ok:false, msg:'Sign in to submit' };
-    const data = readLB();
-    if(!data[game]) data[game] = [];
-    data[game].push({ name, score: Number(score), t: Date.now() });
-    // keep only top 100 entries to avoid unlimited growth
-    data[game].sort((a,b)=>b.score - a.score || a.t - b.t);
-    data[game] = data[game].slice(0,100);
-    writeLB(data);
-    return { ok:true };
-  }
-
-  function getTop(game, count=10){
-    const data = readLB();
-    return (data[game] || []).slice(0, count);
-  }
-
-  // UI
-  const lbList = $('#lbList'), lbGame = $('#lbGame'), refreshBtn = $('#refreshLb'), submitBtn = $('#submitLb');
-
-  function renderLB(){
-    const game = lbGame.value;
-    const top = getTop(game, 10);
-    lbList.innerHTML = '';
-    if(top.length === 0) {
-      lbList.innerHTML = '<li class="muted">No scores yet</li>';
-      return;
-    }
-    top.forEach((e, i)=>{
-      const li = document.createElement('li');
-      li.textContent = `${i+1}. ${e.name} — ${fmt(e.score)}`;
-      lbList.appendChild(li);
-    });
-  }
-
-  refreshBtn.addEventListener('click', renderLB);
-
-  submitBtn.addEventListener('click', ()=>{
-    const u = currentUser();
-    if(!u || !u.name){ if(confirm('You are not signed in. Sign in now?')) { $('#signinModal').setAttribute('aria-hidden','false'); } return; }
-    const name = u.name;
-    // pick game and corresponding score
-    const g = lbGame.value;
-    let score = 0;
-    if(g === 'slots') score = Number(S.get('slots_bal',100));
-    else if(g === 'blackjack') score = Number(S.get('bj_bank',100));
-    else if(g === 'math') score = Number(S.get('math_best',0));
-    else if(g === 'typing') score = Number(S.get('type_best',0));
-    const res = submitScore(g, name, score);
-    if(res.ok){ alert('Score submitted!'); renderLB(); } else alert(res.msg || 'Error');
-  });
-
-  // initial render
-  renderLB();
-
-  // switch game -> render
-  lbGame.addEventListener('change', renderLB);
 })();
 
 /* =========================
