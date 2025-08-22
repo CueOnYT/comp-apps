@@ -4,8 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Devin's Games — Game Hub</title>
-  <meta name="description" content="Devin's Games — Slots, Blackjack, Math Sprint, Typing, 3D Drift. Responsive, polished, single-page app with customization and shared balance." />
+  <meta name="description" content="Devin's Games — Slots, Blackjack, Math Sprint, Typing, 3D Retro Drift. Shared wallet, shop, customization, shortcuts." />
   <link rel="stylesheet" href="styles.css">
+  <!-- Three.js (global build, no config needed) -->
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
 </head>
 <body>
   <div id="app" class="app">
@@ -19,28 +21,33 @@
       </div>
 
       <nav class="tabs" role="tablist" aria-label="Game Tabs">
-        <button class="tab" data-tab="slots" aria-current="page">🎰 Slots</button>
-        <button class="tab" data-tab="blackjack">🂡 Blackjack</button>
-        <button class="tab" data-tab="math">➗ Math Sprint</button>
-        <button class="tab" data-tab="typing">⌨️ Typing</button>
-        <button class="tab" data-tab="game">🚗 Game</button>
-        <button class="tab" data-tab="shop">🛒 Shop</button>
-        <button class="tab" data-tab="custom">⚙️ Customize</button>
+        <button class="tab" data-tab="slots" aria-current="page" title="1">🎰 Slots</button>
+        <button class="tab" data-tab="blackjack" title="2">🂡 Blackjack</button>
+        <button class="tab" data-tab="math" title="3">➗ Math Sprint</button>
+        <button class="tab" data-tab="typing" title="4">⌨️ Typing</button>
+        <button class="tab" data-tab="game" title="5">🚗 Game</button>
+        <button class="tab" data-tab="shop" title="6">🛒 Shop</button>
+        <button class="tab" data-tab="custom" title="7">⚙️ Customize</button>
       </nav>
-
-      <div class="global-pills">
-        <div class="pill">Balance: <strong id="globalBank">100</strong></div>
-        <div class="pill hint" title="Keyboard Shortcuts">ⓘ Shortcuts: 1–6 switch • Space/Enter action • H/S in Blackjack • WASD/Shift in Game</div>
-      </div>
     </header>
 
     <main class="main">
+      <!-- GLOBAL WALLET HUD -->
+      <section class="panel active" id="sec-home" role="region" aria-label="Wallet">
+        <div class="hud sticky">
+          <div class="pill">Coins: <strong id="walletVal" class="walletVal">100</strong></div>
+          <div class="pill">Equipped Car: <strong id="hudCar">Classic</strong></div>
+          <div class="pill">Accent: <strong id="hudAccent">#7cf1c8</strong></div>
+          <div class="pill small">Shortcuts: <span class="muted">1-7 switch tabs • S spin • D deal • H hit • J stand • M math start • Enter answer • T typing start • +/- bet • G go Game • P open Shop</span></div>
+        </div>
+      </section>
+
       <!-- SLOTS -->
-      <section id="sec-slots" class="panel active" role="tabpanel" aria-label="Slots">
+      <section id="sec-slots" class="panel active" role="tabpanel" aria-labelledby="tab-slots">
         <h2>Lucky Slots</h2>
-        <p class="slots-note">Thank You James For The Triple 🍋</p>
+        <p class="slots-note">Slightly luckier 🍀 — but still fair</p>
         <div class="hud">
-          <div class="pill">Balance: <strong id="slotsBal">100</strong></div>
+          <div class="pill">Coins: <strong id="slotsBal" class="walletVal">100</strong></div>
           <div class="pill">Bet: <strong id="slotsBet">5</strong></div>
           <div class="pill">Best: <strong id="slotsBest">0</strong></div>
         </div>
@@ -54,11 +61,11 @@
             </div>
 
             <div class="controls">
-              <button class="btn primary" id="spinBtn" aria-keyshortcuts="Space">Spin (Space)</button>
+              <button class="btn primary" id="spinBtn" title="S">Spin</button>
               <div class="bet-controls">
-                <button class="btn" id="betDown" data-dir="-">−</button>
+                <button class="btn" id="betDown" data-dir="-" title="-">−</button>
                 <div class="bet-display" id="betDisplay">5</div>
-                <button class="btn" id="betUp" data-dir="+">+</button>
+                <button class="btn" id="betUp" data-dir="+" title="+">+</button>
               </div>
             </div>
 
@@ -72,19 +79,19 @@
                 <li>3× ⭐ = 20× bet</li>
                 <li>3× 🍒 = 12× bet</li>
                 <li>3× 🍋 = 8× bet</li>
-                <li>Any 2 matching = 3× bet</li>
+                <li>Any 2 matching = 4× bet (buffed)</li>
               </ul>
-              <p class="muted">Shared balance across all games. Stored locally in your browser.</p>
+              <p class="muted">No negatives — you can’t bet coins you don’t have.</p>
             </div>
           </aside>
         </div>
       </section>
 
       <!-- BLACKJACK -->
-      <section id="sec-blackjack" class="panel" role="tabpanel" aria-hidden="true" aria-label="Blackjack">
+      <section id="sec-blackjack" class="panel" role="tabpanel" aria-hidden="true">
         <h2>Blackjack</h2>
         <div class="hud">
-          <div class="pill">Bank: <strong id="bjBank">100</strong></div>
+          <div class="pill">Coins: <strong id="bjBank" class="walletVal">100</strong></div>
           <div class="pill">Bet: <strong id="bjBet">10</strong></div>
           <div class="pill">Best: <strong id="bjBest">0</strong></div>
         </div>
@@ -98,14 +105,14 @@
             <div class="cards" id="player"></div>
 
             <div class="controls">
-              <button class="btn primary" id="bjDeal" aria-keyshortcuts="Space">Deal (Space)</button>
-              <button class="btn" id="bjHit" disabled aria-keyshortcuts="KeyH">Hit (H)</button>
-              <button class="btn" id="bjStand" disabled aria-keyshortcuts="KeyS">Stand (S)</button>
+              <button class="btn primary" id="bjDeal" title="D">Deal</button>
+              <button class="btn" id="bjHit" disabled title="H">Hit</button>
+              <button class="btn" id="bjStand" disabled title="J">Stand</button>
 
               <div class="bet-controls small">
-                <button class="btn ghost" id="bjBetDown" data-dir="-">−</button>
+                <button class="btn ghost" id="bjBetDown" data-dir="-" title="-">−</button>
                 <div class="bet-display" id="bjBetDisplay">10</div>
-                <button class="btn ghost" id="bjBetUp" data-dir="+">+</button>
+                <button class="btn ghost" id="bjBetUp" data-dir="+" title="+">+</button>
               </div>
             </div>
 
@@ -116,9 +123,9 @@
             <div class="card small">
               <h3>Rules</h3>
               <ul>
-                <li>Ace is 1 or 11.</li>
-                <li>Dealer hits to 16 and stands on 17+.</li>
-                <li>Blackjack pays 3:2 on an initial winning hand.</li>
+                <li>Ace is 1 or 11</li>
+                <li>Dealer hits to 16 and stands on 17+</li>
+                <li>Blackjack pays 3:2</li>
               </ul>
             </div>
           </aside>
@@ -126,7 +133,7 @@
       </section>
 
       <!-- MATH -->
-      <section id="sec-math" class="panel" role="tabpanel" aria-hidden="true" aria-label="Math Sprint">
+      <section id="sec-math" class="panel" role="tabpanel" aria-hidden="true">
         <h2>Math Sprint</h2>
         <div class="hud">
           <div class="pill">Score: <strong id="mathScore">0</strong></div>
@@ -140,8 +147,8 @@
             <div class="problem" id="mathQ">Loading...</div>
             <div class="controls">
               <input id="mathA" type="number" placeholder="Answer" />
-              <button class="btn primary" id="mathSubmit" aria-keyshortcuts="Enter">Submit (Enter)</button>
-              <button class="btn" id="mathStart" aria-keyshortcuts="Space">Start (Space)</button>
+              <button class="btn primary" id="mathSubmit" title="Enter">Submit</button>
+              <button class="btn" id="mathStart" title="M">Start</button>
             </div>
             <div id="mathMsg" class="message muted"></div>
           </div>
@@ -160,14 +167,14 @@
                   <option value="hard">Hard</option>
                 </select>
               </label>
-              <p class="muted">Hard includes chained problems & larger numbers.</p>
+              <p class="muted">Hard mode includes chained problems.</p>
             </div>
           </aside>
         </div>
       </section>
 
       <!-- TYPING -->
-      <section id="sec-typing" class="panel" role="tabpanel" aria-hidden="true" aria-label="Typing Test">
+      <section id="sec-typing" class="panel" role="tabpanel" aria-hidden="true">
         <h2>Typing Test</h2>
         <div class="hud">
           <div class="pill">WPM: <strong id="typeWpm">0</strong></div>
@@ -180,48 +187,50 @@
           <div id="typingText" class="typingText" aria-live="polite"></div>
           <div class="controls">
             <input id="typeInput" type="text" placeholder="Tap Start then type here" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
-            <button class="btn primary" id="typeStart" aria-keyshortcuts="Space">Start (Space)</button>
+            <button class="btn primary" id="typeStart" title="T">Start</button>
           </div>
           <div id="typeMsg" class="message muted"></div>
         </div>
       </section>
 
-      <!-- GAME (Three.js) -->
-      <section id="sec-game" class="panel" role="tabpanel" aria-hidden="true" aria-label="3D Drift Game">
-        <h2>Retro Drift — 3D</h2>
+      <!-- 3D DRIFT GAME -->
+      <section id="sec-game" class="panel" role="tabpanel" aria-hidden="true">
+        <h2>Retro Drift</h2>
         <div class="hud">
-          <div class="pill">Score: <strong id="gameScore">0</strong></div>
-          <div class="pill">Drift: <strong id="driftPct">0%</strong></div>
-          <div class="pill">FPS: <strong id="fps">0</strong></div>
+          <div class="pill">Style Points: <strong id="driftScore">0</strong></div>
+          <div class="pill">Best: <strong id="driftBest">0</strong></div>
+          <div class="pill">Car: <strong id="driftCarName">Classic</strong></div>
         </div>
-        <div id="gameWrap">
-          <canvas id="gameCanvas"></canvas>
+
+        <div class="game-wrap">
+          <canvas id="driftCanvas"></canvas>
 
           <!-- Mobile controls -->
-          <div class="mobile-controls" id="mobileCtrls" aria-hidden="true">
-            <button class="ctl" id="leftBtn">◀</button>
-            <button class="ctl" id="rightBtn">▶</button>
-            <button class="ctl" id="gasBtn">⏵</button>
-            <button class="ctl" id="brakeBtn">⏸</button>
-            <button class="ctl" id="driftBtn">⤾</button>
+          <div class="mobile-controls" id="mobileCtrls">
+            <button class="pad" id="btnLeft">◀</button>
+            <button class="pad" id="btnRight">▶</button>
+            <button class="pad" id="btnAccel">▲</button>
+            <button class="pad" id="btnBrake">■</button>
           </div>
         </div>
-        <p class="muted small">Controls: WASD/Arrows = drive • Shift/Space = drift • R = reset car • M = mute engine • Mobile buttons on touch devices. Earn small coins by drifting cleanly.</p>
+
+        <div class="message muted">Controls — PC: WASD / Arrow keys, Space brake. Mobile: onscreen buttons. Earn style points by drifting!</div>
       </section>
 
       <!-- SHOP -->
-      <section id="sec-shop" class="panel" role="tabpanel" aria-hidden="true" aria-label="Shop">
+      <section id="sec-shop" class="panel" role="tabpanel" aria-hidden="true">
         <h2>Shop</h2>
-        <p class="muted">Spend your shared balance on cosmetics & small boosts. Owned items show as Active/Owned.</p>
+        <p class="muted">Spend your coins on cosmetics, boosts, and themes. Items persist locally.</p>
 
-        <div id="shopGrid" class="shop-grid">
-          <!-- Items injected by JS -->
+        <div class="shop-grid" id="shopGrid">
+          <!-- Populated by JS -->
         </div>
       </section>
 
       <!-- CUSTOMIZATION -->
-      <section id="sec-custom" class="panel" role="tabpanel" aria-hidden="true" aria-label="Customization">
+      <section id="sec-custom" class="panel" role="tabpanel" aria-hidden="true">
         <h2>Customization</h2>
+
         <div class="card">
           <label>Theme:
             <select id="themeSelect">
@@ -245,10 +254,6 @@
               <option value="60">60s</option>
             </select>
           </label>
-
-          <div class="muted small" style="margin-top:.5rem">
-            Tips: Use the Shop to unlock extra themes, car skins, and boosters. All purchases are permanent on this device.
-          </div>
         </div>
       </section>
     </main>
@@ -259,8 +264,6 @@
     </footer>
   </div>
 
-  <!-- Three.js (CDN) -->
-  <script src="https://unpkg.com/three@0.161.0/build/three.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
