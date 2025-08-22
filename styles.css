@@ -89,10 +89,6 @@ h1{font-size:20px;margin:0}
 .modal[aria-hidden="false"], .modal.show{display:flex}
 .modal-content{background:var(--panel);padding:18px;border-radius:12px;max-width:400px;width:92%;border:1px solid rgba(255,255,255,0.04)}
 
-/* leaderboard list */
-#leaderboardList ol{margin:8px 0;padding-left:18px}
-#leaderboardList li{margin:6px 0}
-
 /* small tweaks for customization controls */
 .card label, .card select, .card input[type="color"], .card input[type="range"]{display:block;margin:8px 0}
 
