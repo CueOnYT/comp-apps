@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Devin's Games — Game Hub</title>
-  <meta name="description" content="Devin's Games — Slots, Blackjack, Math Sprint, Typing, and a retro 3D drifting game. Responsive, polished, single-page app with customization." />
+  <meta name="description" content="Devin's Games — Slots, Blackjack, Math Sprint, Typing, 3D Drift. Responsive, polished, single-page app with customization and shared balance." />
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -18,53 +18,25 @@
         </div>
       </div>
 
-      <nav class="tabs" role="tablist">
-        <button class="tab" data-tab="game" aria-current="page">🚗 Game</button>
-        <button class="tab" data-tab="slots">🎰 Slots</button>
+      <nav class="tabs" role="tablist" aria-label="Game Tabs">
+        <button class="tab" data-tab="slots" aria-current="page">🎰 Slots</button>
         <button class="tab" data-tab="blackjack">🂡 Blackjack</button>
         <button class="tab" data-tab="math">➗ Math Sprint</button>
         <button class="tab" data-tab="typing">⌨️ Typing</button>
+        <button class="tab" data-tab="game">🚗 Game</button>
+        <button class="tab" data-tab="shop">🛒 Shop</button>
         <button class="tab" data-tab="custom">⚙️ Customize</button>
       </nav>
 
-      <!-- Login removed per your request -->
+      <div class="global-pills">
+        <div class="pill">Balance: <strong id="globalBank">100</strong></div>
+        <div class="pill hint" title="Keyboard Shortcuts">ⓘ Shortcuts: 1–6 switch • Space/Enter action • H/S in Blackjack • WASD/Shift in Game</div>
+      </div>
     </header>
 
     <main class="main">
-      <!-- RETRO DRIFTING GAME -->
-      <section id="sec-game" class="panel active" role="tabpanel">
-        <h2>Retro Drift</h2>
-        <p class="muted small">
-          Keyboard: Arrow keys or A/D to steer, Up to accelerate, Down to brake, Space = handbrake.  
-          Shortcuts: 1=Game, 2=Slots, 3=Blackjack, 4=Math, 5=Typing, 6=Customize.
-        </p>
-
-        <div class="game-wrap">
-          <canvas id="driftCanvas" width="960" height="540" aria-label="Retro drifting game"></canvas>
-
-          <!-- Mobile touch controls -->
-          <div class="touch-controls" id="touchControls" aria-hidden="false">
-            <div class="row">
-              <button class="btn circle" id="btnLeft" aria-label="Steer Left">⟵</button>
-              <button class="btn circle" id="btnRight" aria-label="Steer Right">⟶</button>
-            </div>
-            <div class="row">
-              <button class="btn pill" id="btnBrake" aria-label="Brake">Brake</button>
-              <button class="btn pill primary" id="btnGas" aria-label="Accelerate">Gas</button>
-              <button class="btn pill" id="btnEbrake" aria-label="Handbrake">E-Brake</button>
-            </div>
-          </div>
-        </div>
-        <div id="driftHud" class="hud">
-          <div class="pill">Speed: <strong id="hudSpeed">0</strong> km/h</div>
-          <div class="pill">Drift: <strong id="hudDrift">0%</strong></div>
-          <div class="pill">Lap: <strong id="hudLap">0</strong></div>
-        </div>
-        <div id="driftMsg" class="message muted"></div>
-      </section>
-
       <!-- SLOTS -->
-      <section id="sec-slots" class="panel" role="tabpanel" aria-hidden="true">
+      <section id="sec-slots" class="panel active" role="tabpanel" aria-label="Slots">
         <h2>Lucky Slots</h2>
         <p class="slots-note">Thank You James For The Triple 🍋</p>
         <div class="hud">
@@ -82,7 +54,7 @@
             </div>
 
             <div class="controls">
-              <button class="btn primary" id="spinBtn">Spin (Space)</button>
+              <button class="btn primary" id="spinBtn" aria-keyshortcuts="Space">Spin (Space)</button>
               <div class="bet-controls">
                 <button class="btn" id="betDown" data-dir="-">−</button>
                 <div class="bet-display" id="betDisplay">5</div>
@@ -102,14 +74,14 @@
                 <li>3× 🍋 = 8× bet</li>
                 <li>Any 2 matching = 3× bet</li>
               </ul>
-              <p class="muted">Bets are clamped to your balance so you cannot go below $0. Values stored locally in your browser.</p>
+              <p class="muted">Shared balance across all games. Stored locally in your browser.</p>
             </div>
           </aside>
         </div>
       </section>
 
       <!-- BLACKJACK -->
-      <section id="sec-blackjack" class="panel" role="tabpanel" aria-hidden="true">
+      <section id="sec-blackjack" class="panel" role="tabpanel" aria-hidden="true" aria-label="Blackjack">
         <h2>Blackjack</h2>
         <div class="hud">
           <div class="pill">Bank: <strong id="bjBank">100</strong></div>
@@ -126,9 +98,9 @@
             <div class="cards" id="player"></div>
 
             <div class="controls">
-              <button class="btn primary" id="bjDeal">Deal (D)</button>
-              <button class="btn" id="bjHit" disabled>Hit (H)</button>
-              <button class="btn" id="bjStand" disabled>Stand (S)</button>
+              <button class="btn primary" id="bjDeal" aria-keyshortcuts="Space">Deal (Space)</button>
+              <button class="btn" id="bjHit" disabled aria-keyshortcuts="KeyH">Hit (H)</button>
+              <button class="btn" id="bjStand" disabled aria-keyshortcuts="KeyS">Stand (S)</button>
 
               <div class="bet-controls small">
                 <button class="btn ghost" id="bjBetDown" data-dir="-">−</button>
@@ -145,7 +117,7 @@
               <h3>Rules</h3>
               <ul>
                 <li>Ace is 1 or 11.</li>
-                <li>Dealer hits to 16 and stands on 17+</li>
+                <li>Dealer hits to 16 and stands on 17+.</li>
                 <li>Blackjack pays 3:2 on an initial winning hand.</li>
               </ul>
             </div>
@@ -154,7 +126,7 @@
       </section>
 
       <!-- MATH -->
-      <section id="sec-math" class="panel" role="tabpanel" aria-hidden="true">
+      <section id="sec-math" class="panel" role="tabpanel" aria-hidden="true" aria-label="Math Sprint">
         <h2>Math Sprint</h2>
         <div class="hud">
           <div class="pill">Score: <strong id="mathScore">0</strong></div>
@@ -168,8 +140,8 @@
             <div class="problem" id="mathQ">Loading...</div>
             <div class="controls">
               <input id="mathA" type="number" placeholder="Answer" />
-              <button class="btn primary" id="mathSubmit">Submit (Enter)</button>
-              <button class="btn" id="mathStart">Start (Shift+Enter)</button>
+              <button class="btn primary" id="mathSubmit" aria-keyshortcuts="Enter">Submit (Enter)</button>
+              <button class="btn" id="mathStart" aria-keyshortcuts="Space">Start (Space)</button>
             </div>
             <div id="mathMsg" class="message muted"></div>
           </div>
@@ -188,14 +160,14 @@
                   <option value="hard">Hard</option>
                 </select>
               </label>
-              <p class="muted">Hard mode includes multi-step/chained problems and larger numbers.</p>
+              <p class="muted">Hard includes chained problems & larger numbers.</p>
             </div>
           </aside>
         </div>
       </section>
 
       <!-- TYPING -->
-      <section id="sec-typing" class="panel" role="tabpanel" aria-hidden="true">
+      <section id="sec-typing" class="panel" role="tabpanel" aria-hidden="true" aria-label="Typing Test">
         <h2>Typing Test</h2>
         <div class="hud">
           <div class="pill">WPM: <strong id="typeWpm">0</strong></div>
@@ -208,16 +180,48 @@
           <div id="typingText" class="typingText" aria-live="polite"></div>
           <div class="controls">
             <input id="typeInput" type="text" placeholder="Tap Start then type here" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
-            <button class="btn primary" id="typeStart">Start (Enter)</button>
+            <button class="btn primary" id="typeStart" aria-keyshortcuts="Space">Start (Space)</button>
           </div>
           <div id="typeMsg" class="message muted"></div>
         </div>
       </section>
 
-      <!-- CUSTOMIZATION -->
-      <section id="sec-custom" class="panel" role="tabpanel" aria-hidden="true">
-        <h2>Customization</h2>
+      <!-- GAME (Three.js) -->
+      <section id="sec-game" class="panel" role="tabpanel" aria-hidden="true" aria-label="3D Drift Game">
+        <h2>Retro Drift — 3D</h2>
+        <div class="hud">
+          <div class="pill">Score: <strong id="gameScore">0</strong></div>
+          <div class="pill">Drift: <strong id="driftPct">0%</strong></div>
+          <div class="pill">FPS: <strong id="fps">0</strong></div>
+        </div>
+        <div id="gameWrap">
+          <canvas id="gameCanvas"></canvas>
 
+          <!-- Mobile controls -->
+          <div class="mobile-controls" id="mobileCtrls" aria-hidden="true">
+            <button class="ctl" id="leftBtn">◀</button>
+            <button class="ctl" id="rightBtn">▶</button>
+            <button class="ctl" id="gasBtn">⏵</button>
+            <button class="ctl" id="brakeBtn">⏸</button>
+            <button class="ctl" id="driftBtn">⤾</button>
+          </div>
+        </div>
+        <p class="muted small">Controls: WASD/Arrows = drive • Shift/Space = drift • R = reset car • M = mute engine • Mobile buttons on touch devices. Earn small coins by drifting cleanly.</p>
+      </section>
+
+      <!-- SHOP -->
+      <section id="sec-shop" class="panel" role="tabpanel" aria-hidden="true" aria-label="Shop">
+        <h2>Shop</h2>
+        <p class="muted">Spend your shared balance on cosmetics & small boosts. Owned items show as Active/Owned.</p>
+
+        <div id="shopGrid" class="shop-grid">
+          <!-- Items injected by JS -->
+        </div>
+      </section>
+
+      <!-- CUSTOMIZATION -->
+      <section id="sec-custom" class="panel" role="tabpanel" aria-hidden="true" aria-label="Customization">
+        <h2>Customization</h2>
         <div class="card">
           <label>Theme:
             <select id="themeSelect">
@@ -226,44 +230,12 @@
             </select>
           </label>
 
-          <label>Preset:
-            <select id="presetSelect">
-              <option value="default" selected>Default</option>
-              <option value="ocean">Ocean</option>
-              <option value="sunset">Sunset</option>
-            </select>
-          </label>
-
           <label>Accent:
             <input type="color" id="accentPicker" value="#7cf1c8" />
           </label>
 
-          <label>Font family:
-            <select id="fontFamily">
-              <option value="Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial">Inter</option>
-              <option value="Georgia, serif">Georgia</option>
-              <option value="'Courier New', monospace">Monospace</option>
-            </select>
-          </label>
-
           <label>Font size:
             <input id="fontSize" type="range" min="13" max="20" value="16">
-          </label>
-
-          <label>Background:
-            <select id="bgPattern">
-              <option value="radial">Radial Gradient</option>
-              <option value="stripes">Subtle Stripes</option>
-              <option value="flat">Flat Color</option>
-            </select>
-          </label>
-
-          <label>Enable sounds:
-            <input type="checkbox" id="enableSound" checked>
-          </label>
-
-          <label>Disable animations:
-            <input type="checkbox" id="disableAnim">
           </label>
 
           <label>Typing time:
@@ -273,6 +245,10 @@
               <option value="60">60s</option>
             </select>
           </label>
+
+          <div class="muted small" style="margin-top:.5rem">
+            Tips: Use the Shop to unlock extra themes, car skins, and boosters. All purchases are permanent on this device.
+          </div>
         </div>
       </section>
     </main>
@@ -283,6 +259,8 @@
     </footer>
   </div>
 
+  <!-- Three.js (CDN) -->
+  <script src="https://unpkg.com/three@0.161.0/build/three.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
