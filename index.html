@@ -1,215 +1,803 @@
-<!doctype html>
+# Build a single-file "index.html" with multiple mini-games (slots, blackjack, roulette, video poker,
+# minesweeper, checkers, chess-basic, and a simple pool practice), neon LED-blue theme, and no external assets.
+# The file is self-contained and GitHub Pages-ready.
+
+from pathlib import Path
+root = Path("/mnt/data")
+html_path = root / "index.html"
+
+index_html = r"""<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Devin's Games — Game Hub</title>
-  <meta name="description" content="Devin's Games — Slots, Blackjack, Math Sprint, Typing, 3D Retro Drift. Shared wallet, shop, customization." />
-  <!-- Three.js -->
-  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Devin Casino — All-in-One</title>
+<meta name="description" content="Devin Slifer • Computer Apps project • Entertainment only, no real money."/>
+<style>
+:root{
+  --bg:#060912;
+  --panel:#0b1224;
+  --accent:#1c7dff;
+  --accent-2:#60a5ff;
+  --text:#e6f0ff;
+  --muted:#9fb7e6;
+  --good:#2ecc71;
+  --warn:#f39c12;
+  --bad:#e74c3c;
+  --shadow: 0 10px 30px rgba(28,125,255,0.25);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:radial-gradient(1200px 600px at 20% 0%, rgba(28,125,255,.08), transparent), var(--bg); color:var(--text); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, Noto Sans, "Helvetica Neue", sans-serif;}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer}
 
-  <style>
-    body { margin:0; font-family: sans-serif; background:#111; color:#eee; }
-    .app { display:flex; flex-direction:column; min-height:100vh; }
-    header { background:#222; padding:1rem; display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; }
-    .brand { display:flex; gap:1rem; align-items:center; }
-    .logo { background:#7cf1c8; color:#111; font-weight:bold; padding:.5rem; border-radius:50%; }
-    nav.tabs { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:1rem; }
-    nav.tabs .tab { background:#333; color:#eee; border:none; padding:.5rem 1rem; border-radius:.5rem; cursor:pointer; }
-    nav.tabs .tab[aria-current="page"] { background:#7cf1c8; color:#111; font-weight:bold; }
-    main { flex:1; padding:1rem; }
-    .panel { display:none; }
-    .panel.active { display:block; }
-    .hud { display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:1rem; }
-    .pill { background:#333; padding:.5rem 1rem; border-radius:2rem; }
-    .pill.small { font-size:.8rem; }
-    .layout.two-col { display:grid; grid-template-columns:1fr 200px; gap:1rem; }
-    .controls { margin-top:1rem; display:flex; gap:.5rem; flex-wrap:wrap; }
-    .btn { background:#333; border:none; color:#eee; padding:.5rem 1rem; border-radius:.5rem; cursor:pointer; }
-    .btn.primary { background:#7cf1c8; color:#111; font-weight:bold; }
-    .bet-controls { display:flex; gap:.5rem; align-items:center; }
-    .bet-display { min-width:2rem; text-align:center; }
-    .message { margin-top:.5rem; }
-    .cards { display:flex; gap:.5rem; margin-bottom:.5rem; }
-    .cards .cardEl { background:#fff; color:#000; padding:.5rem; border-radius:.25rem; }
-    .typing-area { margin-top:1rem; }
-    .typingText { background:#222; padding:1rem; border-radius:.5rem; margin-bottom:.5rem; min-height:3rem; }
-    .shop-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:1rem; }
-    .shop-item { background:#222; padding:1rem; border-radius:.5rem; text-align:center; }
-    footer { background:#222; padding:1rem; text-align:center; }
-    input, select { padding:.3rem; border-radius:.3rem; border:none; }
-  </style>
+.header{
+  padding:26px 18px 10px;
+  text-align:center;
+}
+.header h1{margin:0 0 6px 0; font-size: clamp(26px, 4.5vw, 46px); text-shadow:0 0 12px rgba(96,165,255,.35)}
+.header .tag{margin:0;color:var(--muted)}
+
+.nav{
+  display:flex; flex-wrap:wrap; gap:8px; justify-content:center; padding:10px 12px 18px;
+}
+.nav button{
+  background: linear-gradient(180deg,#13306a,#0b1b3a);
+  color:var(--text);
+  border:1px solid rgba(96,165,255,.45);
+  border-radius:12px; padding:10px 14px; box-shadow:var(--shadow);
+}
+.nav button.active{ outline:2px solid var(--accent-2) }
+
+.container{max-width:1200px;margin:0 auto;padding:0 12px 24px}
+.panel{
+  background: linear-gradient(180deg, rgba(12,20,40,0.9), rgba(9,15,30,0.9));
+  border:1px solid rgba(96,165,255,.25);
+  border-radius:18px;
+  padding:16px;
+  box-shadow: var(--shadow);
+  margin-top:8px;
+}
+
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:14px}
+.row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+.input{background:#0a152d;color:var(--text);border:1px solid rgba(96,165,255,.35);border-radius:10px;padding:8px}
+
+.footer{ text-align:center; padding:18px; color:var(--muted) }
+small.disclaimer{display:block;color:var(--muted); margin-top:6px}
+
+/* Slots */
+#slots .reels{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:8px 0}
+#slots .reel{height:150px;background:radial-gradient(200px 120px at 50% 0%, rgba(96,165,255,.15), transparent), #0a1326;border:1px solid rgba(96,165,255,.3);border-radius:16px;display:grid;place-items:center;font-size:64px;box-shadow:var(--shadow)}
+#slots .controls{display:flex;gap:8px;align-items:center;margin-top:8px}
+
+/* Blackjack */
+#blackjack .table{display:grid; gap:10px}
+#blackjack .hand{background:linear-gradient(180deg,#0c1734,#0a142a);border:1px solid rgba(96,165,255,.3);border-radius:16px;padding:12px;box-shadow:var(--shadow);}
+#blackjack .cards{display:flex;gap:8px;flex-wrap:wrap;min-height:78px}
+#blackjack .card{width:56px;height:78px;border-radius:10px;border:1px solid rgba(96,165,255,.4);display:grid;place-items:center;background:#0e1a3a;font-weight:700}
+#blackjack .controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.hidden{filter:brightness(0.5) blur(1px)}
+
+/* Roulette */
+#roulette .wrap{display:grid;grid-template-columns: minmax(260px,340px) 1fr; gap:16px; align-items:center}
+#roulette .wheel{aspect-ratio:1/1; width:100%; border-radius:50%; border:2px solid rgba(96,165,255,.4); box-shadow:var(--shadow); display:grid;place-items:center;background:radial-gradient(120px 120px at 50% 50%, rgba(96,165,255,.18), #0a142a)}
+#roulette .result{font-size:42px}
+#roulette .bets{display:grid;grid-template-columns: repeat(12, 1fr); gap:6px}
+#roulette .cell{padding:8px;border:1px solid rgba(96,165,255,.25);border-radius:10px;text-align:center;cursor:pointer; user-select:none}
+#roulette .cell.active{outline:2px solid var(--accent)}
+
+/* Video Poker */
+#vpoker .cards{display:flex; gap:8px; flex-wrap:wrap; min-height:78px}
+#vpoker .card{width:56px;height:78px;border-radius:10px;border:1px solid rgba(96,165,255,.4);display:grid;place-items:center;background:#0e1a3a;font-weight:700}
+#vpoker .hold{display:block; text-align:center; font-size:12px; color:var(--muted);}
+#vpoker .controls{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+
+/* Minesweeper */
+#mines .board{display:grid; gap:4px; margin-top:8px}
+#mines .cell{width:28px; height:28px; border-radius:6px; background:#0b152e; border:1px solid rgba(96,165,255,.3); display:grid; place-items:center; cursor:pointer; user-select:none}
+#mines .cell.revealed{background:#0f1f44}
+#mines .cell.mine{background:#3b0f14; border-color:#622}
+#mines .cell.flag{outline:1px dashed var(--warn)}
+#mines .panel .row{justify-content:space-between}
+
+/* Checkers */
+#checkers .board{display:grid; grid-template-columns: repeat(8, 42px); gap:0; margin-top:8px; border:2px solid rgba(96,165,255,.4);}
+#checkers .sq{width:42px; height:42px; display:grid; place-items:center; font-size:22px; cursor:pointer; user-select:none}
+#checkers .dark{background:#0c1734}
+#checkers .light{background:#0b1224; border-left:1px solid rgba(96,165,255,.08); border-top:1px solid rgba(96,165,255,.08)}
+#checkers .sq.sel{outline:2px solid var(--accent)}
+
+/* Chess (basic two-player, no check validation) */
+#chess .board{display:grid; grid-template-columns: repeat(8, 48px); margin-top:8px; border:2px solid rgba(96,165,255,.4)}
+#chess .sq{width:48px;height:48px;display:grid;place-items:center;cursor:pointer;user-select:none}
+#chess .dark{background:#0c1734}
+#chess .light{background:#0b1224}
+#chess .sq.sel{outline:2px solid var(--accent)}
+
+/* Pool (simple practice) */
+#pool canvas{width:100%; max-width:720px; height:auto; background:#0a142a; border:1px solid rgba(96,165,255,.3); border-radius:14px; box-shadow:var(--shadow)}
+#pool .controls{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:8px}
+</style>
 </head>
 <body>
-  <div id="app" class="app">
-    <header class="top">
-      <div class="brand">
-        <div class="logo">DG</div>
-        <div>
-          <h1>Devin’s Games</h1>
-          <p class="tag">Fun practice games — made by Devin Slifer</p>
-        </div>
-      </div>
+  <div class="header">
+    <h1>Devin Casino</h1>
+    <p class="tag">by <strong>Devin Slifer</strong> • Computer Apps Project • Entertainment only — no real money</p>
+  </div>
 
-      <nav class="tabs" role="tablist" aria-label="Game Tabs">
-        <button class="tab" data-tab="slots" aria-current="page">🎰 Slots</button>
-        <button class="tab" data-tab="blackjack">🂡 Blackjack</button>
-        <button class="tab" data-tab="math">➗ Math Sprint</button>
-        <button class="tab" data-tab="typing">⌨️ Typing</button>
-        <button class="tab" data-tab="shop">🛒 Shop</button>
-        <button class="tab" data-tab="custom">⚙️ Customize</button>
-      </nav>
-    </header>
+  <div class="nav" id="nav"></div>
 
-    <main class="main">
-      <!-- WALLET HUD -->
-      <section class="panel active" id="sec-slots">
-        <div class="hud sticky">
-          <div class="pill">Coins: <strong id="walletVal" class="walletVal">100</strong></div>
-        </div>
-
-        <h2>Lucky Slots</h2>
-        <div class="hud">
-          <div class="pill">Bet: <strong id="slotsBet">5</strong></div>
-          <div class="pill">Best: <strong id="slotsBest">0</strong></div>
-        </div>
-
-        <div class="reels">
-          <div class="reel" id="reel1">🍒</div>
-          <div class="reel" id="reel2">🍋</div>
-          <div class="reel" id="reel3">⭐</div>
-        </div>
-
-        <div class="controls">
-          <button class="btn primary" id="spinBtn">Spin</button>
-          <div class="bet-controls">
-            <button class="btn" id="betDown">−</button>
-            <div class="bet-display" id="betDisplay">5</div>
-            <button class="btn" id="betUp">+</button>
-          </div>
-        </div>
-        <div id="slotsMsg" class="message muted">Ready to play.</div>
-      </section>
-
-      <section id="sec-blackjack" class="panel">
-        <div class="hud">
-          <div class="pill">Bet: <strong id="bjBet">10</strong></div>
-        </div>
-        <h2>Blackjack</h2>
-        <h4>Dealer (<span id="dVal">?</span>)</h4>
-        <div class="cards" id="dealer"></div>
-        <h4>You (<span id="pVal">0</span>)</h4>
-        <div class="cards" id="player"></div>
-        <div class="controls">
-          <button class="btn primary" id="bjDeal">Deal</button>
-          <button class="btn" id="bjHit" disabled>Hit</button>
-          <button class="btn" id="bjStand" disabled>Stand</button>
-        </div>
-        <div id="bjMsg" class="message muted">Good luck!</div>
-      </section>
-
-      <section id="sec-math" class="panel">
-        <h2>Math Sprint</h2>
-        <div class="hud">
-          <div class="pill">Score: <strong id="mathScore">0</strong></div>
-          <div class="pill">Streak: <strong id="mathStreak">0</strong></div>
-          <div class="pill">Time: <strong id="mathTime">60</strong>s</div>
-        </div>
-        <div id="mathQ">Click start</div>
-        <div class="controls">
-          <input id="mathA" type="number" placeholder="Answer" />
-          <button class="btn primary" id="mathSubmit">Submit</button>
-          <button class="btn" id="mathStart">Start</button>
-        </div>
-        <div id="mathMsg" class="message muted"></div>
-      </section>
-
-      <section id="sec-typing" class="panel">
-        <h2>Typing Test</h2>
-        <div class="hud">
-          <div class="pill">WPM: <strong id="typeWpm">0</strong></div>
-          <div class="pill">Accuracy: <strong id="typeAcc">100%</strong></div>
-          <div class="pill">Time: <strong id="typeTime">30</strong>s</div>
-        </div>
-        <div id="typingText" class="typingText"></div>
-        <div class="controls">
-          <input id="typeInput" type="text" />
-          <button class="btn primary" id="typeStart">Start</button>
-        </div>
-        <div id="typeMsg" class="message muted"></div>
-      </section>
-
-      <section id="sec-shop" class="panel">
-        <h2>Shop</h2>
-        <p class="muted">Spend your coins.</p>
-        <div class="shop-grid" id="shopGrid"></div>
-      </section>
-
-      <section id="sec-custom" class="panel">
-        <h2>Customization</h2>
-        <label>Theme:
-          <select id="themeSelect">
-            <option value="dark" selected>Dark</option>
-            <option value="light">Light</option>
-          </select>
-        </label>
-        <label>Accent:
-          <input type="color" id="accentPicker" value="#7cf1c8" />
-        </label>
-      </section>
-    </main>
-
-    <footer class="footer">
-      <div>Created by Devin Slifer</div>
-    </footer>
+  <div class="container">
+    <!-- Panels mount here -->
+    <div id="panels"></div>
+    <div class="footer">
+      <small>Tip: Your balance is local to each game (fake money). Refresh to reset.</small>
+      <small class="disclaimer">This is a student project. Games are approximations of real mechanics.</small>
+    </div>
   </div>
 
 <script>
-// === TABS ===
-const tabs=document.querySelectorAll(".tab"),panels=document.querySelectorAll(".panel");
-tabs.forEach(t=>t.addEventListener("click",()=>{tabs.forEach(tb=>tb.removeAttribute("aria-current"));panels.forEach(p=>p.classList.remove("active"));t.setAttribute("aria-current","page");document.getElementById("sec-"+t.dataset.tab).classList.add("active")}));
-// === WALLET ===
-let wallet=100;const updateWallet=()=>document.querySelectorAll(".walletVal").forEach(e=>e.textContent=wallet);updateWallet();
+/* ---------- SPA NAV ---------- */
+const games = [
+  { id:'slots', label:'Slots' },
+  { id:'blackjack', label:'Blackjack' },
+  { id:'roulette', label:'Roulette' },
+  { id:'vpoker', label:'Video Poker' },
+  { id:'mines', label:'Minesweeper' },
+  { id:'checkers', label:'Checkers' },
+  { id:'chess', label:'Chess (Basic)' },
+  { id:'pool', label:'Pool Practice' },
+];
 
-// === SLOTS ===
-let slotsBet=5,slotsBest=0;
-const betDisplay=document.getElementById("betDisplay"),slotsMsg=document.getElementById("slotsMsg"),slotsBestEl=document.getElementById("slotsBest"),reelsEls=[reel1,reel2,reel3];
-function updateBetDisplay(){betDisplay.textContent=slotsBet;document.getElementById("slotsBet").textContent=slotsBet}
-betUp.onclick=()=>{if(slotsBet<wallet){slotsBet++;updateBetDisplay()}};
-betDown.onclick=()=>{if(slotsBet>1){slotsBet--;updateBetDisplay()}};
-spinBtn.onclick=()=>{if(slotsBet>wallet){slotsMsg.textContent="Not enough coins";return}wallet-=slotsBet;updateWallet();const symbols=["🍒","🍋","⭐","🍊","🔔"],res=reelsEls.map(r=>r.textContent=symbols[Math.floor(Math.random()*symbols.length)]||"");let payout=0;if(res[0]==res[1]&&res[1]==res[2]){if(res[0]=="⭐")payout=slotsBet*20;else if(res[0]=="🍒")payout=slotsBet*12;else if(res[0]=="🍋")payout=slotsBet*8;else payout=slotsBet*6}else if(res[0]==res[1]||res[1]==res[2]||res[0]==res[2])payout=slotsBet*4;if(payout){wallet+=payout;updateWallet();slotsMsg.textContent="You won "+payout; if(payout>slotsBest){slotsBest=payout;slotsBestEl.textContent=slotsBest}}else slotsMsg.textContent="No match";};
+const navEl = document.getElementById('nav');
+const panelsEl = document.getElementById('panels');
 
-// === BLACKJACK ===
-const deck=()=>["A","2","3","4","5","6","7","8","9","10","J","Q","K"].flatMap(v=>["♠","♥","♦","♣"].map(s=>v+s));
-let bjDeck=[],player=[],dealer=[],bjBet=10;
-function value(hand){let t=0,a=0;hand.forEach(c=>{let v=c.slice(0,-1);if(v=="A"){t+=11;a++}else if(["K","Q","J"].includes(v))t+=10;else t+=+v});while(t>21&&a>0){t-=10;a--}return t}
-function render(){playerDiv=document.getElementById("player");dealerDiv=document.getElementById("dealer");playerDiv.innerHTML="";dealerDiv.innerHTML="";player.forEach(c=>{let e=document.createElement("div");e.className="cardEl";e.textContent=c;playerDiv.appendChild(e)});dealer.forEach(c=>{let e=document.createElement("div");e.className="cardEl";e.textContent=c;dealerDiv.appendChild(e)});pVal.textContent=value(player);dVal.textContent=value(dealer)}
-bjDeal.onclick=()=>{if(bjBet>wallet){bjMsg.textContent="Not enough coins";return}bjDeck=deck().sort(()=>Math.random()-.5);player=[bjDeck.pop(),bjDeck.pop()];dealer=[bjDeck.pop(),bjDeck.pop()];wallet-=bjBet;updateWallet();bjHit.disabled=bjStand.disabled=false;render();bjMsg.textContent="Hit or Stand?"}
-bjHit.onclick=()=>{player.push(bjDeck.pop());render();if(value(player)>21){bjMsg.textContent="Bust!";bjHit.disabled=bjStand.disabled=true}}
-bjStand.onclick=()=>{while(value(dealer)<17)dealer.push(bjDeck.pop());render();let pv=value(player),dv=value(dealer);if(dv>21||pv>dv){wallet+=bjBet*2;updateWallet();bjMsg.textContent="You win!"}else if(pv==dv){wallet+=bjBet;updateWallet();bjMsg.textContent="Push"}else bjMsg.textContent="Dealer wins";bjHit.disabled=bjStand.disabled=true};
+function mountPanel(id, html){
+  const el = document.createElement('section');
+  el.className = 'panel';
+  el.id = id;
+  el.innerHTML = html;
+  el.style.display = 'none';
+  panelsEl.appendChild(el);
+  return el;
+}
 
-// === MATH ===
-let score=0,streak=0,time=60,timer=null,answer=0;
-mathStart.onclick=()=>{score=0;streak=0;time=60;updateMath();nextQ();if(timer)clearInterval(timer);timer=setInterval(()=>{time--;updateMath();if(time<=0){clearInterval(timer);mathMsg.textContent="Time up!"}},1000)}
-function updateMath(){mathScore.textContent=score;mathStreak.textContent=streak;mathTime.textContent=time}
-function nextQ(){let a=Math.floor(Math.random()*10)+1,b=Math.floor(Math.random()*10)+1;answer=a+b;mathQ.textContent=a+" + "+b+" = ?";mathA.value=""}
-mathSubmit.onclick=()=>{if(+mathA.value===answer){score+=10;streak++;wallet+=2;mathMsg.textContent="Correct! +2 coins"}else{streak=0;mathMsg.textContent="Wrong!"}updateWallet();updateMath();nextQ()}
+function showPanel(id){
+  [...panelsEl.children].forEach(p=>p.style.display = (p.id===id?'block':'none'));
+  [...navEl.children].forEach(b=>b.classList.toggle('active', b.dataset.id===id));
+  // lazy-init when shown
+  const panel = document.getElementById(id);
+  const init = panel.dataset.init;
+  if(init!=='1'){
+    panel.dataset.init='1';
+    const evt = new CustomEvent('init-'+id, {detail:{el:panel}});
+    window.dispatchEvent(evt);
+  }
+}
 
-// === TYPING ===
-const texts=["hello world","javascript game hub","practice typing test"];
-let typingIndex=0,target="",typed="",typeTimer=null,typeTime=30,startTime;
-typeStart.onclick=()=>{target=texts[Math.floor(Math.random()*texts.length)];typingText.textContent=target;typed="";typeInput.value="";typeInput.focus();startTime=Date.now();typeTime=30;typeTimer=setInterval(()=>{typeTime--;typeTime<=0&&endTyping();typeTime>0&&(typeTimeEl.textContent=typeTime)},1000)}
-function endTyping(){clearInterval(typeTimer);let words=typed.trim().split(/\s+/).length;let minutes=(Date.now()-startTime)/60000;let wpm=Math.round(words/minutes);typeWpm.textContent=wpm;typeAcc.textContent=Math.round((typed===target?100:50))+"%";if(typed===target){wallet+=10;updateWallet();typeMsg.textContent="Perfect! +10 coins"}else typeMsg.textContent="Try again"}
-typeInput.oninput=()=>{typed=typeInput.value}
+games.forEach(g=>{
+  const b = document.createElement('button');
+  b.textContent = g.label;
+  b.dataset.id = g.id;
+  b.addEventListener('click', ()=>showPanel(g.id));
+  navEl.appendChild(b);
+});
 
-// === SHOP ===
-const items=[{name:"Hat",cost:20},{name:"Car Skin",cost:50},{name:"Theme Pack",cost:30}];
-shopGrid.innerHTML=items.map(i=>`<div class="shop-item"><strong>${i.name}</strong><br>${i.cost}c<br><button onclick="buy('${i.name}',${i.cost})">Buy</button></div>`).join("");
-function buy(n,c){if(wallet>=c){wallet-=c;updateWallet();alert("Bought "+n)}else alert("Not enough coins")}
+/* ---------- Utility ---------- */
+class Bank {
+  constructor(start=1000){ this.balance = start; }
+  canBet(amt){ return Number.isFinite(amt) && amt>0 && amt<=this.balance; }
+  bet(amt){ if(!this.canBet(amt)) throw new Error('Invalid bet'); this.balance -= amt; return amt; }
+  win(amt){ this.balance += amt; }
+  toString(){ return '$'+this.balance.toLocaleString(); }
+}
+function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
+function el(html){ const t=document.createElement('template'); t.innerHTML=html.trim(); return t.content.firstChild; }
 
-// === CUSTOM ===
-themeSelect.onchange=()=>{document.body.style.background=themeSelect.value=="dark"?"#111":"#fff";document.body.style.color=themeSelect.value=="dark"?"#eee":"#000";}
-accentPicker.oninput=()=>{document.querySelectorAll(".btn.primary").forEach(b=>b.style.background=accentPicker.value);}
+/* ---------- Slots Panel ---------- */
+mountPanel('slots', `
+  <h2>🎰 Slots</h2>
+  <div class="grid-2">
+    <div>
+      <div class="reels"><div class="reel" id="r1">🍒</div><div class="reel" id="r2">🍋</div><div class="reel" id="r3">⭐</div></div>
+      <div class="controls">
+        <label>Bet $<input id="slots-bet" class="input" type="number" value="10" min="1" step="1"></label>
+        <button id="slots-spin">SPIN</button>
+        <label style="margin-left:auto"><input type="checkbox" id="slots-auto"> Auto</label>
+      </div>
+      <p id="slots-msg" class="muted"></p>
+    </div>
+    <div>
+      <div class="panel" style="margin:0">
+        <div class="row"><strong>Balance:</strong><span id="slots-bal"></span></div>
+        <hr style="border-color:rgba(96,165,255,.2)">
+        <div>
+          <h3 style="margin:.2rem 0">Payouts (3 in a row)</h3>
+          <ul style="margin:.3rem 0 0 1rem; padding:0">
+            <li>💎 ×25 (jackpot)</li>
+            <li>🍒 ×10</li>
+            <li>🔔 ×8</li>
+            <li>🍋 ×6</li>
+            <li>⭐ ×5</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+`);
+
+window.addEventListener('init-slots', (e)=>{
+  const panel = e.detail.el;
+  const bank = new Bank(1000);
+  const sym=['🍒','🍋','🔔','⭐','💎'];
+  const weights = {'🍒':5,'🍋':4,'🔔':3,'⭐':2,'💎':1};
+  const payout = {'🍒':10,'🍋':6,'🔔':8,'⭐':5,'💎':25};
+  const r = [panel.querySelector('#r1'), panel.querySelector('#r2'), panel.querySelector('#r3')];
+  const betEl = panel.querySelector('#slots-bet');
+  const spin = panel.querySelector('#slots-spin');
+  const auto = panel.querySelector('#slots-auto');
+  const bal = panel.querySelector('#slots-bal');
+  const msg = panel.querySelector('#slots-msg');
+  bal.textContent = bank.toString();
+  function bag(){ const b=[]; for(const s of sym){ for(let i=0;i<weights[s];i++) b.push(s); } return b; }
+  function update(){ bal.textContent = bank.toString(); }
+  function spinOnce(){
+    const bet = Math.floor(+betEl.value||0);
+    if(!bank.canBet(bet)){ msg.textContent='Invalid bet'; return; }
+    bank.bet(bet);
+    const b = bag();
+    const res = [b[Math|0](Math.random()*b.length), b[Math|0](Math.random()*b.length), b[Math|0](Math.random()*b.length)];
+    r.forEach((el,i)=>{ el.textContent = res[i]; });
+    let win=0;
+    if(res[0]===res[1] && res[1]===res[2]){ win = bet*payout[res[0]]; bank.win(win); msg.textContent='Win $'+win; }
+    else msg.textContent='No win';
+    update();
+  }
+  let timer=null;
+  spin.addEventListener('click', spinOnce);
+  auto.addEventListener('change', ()=>{
+    clearInterval(timer);
+    if(auto.checked){
+      timer=setInterval(()=>{
+        if(!bank.canBet(+betEl.value)){ auto.checked=false; clearInterval(timer); msg.textContent='Auto stopped'; return; }
+        spinOnce();
+      }, 650);
+    }
+  });
+  update();
+});
+
+/* ---------- Blackjack Panel ---------- */
+mountPanel('blackjack', `
+  <h2>🂡 Blackjack</h2>
+  <div class="table">
+    <div class="hand"><strong>Dealer</strong><div id="bj-dealer" class="cards"></div><div id="bj-dt" class="muted"></div></div>
+    <div class="hand"><strong>Player</strong><div id="bj-player" class="cards"></div><div id="bj-pt" class="muted"></div></div>
+  </div>
+  <div class="row controls" style="margin-top:8px">
+    <label>Bet $<input id="bj-bet" class="input" type="number" value="25" min="1" step="1"></label>
+    <button id="bj-deal">Deal</button>
+    <button id="bj-hit" disabled>Hit</button>
+    <button id="bj-stand" disabled>Stand</button>
+    <button id="bj-double" disabled>Double</button>
+    <span style="margin-left:auto">Balance: <strong id="bj-bal"></strong></span>
+    <span id="bj-msg" class="muted"></span>
+  </div>
+`);
+
+window.addEventListener('init-blackjack', (e)=>{
+  const $=sel=>e.detail.el.querySelector(sel);
+  const bank=new Bank(1000);
+  const dealerEl = $('#bj-dealer'), playerEl=$('#bj-player');
+  const dt=$('#bj-dt'), pt=$('#bj-pt'), msg=$('#bj-msg'), bal=$('#bj-bal');
+  const dealBtn=$('#bj-deal'), hitBtn=$('#bj-hit'), standBtn=$('#bj-stand'), dblBtn=$('#bj-double');
+  const betEl=$('#bj-bet');
+  const ranks=['A','2','3','4','5','6','7','8','9','10','J','Q','K'], suits=['♠','♥','♦','♣'];
+  function shoe(decks=6){ const s=[]; for(let d=0;d<decks;d++) for(const r of ranks) for(const su of suits) s.push({r:symbol=r, s:su}); return shuffle(s); }
+  let cards=shoe(), dealer=[], player=[], bet=0, active=false;
+  function draw(){ if(cards.length<30) cards=shoe(); return cards.pop(); }
+  function value(hand){
+    let total=0, aces=0;
+    for(const c of hand){ if(c.r==='A') aces++; total += (c.r==='A'?11: (['K','Q','J'].includes(c.r)?10:+c.r)); }
+    while(total>21 && aces>0){ total-=10; aces--; } return total;
+  }
+  function render(){
+    dealerEl.innerHTML=''; playerEl.innerHTML='';
+    dealer.forEach((c,i)=>dealerEl.appendChild(el(`<div class="card ${active&&i===0?'hidden':''}">${active&&i===0?'🂠':c.r+c.s}</div>`)));
+    player.forEach(c=>playerEl.appendChild(el(`<div class="card">${c.r+c.s}</div>`)));
+    dt.textContent = active?'Total: ?':'Total: '+value(dealer);
+    pt.textContent = 'Total: '+value(player);
+    bal.textContent = bank.toString();
+  }
+  function setBtns(on){ hitBtn.disabled=standBtn.disabled=dblBtn.disabled=!on; }
+  dealBtn.addEventListener('click', ()=>{
+    if(active) return;
+    const b=Math.floor(+betEl.value||0); if(!bank.canBet(b)) { msg.textContent='Invalid bet'; return; }
+    bank.bet(b); bet=b; dealer=[]; player=[]; active=true; setBtns(true);
+    player.push(draw(),draw()); dealer.push(draw(),draw()); msg.textContent='Good luck!'; render();
+    if(value(player)===21) endRound();
+  });
+  hitBtn.addEventListener('click', ()=>{ if(!active)return; player.push(draw()); render(); if(value(player)>21) endRound(); });
+  standBtn.addEventListener('click', ()=>{ if(!active)return; dealerTurn(); });
+  dblBtn.addEventListener('click', ()=>{
+    if(!active) return; if(!bank.canBet(bet)) return;
+    bank.bet(bet); bet*=2; player.push(draw()); render(); if(value(player)>21) endRound(); else dealerTurn();
+  });
+  function dealerTurn(){ setBtns(false); active=false; render(); while(value(dealer)<17){ dealer.push(draw()); render(); } endRound(); }
+  function endRound(){
+    const p=value(player), d=value(dealer);
+    let win=0, txt='';
+    const bjP=(p===21 && player.length===2 && player.some(c=>c.r==='A'));
+    const bjD=(d===21 && dealer.length===2 && dealer.some(c=>c.r==='A'));
+    if(p>21) txt='Player busts';
+    else if(d>21) { txt='Dealer busts'; win=bet*2; }
+    else if(bjP && !bjD){ txt='Blackjack!'; win=Math.floor(bet*2.5); }
+    else if(bjD && !bjP){ txt='Dealer blackjack'; }
+    else if(p>d){ txt='Player wins'; win=bet*2; }
+    else if(d>p){ txt='Dealer wins'; }
+    else { txt='Push'; win=bet; }
+    if(win) bank.win(win);
+    msg.textContent = `${txt} ${win?`(payout $${win})`:''}`;
+    setBtns(false); active=false; render();
+  }
+  render();
+});
+
+/* ---------- Roulette Panel ---------- */
+mountPanel('roulette', `
+  <h2>🎯 Roulette (European)</h2>
+  <div class="wrap">
+    <div class="wheel"><div class="result" id="rl-result">–</div></div>
+    <div>
+      <div class="bets" id="rl-bets"></div>
+      <div class="row" style="margin-top:8px">
+        <label>Bet $<input id="rl-bet" class="input" type="number" value="10" min="1"></label>
+        <button id="rl-spin">Spin</button>
+        <span style="margin-left:auto">Balance: <strong id="rl-bal"></strong></span>
+        <span id="rl-msg" class="muted"></span>
+      </div>
+      <small class="disclaimer">Click numbers to toggle bets. Payouts: Straight 35:1, Red/Black & Even/Odd 1:1, Dozens 2:1.</small>
+    </div>
+  </div>
+`);
+
+window.addEventListener('init-roulette', (e)=>{
+  const $=sel=>e.detail.el.querySelector(sel);
+  const bank=new Bank(1000);
+  const result=$('#rl-result'), grid=$('#rl-bets'), msg=$('#rl-msg'), bal=$('#rl-bal'), betEl=$('#rl-bet'), spin=$('#rl-spin');
+  const nums=[0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26]; // wheel order
+  const red=[1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+  const bets=new Map(); // key -> amount; keys: "n:17", "red", "black", "even","odd","d1","d2","d3"
+  function cell(label,key){ const c=el(`<div class="cell" data-k="${key}">${label}</div>`); c.addEventListener('click',()=>{
+    const k=c.dataset.k; if(c.classList.toggle('active')) bets.set(k, true); else bets.delete(k);
+  }); return c; }
+  // build number grid 1..36 plus specials
+  for(let i=1;i<=36;i++) grid.appendChild(cell(i, 'n:'+i));
+  grid.appendChild(cell('0','n:0'));
+  grid.appendChild(cell('RED','red'));
+  grid.appendChild(cell('BLK','black'));
+  grid.appendChild(cell('EVEN','even'));
+  grid.appendChild(cell('ODD','odd'));
+  grid.appendChild(cell('1-12','d1'));
+  grid.appendChild(cell('13-24','d2'));
+  grid.appendChild(cell('25-36','d3'));
+  function spinOnce(){
+    const stake=Math.floor(+betEl.value||0);
+    if(!bank.canBet(stake) || bets.size===0){ msg.textContent='Pick bets and enter valid stake.'; return; }
+    const total = stake * bets.size; if(!bank.canBet(total)){ msg.textContent='Not enough balance for all bets.'; return; }
+    bank.bet(total);
+    const stop = nums[Math.floor(Math.random()*nums.length)];
+    const isRed=red.includes(stop);
+    let win=0;
+    for(const k of bets.keys()){
+      if(k.startsWith('n:')){
+        const n=+k.split(':')[1]; if(n===stop) win += stake*36;
+      } else if(k==='red' && isRed) win += stake*2;
+      else if(k==='black' && !isRed && stop!==0) win += stake*2;
+      else if(k==='even' && stop!==0 && stop%2===0) win += stake*2;
+      else if(k==='odd' && stop%2===1) win += stake*2;
+      else if(k==='d1' && stop>=1 && stop<=12) win += stake*3;
+      else if(k==='d2' && stop>=13 && stop<=24) win += stake*3;
+      else if(k==='d3' && stop>=25 && stop<=36) win += stake*3;
+    }
+    if(win>0) bank.win(win);
+    result.textContent = stop + (isRed?' 🔴':' ⚫');
+    bal.textContent = bank.toString();
+    msg.textContent = win?('Win $'+win):'No win';
+  }
+  bal.textContent = bank.toString();
+  spin.addEventListener('click', spinOnce);
+});
+
+/* ---------- Video Poker (Jacks or Better) ---------- */
+mountPanel('vpoker', `
+  <h2>🃏 Video Poker — Jacks or Better</h2>
+  <div class="row controls">
+    <label>Bet $<input id="vp-bet" class="input" type="number" value="5" min="1"></label>
+    <button id="vp-deal">Deal/Draw</button>
+    <button id="vp-holdall">Toggle Hold All</button>
+    <span style="margin-left:auto">Balance: <strong id="vp-bal"></strong></span>
+    <span id="vp-msg" class="muted"></span>
+  </div>
+  <div id="vp-cards" class="cards"></div>
+`);
+
+window.addEventListener('init-vpoker', (e)=>{
+  const $=sel=>e.detail.el.querySelector(sel);
+  const bank=new Bank(1000);
+  const ranks=['2','3','4','5','6','7','8','9','10','J','Q','K','A'], suits=['♠','♥','♦','♣'];
+  function deck(){ const d=[]; for(const r of ranks) for(const s of suits) d.push({r,s}); return shuffle(d); }
+  const cardsEl=$('#vp-cards'), bal=$('#vp-bal'), msg=$('#vp-msg'), betEl=$('#vp-bet'), deal=$('#vp-deal'), holdAll=$('#vp-holdall');
+  let d=[], hand=[], held=[false,false,false,false,false], phase='bet', bet=0;
+  function render(){
+    cardsEl.innerHTML='';
+    hand.forEach((c,i)=>{
+      const card=el(`<div class="card"><div>${c?rLabel(c):'🂠'}</div><small class="hold">${held[i]?'HOLD':''}</small></div>`);
+      card.addEventListener('click', ()=>{ if(phase==='draw'){ held[i]=!held[i]; render(); } });
+      cardsEl.appendChild(card);
+    });
+    bal.textContent = bank.toString();
+  }
+  function rLabel(c){ return c.r+c.s; }
+  function rankCounts(h){ const m=new Map(); for(const c of h){ m.set(c.r,(m.get(c.r)||0)+1); } return m; }
+  function isFlush(h){ return new Set(h.map(c=>c.s)).size===1; }
+  function toOrder(r){ return ranks.indexOf(r); }
+  function isStraight(h){
+    const a = h.map(c=>toOrder(c.r)).sort((x,y)=>x-y);
+    // handle A2345
+    const low = [0,1,2,3,12];
+    const isLow = JSON.stringify(a)===JSON.stringify(low);
+    let ok=true; for(let i=1;i<a.length;i++){ if(a[i]!==a[i-1]+1){ ok=false; break; } } return ok || isLow;
+  }
+  function score(h){
+    const flush=isFlush(h), straight=isStraight(h);
+    const counts=[...rankCounts(h).values()].sort((a,b)=>b-a).join(',');
+    if(straight && flush && h.some(c=>c.r==='A') && h.some(c=>c.r==='10')) return ['Royal Flush', 250];
+    if(straight && flush) return ['Straight Flush', 50];
+    if(counts==='4,1') return ['Four of a Kind', 25];
+    if(counts==='3,2') return ['Full House', 9];
+    if(flush) return ['Flush', 6];
+    if(straight) return ['Straight', 4];
+    if(counts==='3,1,1') return ['Three of a Kind', 3];
+    if(counts==='2,2,1') return ['Two Pair', 2];
+    if(counts==='2,1,1,1'){
+      const pairRank = [...rankCounts(h).entries()].find(([r,c])=>c===2)[0];
+      if(['J','Q','K','A'].includes(pairRank)) return ['Jacks or Better', 1];
+    }
+    return ['No Win', 0];
+  }
+  function dealPhase(){
+    d=deck(); hand=[]; held=[false,false,false,false,false];
+    for(let i=0;i<5;i++) hand.push(d.pop());
+    phase='draw'; render(); msg.textContent='Select cards to HOLD, then press Deal/Draw.';
+  }
+  function drawPhase(){
+    for(let i=0;i<5;i++) if(!held[i]) hand[i]=d.pop();
+    const [name, mult]=score(hand);
+    const win=mult*bet; if(win>0) bank.win(win);
+    render(); msg.textContent = name+(win?` — You win $${win}`:' — No win');
+    phase='bet';
+  }
+  deal.addEventListener('click', ()=>{
+    if(phase==='bet'){
+      const b=Math.floor(+betEl.value||0); if(!bank.canBet(b)){ msg.textContent='Invalid bet'; return; }
+      bet=b; bank.bet(b); dealPhase();
+    } else {
+      drawPhase();
+    }
+    bal.textContent=bank.toString();
+  });
+  holdAll.addEventListener('click', ()=>{ if(phase==='draw'){ held=held.map(v=>!v); render(); } });
+  // init
+  hand=[null,null,null,null,null]; render(); bal.textContent=bank.toString();
+});
+
+/* ---------- Minesweeper ---------- */
+mountPanel('mines', `
+  <h2>💣 Minesweeper</h2>
+  <div class="row">
+    <div>Rows <input id="m-r" class="input" type="number" value="10" min="5" max="20" style="width:70px"> Cols <input id="m-c" class="input" type="number" value="12" min="5" max="24" style="width:70px"> Mines <input id="m-m" class="input" type="number" value="20" min="5" max="200" style="width:80px"></div>
+    <button id="m-new">New</button>
+    <span id="m-msg" style="margin-left:auto" class="muted"></span>
+  </div>
+  <div id="m-board" class="board"></div>
+`);
+
+window.addEventListener('init-mines', (e)=>{
+  const $=sel=>e.detail.el.querySelector(sel);
+  const boardEl=$('#m-board'), msg=$('#m-msg'), rEl=$('#m-r'), cEl=$('#m-c'), mEl=$('#m-m'), newBtn=$('#m-new');
+  let R=10,C=12,M=20, grid=[], revealCount=0, finished=false;
+  function idx(r,c){ return r*C+c; }
+  function inb(r,c){ return r>=0 && r<R && c>=0 && c<C; }
+  function neighbors(r,c){ const n=[]; for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){ if(!dr&&!dc) continue; const nr=r+dr,nc=c+dc; if(inb(nr,nc)) n.push([nr,nc]); } return n; }
+  function placeMines(fr,fc){
+    let left=M; while(left>0){
+      const r=Math.floor(Math.random()*R), c=Math.floor(Math.random()*C);
+      if((r===fr&&c===fc) || grid[idx(r,c)].mine) continue; grid[idx(r,c)].mine=true; left--;
+    }
+  }
+  function counts(){ for(let r=0;r<R;r++) for(let c=0;c<C;c++){ const cell=grid[idx(r,c)]; if(cell.mine) continue; cell.count = neighbors(r,c).reduce((s,[nr,nc])=>s+(grid[idx(nr,nc)].mine?1:0),0); } }
+  function open(r,c){
+    const cell=grid[idx(r,c)]; if(cell.revealed||cell.flag||finished) return;
+    cell.revealed=true; revealCount++; draw();
+    if(cell.mine){ finished=true; msg.textContent='BOOM!'; grid.forEach(c=>c.revealed=true); draw(); return; }
+    if(cell.count===0){ neighbors(r,c).forEach(([nr,nc])=>open(nr,nc)); }
+    if(revealCount===R*C-M){ finished=true; msg.textContent='You Win!'; }
+  }
+  function toggleFlag(r,c){ const cell=grid[idx(r,c)]; if(cell.revealed||finished) return; cell.flag=!cell.flag; draw(); }
+  function draw(){
+    boardEl.style.gridTemplateColumns = `repeat(${C}, 28px)`;
+    boardEl.innerHTML='';
+    for(let r=0;r<R;r++) for(let c=0;c<C;c++){
+      const cell=grid[idx(r,c)];
+      const d=el(`<div class="cell ${cell.revealed?'revealed':''} ${cell.mine&&finished?'mine':''} ${cell.flag?'flag':''}"></div>`);
+      d.addEventListener('click', ()=> open(r,c));
+      d.addEventListener('contextmenu', (ev)=>{ ev.preventDefault(); toggleFlag(r,c) });
+      if(cell.revealed&&!cell.mine) d.textContent=cell.count||'';
+      boardEl.appendChild(d);
+    }
+  }
+  function reset(){
+    R=+rEl.value; C=+cEl.value; M=Math.min(+mEl.value, R*C-1);
+    grid = Array.from({length:R*C},()=>({mine:false,revealed:false,flag:false,count:0}));
+    revealCount=0; finished=false; msg.textContent='Left-click to reveal • Right-click to flag';
+    draw();
+  }
+  boardEl.addEventListener('click', function firstClick(ev){
+    const i=[...boardEl.children].indexOf(ev.target);
+    const r=Math.floor(i/C), c=i% C;
+    placeMines(r,c); counts(); boardEl.removeEventListener('click', firstClick, true);
+  }, true);
+  newBtn.addEventListener('click', ()=>{ reset(); boardEl.addEventListener('click', function fc(ev){
+    const i=[...boardEl.children].indexOf(ev.target); const r=Math.floor(i/C), c=i% C;
+    placeMines(r,c); counts(); boardEl.removeEventListener('click', fc, true);
+  }, true); });
+  reset();
+});
+
+/* ---------- Checkers ---------- */
+mountPanel('checkers', `
+  <h2>⛂ Checkers (2-player)</h2>
+  <div class="row"><span id="ck-turn">Turn: 🔵 Blue</span><button id="ck-reset" style="margin-left:auto">Reset</button></div>
+  <div id="ck-board" class="board"></div>
+`);
+
+window.addEventListener('init-checkers', (e)=>{
+  const $=sel=>e.detail.el.querySelector(sel);
+  const bEl=$('#ck-board'), turnEl=$('#ck-turn'), reset=$('#ck-reset');
+  const DARKS=new Set(); for(let r=0;r<8;r++) for(let c=0;c<8;c++) if((r+c)%2===1) DARKS.add(r*8+c);
+  let board=[], blueTurn=true, sel=null;
+  function start(){
+    board=Array(64).fill(null);
+    // place 12 pieces each: Blue at top (rows 0-2), Red at bottom (5-7)
+    for(let r=0;r<3;r++) for(let c=0;c<8;c++) if((r+c)%2===1) board[r*8+c]='B';
+    for(let r=5;r<8;r++) for(let c=0;c<8;c++) if((r+c)%2===1) board[r*8+c]='R';
+    blueTurn=true; sel=null; draw();
+  }
+  function draw(){
+    bEl.innerHTML='';
+    for(let r=0;r<8;r++) for(let c=0;c<8;c++){
+      const i=r*8+c; const dark=DARKS.has(i);
+      const tile=el(`<div class="sq ${dark?'dark':'light'} ${sel===i?'sel':''}">${board[i]? (board[i][0]==='B'?'🔵':'🔴')+(board[i].length>1?'👑':'') : ''}</div>`);
+      if(dark) tile.addEventListener('click', ()=> click(i,r,c));
+      bEl.appendChild(tile);
+    }
+    turnEl.textContent='Turn: '+(blueTurn?'🔵 Blue':'🔴 Red');
+  }
+  function movesFrom(i){
+    const r=Math.floor(i/8), c=i%8, me=board[i]; if(!me) return [];
+    const dir = me[0]==='B' ? 1 : -1;
+    const kings = me.length>1;
+    const dirs = kings ? [1,-1] : [dir];
+    const out=[];
+    for(const dr of dirs){
+      for(const dc of [-1,1]){
+        const r1=r+dr, c1=c+dc, r2=r+2*dr, c2=c+2*dc;
+        if(r1>=0&&r1<8&&c1>=0&&c1<8 && !board[r1*8+c1]) out.push([i,r1*8+c1,false]);
+        if(r2>=0&&r2<8&&c2>=0&&c2<8 && board[r1*8+c1] && board[r1*8+c1][0]!==me[0] && !board[r2*8+c2]) out.push([i,r2*8+c2,r1*8+c1]);
+      }
+    }
+    return out;
+  }
+  function mustJump(color){
+    for(let i=0;i<64;i++) if(board[i]&&board[i][0]===color){ if(movesFrom(i).some(m=>m[2]!==false)) return true; }
+    return false;
+  }
+  function click(i,r,c){
+    if(sel===null){ if(board[i] && (blueTurn?board[i][0]==='B':board[i][0]==='R')) sel=i; else sel=null; draw(); return; }
+    if(i===sel){ sel=null; draw(); return; }
+    const legal=movesFrom(sel);
+    const move=legal.find(m=>m[1]===i && (!mustJump(blueTurn?'B':'R') || m[2]!==false));
+    if(!move){ sel=null; draw(); return; }
+    board[i]=board[sel]; board[sel]=null;
+    // kinging
+    if(board[i][0]==='B' && Math.floor(i/8)===7) board[i]='B*';
+    if(board[i][0]==='R' && Math.floor(i/8)===0) board[i]='R*';
+    if(move[2]!==false){ board[move[2]]=null; // capture
+      // multiple jumps
+      sel=i;
+      if(movesFrom(i).some(m=>m[2]!==false)){ draw(); return; }
+    }
+    sel=null; blueTurn=!blueTurn; draw();
+  }
+  reset.addEventListener('click', start);
+  start();
+});
+
+/* ---------- Chess (basic pass-and-play; no check rules) ---------- */
+mountPanel('chess', `
+  <h2>♟️ Chess (Basic)</h2>
+  <small class="disclaimer">Two-player local play. Legal moves enforced for pieces; check/checkmate & special moves (castling, en passant, promotion choice fixed to queen) simplified.</small>
+  <div class="row"><span id="ch-turn">Turn: ♙ White</span><button id="ch-reset" style="margin-left:auto">Reset</button></div>
+  <div id="ch-board" class="board"></div>
+`);
+
+window.addEventListener('init-chess', (e)=>{
+  const $=sel=>e.detail.el.querySelector(sel);
+  const bEl=$('#ch-board'), turnEl=$('#ch-turn'), reset=$('#ch-reset');
+  const empty = Array(64).fill('');
+  const icons = {'P':'♙','R':'♖','N':'♘','B':'♗','Q':'♕','K':'♔','p':'♟','r':'♜','n':'♞','b':'♝','q':'♛','k':'♚'};
+  let board=[], whiteTurn=true, sel=null;
+  function setup(){
+    board=[...'rnbqkbnrpppppppp................................PPPPPPPP.RNBQKBNR'].map(ch=>ch==='.'?'':ch);
+    whiteTurn=true; sel=null; draw();
+  }
+  function draw(){
+    bEl.innerHTML='';
+    for(let r=0;r<8;r++) for(let c=0;c<8;c++){
+      const i=r*8+c, dark=((r+c)%2)===1;
+      const sq=el(`<div class="sq ${dark?'dark':'light'} ${sel===i?'sel':''}">${icons[board[i]]||''}</div>`);
+      sq.addEventListener('click', ()=>click(i,r,c)); bEl.appendChild(sq);
+    }
+    turnEl.textContent='Turn: ' + (whiteTurn?'♙ White':'♟ Black');
+  }
+  function get(i){ return board[i]||''; }
+  function colorOf(p){ return p && (p===p.toUpperCase()?'w':'b'); }
+  function lineMoves(i, dr, dc){
+    const r0=Math.floor(i/8), c0=i%8, out=[];
+    let r=r0+dr, c=c0+dc;
+    while(r>=0&&r<8&&c>=0&&c<8){
+      const j=r*8+c, t=get(j);
+      if(!t){ out.push(j); }
+      else { if(colorOf(t)!==colorOf(get(i))) out.push(j); break; }
+      r+=dr; c+=dc;
+    }
+    return out;
+  }
+  function moves(i){
+    const p=get(i); if(!p) return [];
+    const isW = p===p.toUpperCase();
+    const dir = isW?-1:1;
+    const r=Math.floor(i/8), c=i%8, out=[];
+    if(p.toUpperCase()==='P'){
+      const f=r+dir, ff=r+2*dir;
+      if(f>=0&&f<8 && !get(f*8+c)) out.push(f*8+c);
+      const home = isW?6:1;
+      if(r===home && !get(f*8+c) && !get(ff*8+c)) out.push(ff*8+c);
+      for(const dc of [-1,1]){
+        const cc=c+dc; if(cc<0||cc>7) continue;
+        const j=f*8+cc; if(get(j) && colorOf(get(j))!==(isW?'w':'b')) out.push(j);
+      }
+    } else if(p.toUpperCase()==='N'){
+      const steps=[[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]];
+      for(const [dr,dc] of steps){
+        const rr=r+dr, cc=c+dc; if(rr<0||rr>7||cc<0||cc>7) continue;
+        const j=rr*8+cc; if(!get(j) || colorOf(get(j))!==colorOf(p)) out.push(j);
+      }
+    } else if(p.toUpperCase()==='B'){
+      [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(d=>out.push(...lineMoves(i,d[0],d[1])));
+    } else if(p.toUpperCase()==='R'){
+      [[1,0],[-1,0],[0,1],[0,-1]].forEach(d=>out.push(...lineMoves(i,d[0],d[1])));
+    } else if(p.toUpperCase()==='Q'){
+      [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]].forEach(d=>out.push(...lineMoves(i,d[0],d[1])));
+    } else if(p.toUpperCase()==='K'){
+      for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){ if(!dr&&!dc) continue;
+        const rr=r+dr, cc=c+dc; if(rr<0||rr>7||cc<0||cc>7) continue;
+        const j=rr*8+cc; if(!get(j) || colorOf(get(j))!==colorOf(p)) out.push(j);
+      }
+    }
+    return out;
+  }
+  function click(i,r,c){
+    const p=get(i);
+    if(sel===null){ if(p && ((whiteTurn && colorOf(p)==='w') || (!whiteTurn && colorOf(p)==='b'))) sel=i; draw(); return; }
+    if(i===sel){ sel=null; draw(); return; }
+    const legal = moves(sel);
+    if(!legal.includes(i)){ sel=null; draw(); return; }
+    // move
+    let piece = get(sel);
+    board[i]=piece; board[sel]=''; sel=null;
+    // promotion
+    if(piece==='P' && Math.floor(i/8)===0) board[i]='Q';
+    if(piece==='p' && Math.floor(i/8)===7) board[i]='q';
+    whiteTurn=!whiteTurn; draw();
+  }
+  reset.addEventListener('click', setup);
+  setup();
+});
+
+/* ---------- Pool (very simple practice) ---------- */
+mountPanel('pool', `
+  <h2>🎱 Pool Practice</h2>
+  <small class="disclaimer">Drag on the table to aim & shoot. Simple elastic physics with walls; 1 target ball + cue ball.</small>
+  <canvas id="pl-c" width="900" height="450"></canvas>
+  <div class="controls">
+    <button id="pl-reset">Rack Balls</button>
+    <span id="pl-msg" class="muted" style="margin-left:auto"></span>
+  </div>
+`);
+
+window.addEventListener('init-pool', (e)=>{
+  const $=sel=>e.detail.el.querySelector(sel);
+  const canvas=$('#pl-c'), ctx=canvas.getContext('2d'), reset=$('#pl-reset'), msg=$('#pl-msg');
+  const W=canvas.width, H=canvas.height, R=12, F=0.992, REST=0.9;
+  let balls=[], dragging=false, start=null;
+  function rack(){
+    balls=[
+      {x:W*0.25, y:H*0.5, vx:0, vy:0, color:'#ffffff'}, // cue
+      {x:W*0.7, y:H*0.5, vx:0, vy:0, color:'#ffd700'}  // target
+    ];
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // table
+    ctx.fillStyle='#0d1b39'; ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle='rgba(96,165,255,.4)'; ctx.strokeRect(4,4,W-8,H-8);
+    // aim line
+    if(dragging && start){
+      ctx.beginPath(); ctx.moveTo(balls[0].x, balls[0].y); ctx.lineTo(start.x, start.y); ctx.stroke();
+    }
+    for(const b of balls){
+      ctx.beginPath(); ctx.arc(b.x,b.y,R,0,Math.PI*2); ctx.fillStyle=b.color; ctx.fill();
+      ctx.strokeStyle='rgba(0,0,0,.4)'; ctx.stroke();
+    }
+  }
+  function step(){
+    // integrate
+    for(const b of balls){
+      b.x += b.vx; b.y += b.vy;
+      b.vx *= F; b.vy *= F;
+      // walls
+      if(b.x<R){ b.x=R; b.vx*=-REST; }
+      if(b.x>W-R){ b.x=W-R; b.vx*=-REST; }
+      if(b.y<R){ b.y=R; b.vy*=-REST; }
+      if(b.y>H-R){ b.y=H-R; b.vy*=-REST; }
+    }
+    // collide
+    const a=balls[0], b=balls[1];
+    const dx=b.x-a.x, dy=b.y-a.y, dist=Math.hypot(dx,dy), minDist=R*2;
+    if(dist>0 && dist<minDist){
+      const nx=dx/dist, ny=dy/dist; const p=(a.vx-b.vx)*nx+(a.vy-b.vy)*ny;
+      if(p>0){
+        const imp = 2*p/2;
+        a.vx -= imp*nx; a.vy -= imp*ny;
+        b.vx += imp*nx; b.vy += imp*ny;
+      }
+      const overlap=minDist-dist; a.x-=nx*overlap/2; a.y-=ny*overlap/2; b.x+=nx*overlap/2; b.y+=ny*overlap/2;
+    }
+    draw(); requestAnimationFrame(step);
+  }
+  canvas.addEventListener('mousedown', (ev)=>{
+    const rect=canvas.getBoundingClientRect(); const x=ev.clientX-rect.left, y=ev.clientY-rect.top;
+    start={x,y}; dragging=true;
+  });
+  canvas.addEventListener('mouseup', (ev)=>{
+    if(!dragging){ return; } dragging=false;
+    const dx=balls[0].x-start.x, dy=balls[0].y-start.y;
+    balls[0].vx += dx*0.05; balls[0].vy += dy*0.05;
+    msg.textContent='Shot!';
+  });
+  reset.addEventListener('click', ()=>{ rack(); msg.textContent='Ready.'; });
+  rack(); draw(); requestAnimationFrame(step);
+});
+
+// Start at Slots by default
+showPanel('slots');
 </script>
 </body>
 </html>
+"""
+
+html_path.write_text(index_html, encoding="utf-8")
+html_path
