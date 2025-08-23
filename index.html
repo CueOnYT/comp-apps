@@ -2,131 +2,275 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Adult Portal — 18+ Only</title>
-  <link rel="stylesheet" href="styles.css" />
+  <title>BlueNight — Video Search</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="referrer" content="no-referrer" />
+  <style>
+    :root{
+      --bg:#0c0d10; --bg-2:#111318; --panel:#171a20; --panel-2:#13161b;
+      --ink:#e8ecf4; --ink-dim:#a9b1c3; --muted:#7b8497;
+      --brand:#2b7cff; --brand-2:#46b3ff; --accent:#4bc2ff;
+      --ok:#27d18b; --warn:#ffb020; --err:#ff5d7a;
+      --radius:14px; --shadow:0 12px 28px rgba(0,0,0,.38);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#0a0b0e,var(--bg));color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif}
+    a{color:inherit;text-decoration:none}
+    /* Header */
+    .nav{position:sticky;top:0;z-index:10;background:rgba(12,13,16,.8);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.06)}
+    .nav-inner{max-width:1200px;margin:auto;padding:10px 16px;display:flex;align-items:center;gap:12px}
+    .logo{display:flex;align-items:center;gap:10px;font-weight:800}
+    .badge{padding:6px 10px;border-radius:10px;border:1px solid rgba(59,131,246,.45);background:linear-gradient(135deg,#0d1118,#0c1a33 60%,#0d2d72);color:#9ec6ff;box-shadow:inset 0 0 18px rgba(43,124,255,.15)}
+    .search{flex:1;display:flex;gap:8px;align-items:center;margin-left:8px;background:var(--bg-2);border:1px solid rgba(255,255,255,.06);border-radius:999px;padding:8px 12px}
+    .search input{flex:1;background:transparent;border:0;color:var(--ink);outline:none;font-size:15px}
+    .btn{cursor:pointer;background:linear-gradient(180deg,#2054cd,#144ed1);border:1px solid rgba(48,128,255,.75);color:white;font-weight:700;border-radius:12px;padding:9px 14px;box-shadow:var(--shadow)}
+    .btn:active{transform:translateY(1px)}
+    /* Content */
+    .wrap{max-width:1200px;margin:18px auto;padding:0 16px}
+    .filters{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 14px}
+    .pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:7px 12px;background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid rgba(255,255,255,.06);color:var(--ink-dim);font-weight:600;cursor:pointer;user-select:none}
+    .pill.active{color:#deebff;border-color:rgba(64,132,255,.5);box-shadow:0 0 0 2px rgba(43,124,255,.22) inset}
+    .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+    .card{background:linear-gradient(180deg,var(--panel),#12151a);border:1px solid rgba(255,255,255,.06);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);transition:transform .15s}
+    .card:hover{transform:translateY(-2px)}
+    .thumb{position:relative;width:100%;aspect-ratio:16/9;background:#0b0c10}
+    .thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(90%)}
+    .dur{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);color:#fff;padding:3px 6px;border-radius:8px;font-size:12px}
+    .meta{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;color:var(--muted);font-size:13px}
+    .title{padding:8px 12px 12px;font-weight:700;color:#dce6ff}
+    .empty{padding:40px;text-align:center;color:var(--muted)}
+    /* Modal player */
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:20px;z-index:20}
+    .modal.open{display:flex}
+    .player{width:min(1100px,92vw);aspect-ratio:16/9;background:#000;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.08);box-shadow:0 20px 60px rgba(0,0,0,.6)}
+    .player iframe{width:100%;height:100%;border:0}
+    .close{position:absolute;top:22px;right:22px}
+    /* Footer */
+    footer{color:#7f8aa3;text-align:center;padding:30px 16px}
+    /* Age gate */
+    .age{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(5,6,8,.92);backdrop-filter:blur(8px);z-index:40}
+    .age-card{max-width:520px;background:linear-gradient(180deg,var(--panel),#11141a);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:24px;box-shadow:var(--shadow);text-align:center}
+    .age h2{margin:0 0 12px}
+    .age p{color:var(--muted)}
+  </style>
 </head>
 <body>
-  <div id="ageGate" class="modal active">
-    <div class="modal-content">
-      <h1>Are you 18 or older?</h1>
-      <p>This site contains adult-oriented material. You must be 18+ to proceed.</p>
-      <div class="age-buttons">
-        <button id="enterBtn" class="btn primary">Yes — Enter</button>
-        <button id="leaveBtn" class="btn">No — Leave</button>
+  <!-- Age gate -->
+  <div id="age" class="age" role="dialog" aria-modal="true">
+    <div class="age-card">
+      <h2>Adults Only (18+)</h2>
+      <p>This site shows user‑generated NSFW embeds from third‑party providers. By continuing you confirm you are 18+ and agree to view external embeds.</p>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:16px">
+        <button class="btn" id="age-yes">I’m 18+ — Continue</button>
+        <button class="pill" id="age-no">Leave</button>
       </div>
-      <p class="small">By entering you agree you are at least 18 and consent to view adult material. Close this window if you do not meet those requirements.</p>
     </div>
   </div>
 
-  <header class="site-header">
-    <div class="wrap">
-      <h2 class="logo">Adult Portal</h2>
-      <nav>
-        <input id="search" placeholder="Search titles..." />
-        <select id="categorySelect">
-          <option value="all">All categories</option>
-          <option value="featured">Featured</option>
-          <option value="models">Models</option>
-          <option value="clips">Clips</option>
-        </select>
-      </nav>
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="logo" href="#"><span class="badge">BN</span> BlueNight</a>
+      <div class="search">
+        <input id="q" placeholder="Search videos (e.g. cosplay, fitness, pov) — press /" />
+        <button id="go" class="btn">Search</button>
+      </div>
+      <button id="safe" class="pill" title="Toggle safe sandboxing for iframes">Sandbox</button>
     </div>
   </header>
 
   <main class="wrap">
-    <section class="hero">
-      <h1>Featured Picks</h1>
-      <p class="lead">Curated — legal — placeholder content. Replace thumbnails with your own media.</p>
-    </section>
-
-    <section id="gallery" class="grid">
-      <!-- Each card uses data-cat for filtering -->
-      <article class="card" data-cat="featured">
-        <div class="thumb blurred"><span>Placeholder</span></div>
-        <h3 class="title">Sample Title 1</h3>
-        <p class="meta">2:03 • Model A</p>
-      </article>
-
-      <article class="card" data-cat="clips">
-        <div class="thumb blurred"><span>Placeholder</span></div>
-        <h3 class="title">Clip Example 2</h3>
-        <p class="meta">5:22 • Studio B</p>
-      </article>
-
-      <article class="card" data-cat="models">
-        <div class="thumb blurred"><span>Placeholder</span></div>
-        <h3 class="title">Model Spotlight</h3>
-        <p class="meta">Gallery • Various</p>
-      </article>
-
-      <!-- repeat a few more to show grid -->
-      <article class="card" data-cat="featured">
-        <div class="thumb blurred"><span>Placeholder</span></div>
-        <h3 class="title">Featured 4</h3>
-        <p class="meta">3:10 • Model C</p>
-      </article>
-      <article class="card" data-cat="clips">
-        <div class="thumb blurred"><span>Placeholder</span></div>
-        <h3 class="title">Clip 5</h3>
-        <p class="meta">1:47 • Studio D</p>
-      </article>
-      <article class="card" data-cat="models">
-        <div class="thumb blurred"><span>Placeholder</span></div>
-        <h3 class="title">Model 6</h3>
-        <p class="meta">Photos • Model E</p>
-      </article>
-    </section>
+    <div class="filters">
+      <div class="pill active" data-order="trending">Trending</div>
+      <div class="pill" data-order="new">Newest</div>
+      <div class="pill" data-order="top">Top</div>
+      <div class="pill" data-duration="short">Short (&lt; 20s)</div>
+      <div class="pill" data-duration="long">Long (≥ 20s)</div>
+    </div>
+    <div id="out" class="grid"></div>
+    <div id="empty" class="empty" style="display:none">No results. Try another query.</div>
   </main>
 
-  <footer class="site-footer">
-    <div class="wrap">
-      <small>© <span id="year"></span> Adult Portal — 18+ only. Replace placeholder content before publishing.</small>
+  <div id="modal" class="modal" aria-hidden="true">
+    <div class="player" role="dialog" aria-modal="true">
+      <iframe id="player" allow="autoplay; fullscreen; encrypted-media" referrerpolicy="no-referrer"></iframe>
     </div>
-  </footer>
+    <button class="btn close" id="close">✕ Close</button>
+  </div>
+
+  <footer>Powered by official provider embeds. Do not re‑host third‑party media. © BlueNight</footer>
 
 <script>
+(() => {
+  const API_BASE = 'https://api.redgifs.com/v2';
+  const USE_PROXY_FIRST = false; // set true if you're running the server below
+  const PROXY_BASE = '/api';
+  let currentOrder = 'trending';
+  let durationFilter = 'any';
+  let sandboxOn = true; // toggle iframe sandbox
+
+  const qs = (s, el=document)=>el.querySelector(s);
+  const qsa = (s, el=document)=>[...el.querySelectorAll(s)];
+  const out = qs('#out');
+  const empty = qs('#empty');
+  const q = qs('#q');
+  const go = qs('#go');
+  const modal = qs('#modal');
+  const player = qs('#player');
+  const closeBtn = qs('#close');
+  const age = qs('#age');
+
   // Age gate
-  const ageGate = document.getElementById('ageGate');
-  const enterBtn = document.getElementById('enterBtn');
-  const leaveBtn = document.getElementById('leaveBtn');
+  qs('#age-yes').onclick = () => age.remove();
+  qs('#age-no').onclick = () => { window.location.href='https://google.com'; };
 
-  enterBtn.addEventListener('click', () => {
-    localStorage.setItem('isAdult', 'yes');
-    ageGate.classList.remove('active');
-  });
-  leaveBtn.addEventListener('click', () => {
-    window.location.href = 'https://www.example.com';
+  // Keyboard shortcuts
+  window.addEventListener('keydown', (e) => {
+    if (e.key === '/') { e.preventDefault(); q.focus(); }
+    if (e.key === 'Escape') { hideModal(); }
   });
 
-  // Auto-check
-  if (localStorage.getItem('isAdult') === 'yes') {
-    ageGate.classList.remove('active');
+  // Filters
+  qsa('.pill[data-order]').forEach(p => p.onclick = () => {
+    qsa('.pill[data-order]').forEach(x=>x.classList.remove('active'));
+    p.classList.add('active');
+    currentOrder = p.dataset.order;
+    search();
+  });
+  qsa('.pill[data-duration]').forEach(p => p.onclick = () => {
+    qsa('.pill[data-duration]').forEach(x=>x.classList.remove('active'));
+    p.classList.add('active');
+    durationFilter = p.dataset.duration; // short | long
+    search();
+  });
+
+  // Sandbox toggle
+  qs('#safe').onclick = () => {
+    sandboxOn = !sandboxOn;
+    qs('#safe').classList.toggle('active', sandboxOn);
+  };
+
+  go.onclick = () => search();
+  q.addEventListener('keydown', (e)=>{ if(e.key==='Enter') search(); });
+
+  // Token cache
+  let tokenCache = { value:null, gotAt:0, ttlMs: 1000*60*20 }; // 20 min default
+
+  async function getToken() {
+    if (USE_PROXY_FIRST) return null; // proxy fetches its own
+    const now = Date.now();
+    if (tokenCache.value && (now - tokenCache.gotAt) < tokenCache.ttlMs) return tokenCache.value;
+    // RedGIFs temporary token
+    const r = await fetch(`${API_BASE}/auth/temporary`, { headers:{'accept':'application/json'} });
+    if (!r.ok) throw new Error('Token fetch failed (CORS/Rate-limit?)');
+    const data = await r.json();
+    const t = data?.token ?? data?.access_token ?? data?.rfToken ?? null;
+    if (!t) throw new Error('Token missing in response');
+    tokenCache = { value:t, gotAt:now, ttlMs: 1000*60*20 };
+    return t;
   }
 
-  // Year
-  document.getElementById('year').textContent = new Date().getFullYear();
+  function asDuration(seconds){
+    if(!Number.isFinite(seconds)) return '';
+    const s = Math.max(0, Math.round(seconds));
+    const m = Math.floor(s/60), ss = String(s%60).padStart(2,'0');
+    return `${m}:${ss}`;
+  }
 
-  // Simple filtering & search
-  const select = document.getElementById('categorySelect');
-  const search = document.getElementById('search');
-  const cards = Array.from(document.querySelectorAll('.card'));
+  function cardHtml(item){
+    const id = item.id || item?.gif?.id;
+    const title = item.title || item?.gif?.title || 'Untitled';
+    const embed = item.embedUrl || item.embed_url || item?.gif?.urls?.embed || null;
+    const thumb = item.thumbnail || item.poster || item?.gif?.urls?.thumbnail || item?.gif?.urls?.poster || '';
+    const dur = item.duration || item?.gif?.duration || 0;
+    const views = item.views || item?.gif?.views || null;
 
-  function filter() {
-    const cat = select.value.toLowerCase();
-    const q = search.value.trim().toLowerCase();
+    return `
+      <article class="card" data-embed="${embed||''}">
+        <div class="thumb">
+          <img loading="lazy" src="${thumb}" alt="${title.replace(/"/g,'&quot;')}" />
+          <div class="dur">${asDuration(dur)}</div>
+        </div>
+        <div class="title">${title}</div>
+        <div class="meta">
+          <span>${views ? (Intl.NumberFormat().format(views)+' views') : '&nbsp;'}</span>
+          <button class="pill">Play ▶</button>
+        </div>
+      </article>
+    `;
+  }
 
-    cards.forEach(c => {
-      const title = c.querySelector('.title').textContent.toLowerCase();
-      const matchesCat = (cat === 'all') || (c.dataset.cat === cat);
-      const matchesQuery = q === '' || title.includes(q);
-      c.style.display = (matchesCat && matchesQuery) ? '' : 'none';
+  function attachCardHandlers(){
+    qsa('.card').forEach(card=>{
+      card.onclick = () => {
+        const url = card.dataset.embed;
+        if(!url){ alert('No embed URL available from provider.'); return; }
+        openModal(url);
+      };
     });
   }
 
-  select.addEventListener('change', filter);
-  search.addEventListener('input', filter);
-</script>
+  function openModal(embedUrl){
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    const attrs = sandboxOn ? 'allow-scripts allow-same-origin allow-popups allow-forms; autoplay; fullscreen; encrypted-media' : 'autoplay; fullscreen; encrypted-media';
+    player.setAttribute('allow', 'autoplay; fullscreen; encrypted-media');
+    if(sandboxOn){ player.setAttribute('sandbox','allow-scripts allow-same-origin allow-popups allow-forms'); } else { player.removeAttribute('sandbox'); }
+    player.src = embedUrl;
+  }
+  function hideModal(){
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+    player.removeAttribute('src');
+  }
+  closeBtn.onclick = hideModal;
+  modal.addEventListener('click', (e)=>{ if(e.target===modal) hideModal(); });
 
+  async function fetchSearch(query, {order='trending', count=30, page=1}={}){
+    // RedGIFs search endpoints. See community docs + wrappers. :contentReference[oaicite:2]{index=2}
+    const params = new URLSearchParams({ search_text: query, order, count, page });
+    const url = `${API_BASE}/gifs/search?${params.toString()}`;
+
+    if (USE_PROXY_FIRST) {
+      const r = await fetch(`${PROXY_BASE}/search?${new URLSearchParams({q:query, order, count, page})}`);
+      if(!r.ok) throw new Error('Proxy search failed');
+      return r.json();
+    } else {
+      const token = await getToken();
+      const r = await fetch(url, { headers: { 'accept':'application/json', 'authorization': `Bearer ${token}` }});
+      if(!r.ok) throw new Error(`Search failed (${r.status})`);
+      return r.json();
+    }
+  }
+
+  function filterByDuration(items){
+    if(durationFilter==='any') return items;
+    return items.filter(it=>{
+      const dur = it.duration || it?.gif?.duration || 0;
+      return durationFilter==='short' ? dur < 20 : dur >= 20;
+    });
+  }
+
+  async function search(){
+    const term = q.value.trim() || 'trending';
+    out.innerHTML = '';
+    empty.style.display = 'none';
+    try{
+      const data = await fetchSearch(term, {order: currentOrder, count: 36});
+      const results = data?.gifs || data?.results || data?.content || [];
+      const filtered = filterByDuration(results);
+      if(!filtered.length){ empty.style.display = 'block'; return; }
+      out.innerHTML = filtered.map(cardHtml).join('');
+      attachCardHandlers();
+    }catch(err){
+      console.error(err);
+      empty.style.display = 'block';
+      empty.textContent = 'Provider blocked direct calls (CORS/rate limit) or no results. If you host the proxy server.js, flip USE_PROXY_FIRST=true.';
+    }
+  }
+
+  // Initial state
+  search();
+})();
+</script>
 </body>
 </html>
